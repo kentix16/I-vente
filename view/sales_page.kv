@@ -1,0 +1,214 @@
+<SalesPage>:
+    MDBoxLayout:
+        orientation:"vertical"
+        padding: dp(20)  # marge autour des enfants
+        spacing: dp(10)  # espace entre enfants
+        MDBoxLayout:
+
+            pos_hint_y:0.9
+            size_hint_y:0.06
+            orientation:"vertical"
+            MDLabel:
+                size_hint_y:1
+                text: "Bienvenue."
+                halign: "left"
+                text_color: 1,1,1,1
+                font_style: "OutfitBlack"
+                role: "large"
+                bold: True
+            MDLabel:
+                size_hint_y:1
+                text: "Vos statistiques d'aujourd'hui"
+                halign: "left"
+                text_color: 2/255,2/255,88/255,1
+                font_style: "OutfitBlack"
+                role: "large"
+                bold: True
+        MDBoxLayout:
+            padding: dp(20)
+            spacing:dp(20)
+            size_hint_y: 0.1
+            orientation:"horizontal"
+
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                RoundedRectangle:
+                    radius: [20,20,20,20]
+                    source: "images/dash.jpg"
+                    pos: self.pos
+                    size: self.size
+            MDCard:
+                style: "elevated"
+                theme_bg_color: "Custom"
+                md_bg_color:1,1,1,1
+                size_hint_x:0.30
+                radius: [20, 20, 20, 20]
+                elevation:10
+                BoxLayout:
+                    orientation:'vertical'
+                    MDListItem:
+                        theme_bg_color: "Custom"
+                        md_bg_color: 0.831, 0.855, 0.918, 1  # Equivalent to 212, 218, 234
+                        size_hint_y: 0.3
+                        radius:[20]
+                        spacing:dp(10)
+                        padding:dp(10)
+                        pos_hint: {"y": 0.6}
+                        halign:"center"
+
+                        MDListItemLeadingIcon:
+                            icon: "cash"
+                            icon_color:245/255,189/255,32/255,1
+
+                        MDListItemHeadlineText:
+                            text: "somme total gagnée"
+                            text_color:245/255,189/255,32/255,1
+                    Label:
+                        id:somme
+                        text:root.somme_total_gagnee
+                        color:0,.65,0,1
+            MDCard:
+                style: "elevated"
+                theme_bg_color: "Custom"
+                size_hint_x:0.30
+                radius: [20, 20, 20, 20]
+                elevation:10
+                md_bg_color:1,1,1,1
+                BoxLayout:
+                    orientation:'vertical'
+                    MDListItem:
+                        theme_bg_color: "Custom"
+                        md_bg_color: 0.831, 0.855, 0.918, 1  # Equivalent to 212, 218, 234
+                        size_hint_y: 0.3
+                        radius:[20]
+                        spacing:dp(10)
+                        padding:dp(10)
+                        pos_hint: {"y": 0.6}
+                        halign:"center"
+
+                        MDListItemLeadingIcon:
+                            icon: "sale"
+                            icon_color:245/255,189/255,32/255,1
+
+                        MDListItemHeadlineText:
+                            text: "total de ventes"
+                            text_color:245/255,189/255,32/255,1
+                    Label:
+                        text:root.total_de_ventes
+                        color:0,0,0,1
+
+            MDCard:
+                style: "elevated"
+                theme_bg_color: "Custom"
+                size_hint_x:0.26
+                radius: [20, 20, 20, 20]
+                elevation:10
+                md_bg_color:212/255,218/255,234/255,1
+                BoxLayout:
+                    orientation:'vertical'
+                    MDListItem:
+                        theme_bg_color: "Custom"
+                        md_bg_color: 0.831, 0.855, 0.918, 1  # Equivalent to 212, 218, 234
+                        size_hint_y: 0.3
+                        radius:[20]
+                        spacing:dp(10)
+                        padding:dp(10)
+                        pos_hint: {"y": 0.6}
+                        halign:"center"
+
+                        MDListItemLeadingIcon:
+                            icon: "package-variant"
+                            icon_color:245/255,189/255,32/255,1
+
+                        MDListItemHeadlineText:
+                            text: "Produits en rupture"
+                            text_color:245/255,189/255,32/255,1
+                    Label:
+                        text:root.produits_en_rupture
+                        color: .1,0,0,1
+
+
+
+
+        MDCard:
+            style: "elevated"
+            theme_bg_color: "Custom"
+            size_hint_y: 0.35
+            size_hint_x:1
+            radius:[20]
+            md_bg_color:1,1,1,1
+
+    MDBoxLayout:
+        orientation:"vertical"
+        size_hint_x: 0.65
+        spacing: dp(20)
+        padding: dp(20)
+        MDCard:
+            style: "elevated"
+            theme_bg_color: "Custom"
+            size_hint_x: 1
+            size_hint_y:0.6
+            md_bg_color: 168,205,230,255
+            radius: [20]
+            elevation: 10
+            BoxLayout:
+                orientation:'vertical'
+                MDListItem:
+                    theme_bg_color: "Custom"
+                    md_bg_color: 186/255,169/255,155/255,1
+                    size_hint_y: 0.1
+                    radius:[20,20,0,0]
+                    spacing:dp(10)
+                    padding:dp(10)
+                    pos_hint: {"y": 0.9}
+                    halign:"center"
+
+                    MDListItemLeadingIcon:
+                        icon: "sale"
+
+                    MDListItemHeadlineText:
+                        text: "liste des ventes"
+                ListeVente:
+                    id:listevente
+                    size_hint:1,1
+                    on_parent:self.show_products_sale()
+        MDCard:
+            style: "elevated"
+            theme_bg_color: "Custom"
+            size_hint_x: 1
+            size_hint_y:0.4
+            md_bg_color: 168,205,230,255
+            radius: [20]
+            elevation: 10
+            BoxLayout:
+                orientation:'vertical'
+                MDListItem:
+                    theme_bg_color: "Custom"
+                    md_bg_color: 186/255,169/255,155/255,1
+                    size_hint_y: 0.2
+                    radius:[20,20,0,0]
+                    spacing:dp(10)
+                    padding:dp(10)
+                    pos_hint: {"y": 0.8}
+                    halign:"center"
+
+                    MDListItemLeadingIcon:
+                        icon: "sale"
+
+                    MDListItemHeadlineText:
+                        text: "pourcentage de vente des produits"
+                PourcentagePV:
+                    id:pourcentagepv
+                    size_hint:1,1
+                    on_parent:self.show_pourcentage_pv()
+
+<MyBoxLayout@BoxLayout>:
+    Button:
+        text:'A'
+    Button:
+        text:'A'
+    Button:
+        text:'A'
+    Button:
+        text:'A'

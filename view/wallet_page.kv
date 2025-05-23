@@ -1,0 +1,188 @@
+<WalletPage>
+    theme_bg_color:"Custom"
+    #md_bg_color:139/255,139/255,139/255,1
+    md_bg_color:248/255,247/255,242/255,1
+    spacing:dp(20)
+    padding:dp(20)
+    MDBoxLayout:
+        orientation:"vertical"
+        spacing:dp(20)
+        padding:dp(20)
+        MDBoxLayout:
+            size_hint_y:0.15
+            spacing:dp(7)
+            padding:dp(7)
+            MDLabel:
+
+                size_hint_y:0.05
+                text:"filtrer par"
+                font_style:"Title"
+                role:"medium"
+            MDButton:
+                theme_bg_color:"Custom"
+                md_bg_color:230/255,255/255,42/255,1
+                radius:[15]
+                on_release:
+                    root.open_time_picker_horizontal("1", "10")
+                MDButtonText:
+                    text:"heure"
+
+            MDButton:
+                id:date_button
+                theme_bg_color:"Custom"
+                md_bg_color:230/255,255/255,42/255,1
+                radius:[15]
+                on_release:
+                    root.show_date_picker()
+                MDButtonText:
+                    text:"Date"
+
+            MDButton:
+                theme_bg_color:"Custom"
+                md_bg_color:230/255,255/255,42/255,1
+                radius:[15]
+                on_release:
+                    root.show_modal_date_picker()
+                MDButtonText:
+                    text:"Période"
+
+            MDButton:
+                theme_bg_color:"Custom"
+                md_bg_color:230/255,255/255,42/255,1
+                radius:[15]
+                on_release:
+                    root.show_year()
+                MDButtonText:
+                    text:"Mois"
+            MDButton:
+                theme_bg_color:"Custom"
+                md_bg_color:230/255,255/255,42/255,1
+                radius:[15]
+                MDButtonText:
+                    text:"Année"
+
+        MDCard:
+            size_hint_x:1
+            size_hint_y:0.85
+            style: "elevated"
+            elevation:10
+            radius:[20]
+            Historique:
+                id:historique
+                size_hint : 1,1
+                on_parent:self.show_historique()
+    MDBoxLayout:
+        orientation:"vertical"
+        spacing:dp(20)
+        padding:dp(20)
+        size_hint_x:0.3
+        MDCard:
+            size_hint_y:0.3
+            style: "elevated"
+            elevation:10
+            radius:[20]
+            theme_bg_color:"Custom"
+            md_bg_color:139/255,139/255,139/255,1
+            BoxLayout:
+                orientation:'vertical'
+                MDListItem:
+                    theme_bg_color: "Custom"
+                    md_bg_color: 214/255,234/255,93/255,1
+                    size_hint_y: 0.2
+                    radius:[20,20,0,0]
+                    spacing:dp(10)
+                    padding:dp(10)
+                    pos_hint: {"y": 0.9}
+                    halign:"center"
+
+                    MDListItemLeadingIcon:
+                        icon: "currency-usd"
+
+
+                    MDListItemHeadlineText:
+
+                        text: "somme dans le portefeuille"
+                LabelSommePortefeuille:
+                    id:labelsommeportefeuille2
+                    text:self.somme_portefeuille
+        MDCard:
+            size_hint_y:0.7
+            style: "elevated"
+            elevation:10
+            radius:[20]
+            MDBoxLayout:
+                orientation:"vertical"
+                radius:[20]
+                spacing:dp(30)
+                MDListItem:
+                    theme_bg_color: "Custom"
+                    md_bg_color: 139/255,139/255,139/255,1
+                    size_hint_y: 0.1
+                    radius:[20,20,0,0]
+                    spacing:dp(10)
+                    padding:dp(10)
+                    pos_hint: {"y": 0.9}
+                    halign:"center"
+
+                    MDListItemLeadingIcon:
+                        icon: "swap-horizontal-bold"
+                        icon_color:1,1,1,1
+
+                    MDListItemHeadlineText:
+                        theme_text_color: "Custom"
+                        text_color:1,1,1,1
+                        text: "effectuer une Transaction"
+
+                MDTextField:
+                    id:somme_transaction
+                    mode:"filled"
+                    MDTextFieldHelperText:
+                        text:"ex: 8000"
+                    MDTextFieldHintText:
+                        text:"entrez la somme"
+
+                MDButton:
+                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                    style: "filled"
+                    on_press:root.add()
+                    MDButtonIcon:
+                        icon: "check-underline-circle"
+                    MDButtonText:
+                        text: "effectuer la transaction"
+
+<SelectMonth>
+    id:select_month_year
+    style:"elevated"
+    elevation:10
+    radius:[20]
+    size_hint:(0.1,0.1)
+    MDBoxLayout:
+        orientation:"vertical"
+        MDBoxLayout:
+            MDIconButton:
+                icon:"arrow-left-thin"
+            MDButton:
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                style: "filled"
+                MDButtonText:
+                    text: root.year
+
+            MDIconButton:
+                icon:"arrow-right-thin"
+        MDBoxLayout:
+            MDIconButton:
+                icon:"arrow-left-thin"
+            SelectYear:
+                id:select_year
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                text: "month"
+            MDIconButton:
+                icon:"arrow-right-thin"
+
+
+
+
+    MDScrollView:
+        size_hint:None,None
+        size:"200dp","200dp"
+

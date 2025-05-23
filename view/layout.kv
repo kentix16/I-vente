@@ -1,0 +1,267 @@
+
+
+<PrincipalScreen@MDBoxLayout>
+    orientation: "vertical"
+    padding: dp(20)  # marge autour des enfants
+    spacing: dp(10)  # espace entre enfants
+<Gradient@MDNavigationDrawer>
+    radius: [20, 20, 20, 20]
+    size_hint_x: 0.20
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            source: "images/bluebg.jpg"
+            pos: self.pos
+            size: self.size
+    md_bg_color: 0, 0, 0, 0  # Rendre le drawer transparent
+    elevation: 0  # Supprimer l'élévation qui peut causer des bordures
+
+
+    MDNavigationDrawerMenu:
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                source: "images/bluebg.jpg"
+                pos: self.pos
+                size: self.size
+        pos_hint: {"center_x": .5, "center_y": .5}
+        md_bg_color: 0, 0, 0, 0
+
+
+        MDBoxLayout:
+            orientation: "vertical"
+            adaptive_height: True
+            spacing: dp(8)
+            padding: [0, dp(10), 0, dp(20)]
+
+            FitImage:
+                source: "assets/logo.png"
+                size_hint: None, None
+                size: dp(50), dp(50)
+                pos_hint: {"center_x": .5}
+                radius: [dp(25)]
+
+            DefaultLabel:
+                text: "Mail Pro"
+                font_style: "Display"
+                role: "small"
+                halign: "center"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+                bold: True
+                adaptive_height: True
+
+        MDNavigationDrawerDivider:
+            color: [1, 1, 1, 0.3]
+
+        MDNavigationDrawerLabel:
+            text: "MENU PRINCIPAL"
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 0.6
+
+        MDNavigationDrawerItem:
+            selected_color: [0, 0, 0, 0.2]
+            ripple_color: [0, 0, 0, 0.2]
+            md_bg_color:0,0,0,0
+            on_release: print(app.manager)
+
+            MDNavigationDrawerItemLeadingIcon:
+                icon: "chart-areaspline"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+            MDNavigationDrawerItemText:
+                text: "statistique du jour"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+        MDNavigationDrawerItem:
+            selected_color: [0, 0, 0, 0.2]
+            ripple_color: [0, 0, 0, 0.2]
+            md_bg_color:0,0,0,0
+            on_release:app.manager.push("WalletPage")
+
+
+            MDNavigationDrawerItemLeadingIcon:
+                icon: "wallet"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+            MDNavigationDrawerItemText:
+                text: "Portefeuille"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+        MDNavigationDrawerItem:
+            selected_color: [0, 0, 0, 0.2]
+            ripple_color: [0, 0, 0, 0.2]
+            md_bg_color:0,0,0,0
+            #active_indicator_color:219/255,237/255,247/255,1
+            on_release:app.manager.push("letie")
+
+            MDNavigationDrawerItemLeadingIcon:
+                icon: "package-variant-closed"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+
+            MDNavigationDrawerItemText:
+                text: "vos produits"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+        MDNavigationDrawerItem:
+            selected_color: [0, 0, 0, 0.2]
+            ripple_color: [0, 0, 0, 0.2]
+            md_bg_color:0,0,0,0
+            on_release:app.manager.push("ExpensesPage")
+
+
+            MDNavigationDrawerItemLeadingIcon:
+                icon: "cash-minus"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+            MDNavigationDrawerItemText:
+                text: "Les dépenses"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+        MDNavigationDrawerItem:
+            selected_color: [0, 0, 0, 0.2]
+            ripple_color: [0, 0, 0, 0.2]
+            md_bg_color:0,0,0,0
+            on_release:app.manager.push("letie")
+
+            MDNavigationDrawerItemLeadingIcon:
+                icon: "chart-bar"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+            MDNavigationDrawerItemText:
+                text: "Statistiques"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+        MDNavigationDrawerItem:
+            selected_color: [1, 1, 1, 0.2]
+            ripple_color: [1, 1, 1, 0.2]
+            md_bg_color:0,0,0,0
+            on_release:app.manager.push("letie")
+
+
+            MDNavigationDrawerItemLeadingIcon:
+                icon: "database"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+            MDNavigationDrawerItemText:
+                text: "Vos données"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+        MDNavigationDrawerDivider:
+            color: 1, 1, 1, 0.3
+
+        MDNavigationDrawerLabel:
+            text: "AUTRES"
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 0.6
+
+        MDNavigationDrawerItem:
+            selected_color: [1, 1, 1, 0.2]
+            ripple_color: [1, 1, 1, 0.2]
+            md_bg_color:0,0,0,0
+            on_release:app.manager.push("letie")
+
+
+            MDNavigationDrawerItemLeadingIcon:
+                icon: "lightbulb-outline"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+
+            MDNavigationDrawerItemText:
+                text: "Exemples"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+        MDNavigationDrawerItem:
+            selected_color: [1, 1, 1, 0.2]
+            ripple_color: [1, 1, 1, 0.2]
+            md_bg_color:0,0,0,0
+            on_release:app.manager.push("letie")
+            MDButton:
+                on_release: app.manager.push("letie")
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                style: "filled"
+                MDButtonIcon:
+                    icon: "package-variant-closed"
+                MDButtonText:
+                    text: "vos produis"
+
+
+            MDNavigationDrawerItemLeadingIcon:
+                icon: "account-circle"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+                text_color: 140/255,119/255,245/255,1
+
+            MDNavigationDrawerItemText:
+                text: "Votre compte"
+                theme_text_color: "Custom"
+                text_color: 140/255,119/255,245/255,1
+        MDNavigationDrawerItem:
+            selected_color: [1, 0, 0, 0.2]
+            ripple_color: [1, 0, 0, 0.2]
+            md_bg_color:0,0,0,0
+            on_release:app.manager.push("letie")
+
+
+            MDNavigationDrawerItemLeadingIcon:
+                icon: "logout"
+                theme_text_color: "Custom"
+                text_color: 140/255,119/255,245/255,1
+
+            MDNavigationDrawerItemText:
+                text: "Déconnexion"
+                theme_text_color: "Custom"
+                text_color: 140/255,119/255,245/255,1
+
+<AppBar@MDTopAppBar>
+    type: "small"
+    theme_bg_color: "Custom"
+    md_bg_color: 1, 1, 1, 1
+
+    MDTopAppBarLeadingButtonContainer:
+        theme_bg_color: "Custom"
+        md_bg_color: 1, 1, 1, 1
+
+        MDActionTopAppBarButton:
+            on_release:app.manager.pop()
+            icon: "arrow-left"
+            theme_icon_color: "Custom"
+            icon_color: 0, 0, 0, 1   # icône noire
+
+    MDTopAppBarTitle:
+        text: "CompanyManager"
+        theme_text_color: "Custom"
+        text_color: 0, 0, 0, 1     # texte noir
+
+    MDTopAppBarTrailingButtonContainer:
+        theme_bg_color: "Custom"
+        md_bg_color: 1, 1, 1, 1
+
+        MDActionTopAppBarButton:
+            icon: "attachment"
+            theme_icon_color: "Custom"
+            icon_color: 0, 0, 0, 1
+
+        MDActionTopAppBarButton:
+            icon: "calendar"
+            theme_icon_color: "Custom"
+            icon_color: 0, 0, 0, 1
+
+        MDActionTopAppBarButton:
+            icon: "dots-vertical"
+            theme_icon_color: "Custom"
+            icon_color: 0, 0, 0, 1
+

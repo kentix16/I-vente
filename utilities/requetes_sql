@@ -1,0 +1,7 @@
+
+------------creation de l'historique---------------------
+SELECT pv.date_de_vente AS date, s.pu*pv.qte AS somme, 'gain' AS mouvement FROM produits_vendu pv
+ JOIN stock s ON s.id_produit=pv.id_produit UNION ALL SELECT date_dep as date, somme_dep as somme,
+ 'dépense' AS mouvement FROM depense ORDER BY date;
+ ----------xxxxxxxxxxxxxxxxxxxxxxxx----------------------
+

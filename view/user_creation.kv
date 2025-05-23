@@ -1,0 +1,54 @@
+<UserCreationScreen>:
+    name: "user_creation"
+    Background:
+        id: background_widget
+
+<Background>:
+    Video:
+        source: 'videos/vid_bg.mp4'  # ← bon chemin si main.py est à la racine
+        state: 'play'
+        options: {'eos': 'loop'}
+        allow_stretch: True
+        keep_ratio: False
+        size_hint: 1, 1
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+
+    Meme:
+        size_hint: None, None
+        size: "350dp", "150dp"
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+<Meme>:
+    spacing: dp(20)
+    orientation: "vertical"
+    
+    MDTextField:
+        mode: "filled"
+        MDTextFieldHelperText:
+            text: " ex: CompagnyManager"
+            text_color_focus: "grey"
+        MDTextFieldHintText:
+            text: "entrez le nom de votre companie"
+            text_color_normal: "grey"
+    MDTextField:
+        mode:"filled"
+        MDTextFieldHelperText:
+            text:"Votre mail"
+        MDTextFieldHintText:
+            text:"ex:companymanager@gmail.com"
+    MDTextField:
+        mode:"filled"
+        MDTextFieldHelperText:
+            text:"créez votre mot de passe"
+        MDTextFieldHintText:
+            text:"ex:45/*klm#"
+    
+    MDButton:
+        on_release: app.manager.push("SalesPage")
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        style: "filled"
+        MDButtonIcon:
+            icon: "check-underline-circle"
+        MDButtonText:
+            text: "confirmer"

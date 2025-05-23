@@ -1,0 +1,301 @@
+
+<InsertProduct>:
+    #name:"insert_product"
+    size_hint_x: 1
+    radius: [15]
+    style: "elevated"
+    elevation: 10
+    MDBoxLayout:
+        orientation:"vertical"
+        spacing:dp(20)
+        padding:dp(20)
+        MDLabel:
+            text_color:0,0,0,1
+            size_hint_y:0.1
+            text: "Insertion de votre produit"
+            halign: "left"
+            text_color: 1,1,1,1
+            font_style: "OutfitBlack"
+            role: "small"
+            bold: True
+        MDTextField:
+            size_hint_x: 0.8  # 80% de la largeur du parent
+            size_hint_y: None
+            height: "30dp"
+            id:nom
+            mode: "filled"
+            size_hint_y:0.25
+
+            MDTextFieldHelperText:
+                text: " ex: Pantalon"
+                text_color_focus: "grey"
+            MDTextFieldHintText:
+                text: "entrez le nom du produit"
+                text_color_normal: "grey"
+        Spinner:
+            id: product_type_spinner
+            text: "Sélectionner un type"
+            values: root.product_types
+            size_hint: None, None
+            size: "200dp", "48dp"
+            on_text: root.on_product_type_select(self, self.text)
+
+
+        MDTextField:
+
+            id:pu
+            mode:"filled"
+            size_hint_y:0.25
+            MDTextFieldHelperText:
+                text:"ex: 8000"
+            MDTextFieldHintText:
+                text:"entrez son prix unitaire"
+        MDTextField:
+
+            id:qt
+            mode:"filled"
+            size_hint_y:0.25
+            MDTextFieldHelperText:
+                text:"ex: 8000"
+            MDTextFieldHintText:
+                text:"entrez le quantité"
+
+        MDButton:
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            style: "filled"
+            on_press:root.add()
+            MDButtonIcon:
+                icon: "check-underline-circle"
+            MDButtonText:
+                text: "créer le produit"
+<DeleteProduct>:
+    #name:"delete_product"
+
+    size_hint_x: 1
+    radius: [15]
+    style: "elevated"
+    elevation: 10
+    MDBoxLayout:
+        orientation:"vertical"
+        spacing:dp(20)
+        padding:dp(20)
+        MDLabel:
+            text_color:0,0,0,1
+            size_hint_y:0.1
+            text: "vente de votre produit"
+            halign: "left"
+            text_color: 1,1,1,1
+            font_style: "OutfitBlack"
+            role: "small"
+            bold: True
+        MDTextField:
+
+            id:nom_produit_vente
+            mode: "filled"
+            size_hint_y:0.1
+            MDTextFieldHelperText:
+                text: " ex: P0001"
+                text_color_focus: "grey"
+            MDTextFieldHintText:
+                text: "entrez le nom du produit"
+                text_color_normal: "grey"
+        MDTextField:
+
+            id:qt_produit_vente
+            mode: "filled"
+            size_hint_y:0.1
+            MDTextFieldHelperText:
+                text: " ex: 3"
+                text_color_focus: "grey"
+            MDTextFieldHintText:
+                text: "entrez le qt du produit à vendre"
+                text_color_normal: "grey"
+
+        MDButton:
+            on_press:root.sale_product()
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            style: "filled"
+            MDButtonIcon:
+                icon: "check-underline-circle"
+            MDButtonText:
+                text: "vendre le produit"
+<InsertProductType>:
+    #name:"insert_type_product"
+    size_hint_x: 1
+    radius: [15]
+    style: "elevated"
+    elevation: 10
+    MDBoxLayout:
+        orientation:"vertical"
+        spacing:dp(20)
+        padding:dp(20)
+        MDLabel:
+            text_color:0,0,0,1
+            size_hint_y:0.1
+            text: "Insérez ici un nouveau type de produit"
+            halign: "left"
+            text_color: 1,1,1,1
+            font_style: "OutfitBlack"
+            role: "small"
+            bold: True
+        MDTextField:
+            id:typetoinsert
+            mode: "filled"
+            size_hint_y:0.1
+            MDTextFieldHelperText:
+                text: " ex: haut léger"
+                text_color_focus: "grey"
+            MDTextFieldHintText:
+                text: "entrez le type ici"
+                text_color_normal: "grey"
+
+        MDButton:
+            on_press:root.add_type()
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            style: "filled"
+            MDButtonIcon:
+                icon: "check-underline-circle"
+            MDButtonText:
+                text: "insérer le type"
+
+<ProductNavigation>:
+    InsertProduct:
+    DeleteProduct:
+    InsertProductType:
+
+
+
+<ProductsPage>:
+    padding: dp(20)
+    spacing:dp(20)
+
+
+    MDBoxLayout:
+        orientation:"vertical"
+        spacing:dp(20)
+        padding:dp(20)
+        size_hint_x:0.3
+        size_hint_y:1
+        MDTabsPrimary:
+            id: tabs
+            pos_hint: {"center_x": .5, "center_y": 0.95}
+            radius: [7]
+            #theme_bg_color: "Custom"
+            #md_bg_color: 98/255,156/255,196/255,1
+
+            MDTabsItem:
+                on_release: root.change_screen_pop()
+                MDTabsItemText
+                    text: "Insérer un produit"
+                MDTabsItemIcon
+                    icon: "package-down"
+
+            MDTabsItem:
+                on_release: root.change_screen()
+                MDTabsItemText
+                    text: "Vendre un produit"
+                MDTabsItemIcon
+                    icon: "package-up"
+            MDTabsItem:
+                on_release: root.change_screen_type()
+                MDTabsItemText
+                    text: "insérer un type"
+                MDTabsItemIcon
+                    icon: "package"
+
+        MDScreenManager:
+            id: screen_manager
+
+            MDScreen:
+                name: "screen1"
+                InsertProduct:
+                    id:insertproduct
+
+
+
+            MDScreen:
+                name: "screen2"
+                DeleteProduct:
+            MDScreen:
+                name: "screen3"
+                InsertProductType:
+                    id:insertproducttype
+
+
+
+
+
+
+
+    Sliver:
+        id: sliver_box
+        size_hint_y: 1
+        size_hint_x: 0.65
+
+
+<GuitarItem>:
+    theme_bg_color: "Custom"
+    md_bg_color: 98/255,156/255,196/255,1
+
+    MDListItemLeadingAvatar:
+        source: "images/calcul.jpg"
+
+    MDListItemHeadlineText:
+        text: "productname"
+        text_color:1,1,1,1
+
+    MDListItemSupportingText:
+        text: "producttype"
+        text_color:1,1,1,1
+
+    MDListItemTertiaryText:
+        text: "productunitprice"
+        text_color:1,1,1,1
+
+    MDListItemTrailingIcon:
+        icon: "delete"
+        icon_color:1,1,1,1
+    MDListItemTrailingIcon:
+        icon: "pencil"
+        icon_color:1,1,1,1
+
+<Sliver@MDScreen>:
+    MDSliverAppbar:
+        background_color: 1,1,1,1 # couleur 2d4a50
+        hide_appbar: True
+
+        MDTopAppBar:
+            type: "medium"
+
+            MDTopAppBarLeadingButtonContainer:
+                MDActionTopAppBarButton:
+                    icon: "package"
+
+            MDTopAppBarTitle:
+                text: "vos produit"
+
+            MDTopAppBarTrailingButtonContainer:
+                MDActionTopAppBarButton:
+                    icon: "attachment"
+                MDActionTopAppBarButton:
+                    icon: "calendar"
+                MDActionTopAppBarButton:
+                    icon: "dots-vertical"
+
+        MDSliverAppbarHeader:
+            FitImage:
+                source: "images/playabg.jpg"
+
+        Content:
+            id: content
+            orientation: "vertical"
+            padding: "12dp"
+            theme_bg_color: "Custom"
+            md_bg_color: 218/255,236/255,246/255,1
+            ListProducts:
+                id:listproducts
+                size_hint : 1,None
+                height : 170
+                on_parent:self.show_products()
+
+

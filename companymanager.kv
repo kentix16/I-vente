@@ -1,0 +1,100 @@
+#:import navigation_screen_manager navigation_screen_manager
+#:import user_creation controllers.user_creation
+#:import sales_page controllers.sales_page
+#:import layout controllers.layout
+#:import products_page controllers.products_page
+#:import wallet_page controllers.wallet_page
+#:import expenses_page controllers.expenses_page
+
+
+MyScreenManager:
+<MyScreenManager@NavigationScreenManager>:
+
+    UserCreationScreen:
+    MainScreen:  # ce sera le screen avec le navigation drawer
+        id:mainscreen
+    LayoutScreen:
+    ProductsScreen:
+        id:productsscreen
+    WalletScreen:
+        id:walletscreen
+    ExpensesScreen:
+        id:expensesscreen
+
+
+<MainScreen@Screen>:
+    name: "SalesPage"
+
+    MDNavigationLayout:
+        ScreenManager:
+            id: nav_screen_manager
+
+            Screen:
+                name: "sales_home"
+                PrincipalScreen:
+                    md_bg_color: 212/255,219/255,237/255,1
+                    AppBar:
+                    SalesPage:
+                        id:salespage
+
+        Gradient:
+<UserCreationScreen@Screen>:
+    name: "user_creation"
+    BoxLayout:
+        orientation: "vertical"
+
+<LayoutScreen@Screen>:
+    name: "layout"
+    BoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Page Layout"
+        MDLabel:
+            text: "Contenu layout"
+
+<ProductsScreen@Screen>:
+    name: "letie"
+    MDNavigationLayout:
+        ScreenManager:
+            id: nav_screen_manager
+
+            Screen:
+                name: "sales_home"
+                PrincipalScreen:
+                    md_bg_color: 212/255,219/255,237/255,1
+                    AppBar:
+                    ProductsPage:
+                        id:productspage
+
+        Gradient:
+
+<WalletScreen@Screen>:
+    name: "WalletPage"
+    MDNavigationLayout:
+        ScreenManager:
+            id: nav_screen_manager
+
+            Screen:
+                name: "sales_home"
+                PrincipalScreen:
+                    md_bg_color:248/255,247/255,242/255,1
+                    AppBar:
+                    WalletPage:
+                        id:walletpage
+
+        Gradient:
+<ExpensesScreen@Screen>:
+    name: "ExpensesPage"
+    MDNavigationLayout:
+        ScreenManager:
+            id: nav_screen_manager
+
+            Screen:
+                name: "sales_home"
+                PrincipalScreen:
+                    md_bg_color:248/255,247/255,242/255,1
+                    AppBar:
+                    ExpensesPage:
+                        id:expensespage
+
+        Gradient:
