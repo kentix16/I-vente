@@ -13,8 +13,8 @@ class MyScreenManager(NavigationScreenManager):
         self.ids.mainscreen.ids.salespage.update_produits_en_rupture()
         self.ids.mainscreen.ids.salespage.ids.pourcentagepv.show_pourcentage_pv()
         self.ids.expensesscreen.ids.expensespage.ids.labelsommeportefeuille.update_somme_portefeuille()
-        self.ids.expensesscreen.ids.expensespage.ids.listedepense.show_expenses()
-        self.ids.walletscreen.ids.walletpage.ids.historique.show_historique()
+        self.ids.expensesscreen.ids.expensespage.ids.listedepense.update_expenses()
+        self.ids.walletscreen.ids.walletpage.ids.historique.update_historique()
         self.ids.walletscreen.ids.walletpage.ids.labelsommeportefeuille2.update_somme_portefeuille()
 
 class CompanyManager(MDApp):

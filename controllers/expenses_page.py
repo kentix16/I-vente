@@ -110,7 +110,7 @@ class ExpensesPage(MDBoxLayout):
         date_dialog.bind(on_ok=self.on_ok_date)
         date_dialog.open()
     def on_ok_date(self,instance_date_picker):
-        date  =instance_date_picker.get_date()[0]
+        date =instance_date_picker.get_date()[0]
         self.ids.listedepense.show_expenses(date)
         instance_date_picker.dismiss()
     def show_modal_date_picker(self, *args):
@@ -171,19 +171,15 @@ class LabelSommePortefeuille(Label):
 class ListeDepense(ScrollView):
     grid_showed = False
     grid = None
+    instance = GestionModel()
     def __init__(self,**kwargs):
         super(ListeDepense,self).__init__(**kwargs)
-
-
     def show_expenses(self,date=None,date_fin=None):
-        if self.grid_showed:
+        if  self.grid_showed:
             self.remove_widget(self.grid)
-            self.grid = None
         self.grid = GridLayout(cols=3,spacing=2,size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter('height'))
-        instance = GestionModel()
-        depenses = instance.get_expenses(date,date_fin)
-        #print(produits)
+        depenses = self.instance.get_expenses(date,date_fin)
         titles = ('DATE','NOM','SOMME')
         for i in enumerate(titles):
             cell = Label(text=i[1], color=(0, 0, 0, 1), bold=True, size_hint=(1, None), height=20)
@@ -196,6 +192,11 @@ class ListeDepense(ScrollView):
                 self.grid.add_widget(cell)
         self.add_widget(self.grid)
         self.grid_showed = True
+    def update_expenses(self):
+        row = self.instance.get_last_depense
+        for item in row:
+            cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=20)
+            self.grid.add_widget(cell)
 
 import os
 

@@ -1,6 +1,5 @@
 from datetime import datetime
 import datetime
-
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.metrics import dp
@@ -147,6 +146,7 @@ class WalletPage(MDBoxLayout):
 class Historique(ScrollView):
     grid_showed = False
     grid = None
+    instance = GestionModel()
     def __init__(self,**kwargs):
         super(Historique,self).__init__(**kwargs)
 
@@ -157,8 +157,7 @@ class Historique(ScrollView):
             self.grid = None
         self.grid = GridLayout(cols=3,spacing=2,size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter('height'))
-        instance = GestionModel()
-        depenses = instance.get_historique(date,date_fin)
+        depenses = self.instance.get_historique(date,date_fin)
         titles = ('DATE','NOM','SOMME')
         for i in enumerate(titles):
             cell = Label(text=i[1], color=(0, 0, 0, 1), bold=True, size_hint=(1, None), height=20)
@@ -171,6 +170,11 @@ class Historique(ScrollView):
                 self.grid.add_widget(cell)
         self.add_widget(self.grid)
         self.grid_showed = True
+    def update_historique(self):
+        row = self.instance.get_last_historique
+        for item in row:
+            cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=20)
+            self.grid.add_widget(cell)
 
 
 

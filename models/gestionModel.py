@@ -5,8 +5,8 @@ class GestionModel:
 
     @property
     def get_pourcentage_produits_vendus(self):
-        res = to_database("""SELECT s.nom,CONCAT(ROUND((SUM(pv.qte)/(select sum(qte) 
-        from produits_vendu WHERE DATE(date_de_vente)=CURRENT_DATE()))*100,2),'%') as pourcentage
+        res = to_database("""SELECT s.nom,ROUND((SUM(pv.qte)/(select sum(qte) 
+        from produits_vendu WHERE DATE(date_de_vente)=CURRENT_DATE()))*100,2) as pourcentage
          from stock s inner join produits_vendu pv on pv.id_produit=s.id_produit WHERE 
          DATE(pv.date_de_vente)= CURRENT_DATE() group by s.nom;
                            
@@ -22,7 +22,7 @@ class GestionModel:
         res = to_database("SELECT SUM(qte) as total FROM produits_vendu WHERE DATE(date_de_vente)=CURRENT_DATE()")
         return res[0][0]
     @property
-    def produits_en_rupture(self):
+    def get_produits_en_rupture(self):
         res = to_database('SELECT COUNT(nom) from stock WHERE qt=0 group by nom')
         if res:
             return res[0][0]
@@ -60,6 +60,14 @@ class GestionModel:
     def get_last_row_depense(self):
         res = to_database('SELECT id_dep FROM depense ORDER BY id_dep DESC LIMIT 1')
         return res[0][0]
+    @property
+    def get_last_depense(self):
+        res = to_database(('SELECT id_dep FROM depense ORDER BY id_dep DESC LIMIT 1'))
+        return res
+    @property
+    def get_last_historique(self):
+        res = to_database('SELECT * from historique ORDER BY date DESC LIMIT 1')
+        return res
 
     @property
     def get_type(self):
@@ -73,19 +81,20 @@ class GestionModel:
 
     def get_expenses(self,date=None,date_fin=None):
         if date :
-            if not date_fin: res = to_database('SELECT date_dep,nom_dep,somme_dep FROM depense WHERE date(date_dep)=%s',
+            if not date_fin: res = to_database('SELECT date_dep,nom_dep,somme_dep FROM depense WHERE date(date_dep)=%s ORDER BY date_dep DESC',
                                    (date,))
-            else:res=to_database('SELECT date_dep,nom_dep,somme_dep FROM depense WHERE date(date_dep) BETWEEN %s AND %s',
+            else:res=to_database('SELECT date_dep,nom_dep,somme_dep FROM depense WHERE date(date_dep) BETWEEN %s AND %s ORDER BY date_dep DESC',
                                  (date,date_fin))
-        else: res = to_database('SELECT date_dep,nom_dep,somme_dep FROM depense')
+        else: res = to_database('SELECT date_dep,nom_dep,somme_dep FROM depense ORDER BY date_dep DESC')
         return res
+
     def get_historique(self,date=None,date_fin=None):
         if date :
-            if not date_fin: res = to_database('SELECT * FROM historique WHERE DATE(date)=%s',
+            if not date_fin: res = to_database('SELECT * FROM historique WHERE DATE(date)=%s order by date desc',
                                    (date,))
-            else:res=to_database('SELECT * FROM historique WHERE DATE(date) BETWEEN %s AND %s',
+            else:res=to_database('SELECT * FROM historique WHERE DATE(date) BETWEEN %s AND %s order by date desc',
                                  (date,date_fin))
-        else: res = to_database('SELECT * FROM historique')
+        else: res = to_database('SELECT * FROM historique order by date desc')
         return res
 
     @property

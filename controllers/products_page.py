@@ -245,14 +245,11 @@ class DeleteProduct(MDCard):
         super(DeleteProduct,self).__init__(**kwargs)
 
     def sale_product(self):
-        print('sale product')
         nom = self.ids.nom_produit_vente.text
         qt=self.ids.qt_produit_vente.text
         print(nom,qt)
         to_database('UPDATE stock SET qt=qt-%s WHERE nom=%s',(qt,nom))
         self.add_to_produit_vendu(qt,nom)
-        #to_database('INSERT INTO produits_vendu VALUES(%s,now,%s,%s)',())
-        print(self.parent.parent.parent.parent.ids.sliver_box.ids.listproducts.show_products())
 
     def add_to_produit_vendu(self,qt,nom):
         def get_id_produit_vendu_and_increment():
