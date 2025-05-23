@@ -1,3 +1,7 @@
+from datetime import datetime
+
+import matplotlib.dates as mdates
+
 from kivy.clock import Clock
 from kivy.core.text import LabelBase
 from kivy.lang import Builder
@@ -8,6 +12,7 @@ from kivy.uix.label import Label
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.card import MDCard
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivy_garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivymd.uix.label import MDLabel
@@ -43,6 +48,46 @@ KV = '''
 
 ResponsiveView:
 '''
+class StatDeVente(MDCard):
+    widget_showed = False
+
+    def __init__(self, **kwargs):
+        super(StatDeVente, self).__init__(**kwargs)
+
+    def show_stat_du_jour(self):
+        print("appel du stat du jour")
+
+        # Nettoyage
+        self.clear_widgets()
+
+        # Layout pour occuper tout l'espace
+        layout = MDBoxLayout(orientation="vertical", size_hint=(1, 1))
+        self.add_widget(layout)
+
+        salemodel = GestionModel()
+        rows = salemodel.get_heures_stat
+
+        if not rows:
+            layout.add_widget(Label(text="Aucune donnée aujourd'hui"))
+            return
+
+        heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
+        somme = [row[1] for row in rows]
+
+        fig, ax = plt.subplots()
+        ax.plot(heures, somme, color='green', linewidth=2)
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
+        fig.autofmt_xdate()
+        ax.set_title("Statistiques journalières")
+        ax.set_ylabel("Somme")
+        ax.set_xlabel("Heure")
+        ax.grid(True)
+
+        canvas = FigureCanvasKivyAgg(fig)
+        layout.add_widget(canvas)  # <- canvas est dans un layout qui remplit le MDCard
+        self.widget_showed = True
+
 class PourcentagePV(RelativeLayout):
     widget_showed = False
 

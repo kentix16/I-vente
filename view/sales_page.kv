@@ -131,17 +131,16 @@
 
 
 
-        MDCard:
+        StatDeVente:
+            id:statedevente
             style: "elevated"
             theme_bg_color: "Custom"
             size_hint_y: 0.35
             size_hint_x:1
             radius:[20]
             md_bg_color:1,1,1,1
-            MDLabel:
-                text : "?"
-                font_style:"Display"
-                pos_hint:{'center_x':.5,'center_y':.5}
+            on_parent:self.show_stat_du_jour()
+
 
     MDBoxLayout:
         orientation:"vertical"
