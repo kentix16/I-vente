@@ -12,6 +12,11 @@ class GestionModel:
                            
                           """)
         return res
+    @property
+    def get_heures_stat(self):
+        res = to_database("SELECT date_de_vente, qte FROM produits_vendu WHERE date(date_de_vente)=CURRENT_DATE()")
+        return res
+
 
     @property
     def get_somme_total_gagnee(self):

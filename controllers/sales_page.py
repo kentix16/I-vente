@@ -8,13 +8,14 @@ from kivy.uix.label import Label
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.card import MDCard
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivy_garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivymd.uix.label import MDLabel
 from kivymd.uix.responsivelayout import MDResponsiveLayout
 from kivymd.uix.screen import MDScreen
 from matplotlib import pyplot as plt
-
+import matplotlib.dates as mdates
 from models.gestionModel import GestionModel
 
 # Pour les variantes spécifiques comme SemiBold et Black
@@ -43,6 +44,38 @@ KV = '''
 
 ResponsiveView:
 '''
+class StatToday(MDCard):
+    stat_showed = False
+    def __init__(self,**kwargs):
+        super(StatToday,self).__init__(**kwargs)
+
+    def show_stat(self):
+        if self.stat_showed:self.clear_widgets()
+        salemodel = GestionModel()
+        rows = salemodel.get_heures_stat
+        heures = [row[0] for row in rows]
+        somme = [valeur[1] for valeur in rows]
+
+        fig,ax = plt.subplots(figsize=(10, 6))
+        ax.plot(heures, somme, color='green', linewidth=2)
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
+        fig.autofmt_xdate()
+        self.stat_showed = True
+
+        ax.set_title("Shopify Inc", fontsize=16)
+        ax.set_ylabel("Prix ($)", fontsize=12)
+        ax.set_xlabel("Date", fontsize=12)
+        ax.grid(True)
+
+        # Rotation des dates
+        plt.xticks(rotation=45)
+
+        # Afficher le graphique
+        fig.tight_layout()
+        self.add_widget(FigureCanvasKivyAgg(fig))
+
+
 class PourcentagePV(RelativeLayout):
     widget_showed = False
 
