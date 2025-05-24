@@ -216,30 +216,26 @@ class ListProducts(ScrollView):
         instance = GestionModel()
         produits = instance.get_produits
         #print(produits)
-        titles = ('PRODUITS','PU','QT','TYPE','')
+        titles = ('','PRODUITS','PU','QT','TYPE')
         for i in enumerate(titles):
             cell = Label(text=i[1], color=(0, 0, 0, 1), bold=True, size_hint=(1, None), height=20)
-            if i[0]==4:
-                cell.size_hint=(.45,None)
+            if i[0]==0:
+                cell.size_hint=(.2,None)
             self.grid.add_widget(cell)
         for row in produits:
+            btn = Button(text='v', bold=True, color=(0, 0, 1, 1), size_hint=(.2, None),
+                         height=20, background_color=(0, 0, 1, .1))
+            btn.bind(on_press=partial(self.remove_product, nom_produit=row[0]))
+            self.grid.add_widget(btn)
             for item in range(len(row)):
                 cell = Label(text = f'{row[item]}',color=(.2,.2,.2,1),size_hint=(1,None),height=20)
                 self.grid.add_widget(cell)
-            else:
-                btn = Button(text='-',bold=True,color=(1,0,0,1),size_hint=(.45,None),
-                              height=20,background_color=(0,0,0,.1))
-                btn.bind(on_press=partial(self.remove_product,nom_produit=row[0]))
-                self.grid.add_widget(btn)
+
         self.add_widget(self.grid)
         self.grid_showed = True
 
     def remove_product(self,instance,nom_produit):
-        try:
-            to_database('DELETE FROM stock WHERE nom=%s',(nom_produit,))
-            self.show_products()
-        except:print('on ne peut pas effacer')
-
+        App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.delectproduct.ids.nom_produit_vente.text=nom_produit
 class DeleteProduct(MDCard):
     def __init__(self,**kwargs):
         super(DeleteProduct,self).__init__(**kwargs)
@@ -264,8 +260,11 @@ class DeleteProduct(MDCard):
             print(new_id)
             return new_id
         id_prov=get_id_produit_vendu_and_increment()
-        id_produit_vendu = to_database('SELECT id_produit FROM stock WHERE nom=%s',(nom,))
-        to_database('INSERT INTO produits_vendu VALUES(%s,CURRENT_TIMESTAMP,%s,%s)', (id_prov,qt,id_produit_vendu[0][0]))
+        try:
+            id_produit_vendu = to_database('SELECT id_produit FROM stock WHERE nom=%s',(nom,))
+            to_database('INSERT INTO produits_vendu VALUES(%s,CURRENT_TIMESTAMP,%s,%s)', (id_prov,qt,id_produit_vendu[0][0]))
+        except:
+            for i in range(1000):print('ce produit n\'existe pas')
         self.ids.nom_produit_vente.text = ''
         self.ids.qt_produit_vente.text = ''
         App.get_running_app().manager.update_all()

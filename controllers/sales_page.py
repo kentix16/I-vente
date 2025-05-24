@@ -15,6 +15,7 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
+from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivy_garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivymd.uix.label import MDLabel
@@ -75,6 +76,55 @@ class StatDeVente(MDCard):
         salemodel = GestionModel()
         rows = salemodel.get_heures_stat
 
+        heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
+        montants = [row[1] for row in rows]
+
+        # Grouper par tranche de 10 minutes
+        donnees_par_10min = defaultdict(float)
+        for heure, montant in zip(heures, montants):
+            minute = (heure.minute // 10) * 10
+            heure_arrondie = heure.replace(minute=minute, second=0, microsecond=0)
+            donnees_par_10min[heure_arrondie] += montant
+
+        heures_groupees = sorted(donnees_par_10min.keys())
+        montant_groupes = [donnees_par_10min[h] for h in heures_groupees]
+
+        couleurs_palette = ['#1abc9c', '#16a085']
+        couleurs_alternees = [couleurs_palette[i % len(couleurs_palette)] for i in range(len(heures_groupees))]
+
+        fig, ax = plt.subplots(figsize=(10, 5))
+        bars = ax.bar(heures_groupees, montant_groupes, width=0.006, color=couleurs_alternees, edgecolor='black',
+                      linewidth=0.5)
+
+        for bar, montant in zip(bars, montant_groupes):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width() / 2.0, height + 0.5, f"{montant:.0f}", ha='center', va='bottom',
+                    fontsize=9, color="#333")
+
+        # Format des dates : ticks majeurs toutes les heures
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+
+        # Optionnel : repères mineurs toutes les 10 minutes
+        #ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=10))
+
+        fig.autofmt_xdate()
+        ax.grid(True, linestyle='--', alpha=0.4)
+        fig.patch.set_facecolor("#f7f7f7")
+        ax.set_facecolor('#f0f0f0')
+        ax.set_ylabel("Prix ($)", fontsize=12)
+        ax.set_xlabel("Heure", fontsize=12)
+        plt.xticks(rotation=45)
+        fig.tight_layout()
+
+        self.add_widget(FigureCanvasKivyAgg(fig))
+
+    """def show_stat_du_jour(self):
+        self.clear_widgets()
+
+        salemodel = GestionModel()
+        rows = salemodel.get_heures_stat
+
         heures = [datetime.strptime(str(row[0]),'%Y-%m-%d %H:%M:%S') for row in rows]
         montants = [row[1] for row in rows]
         donnees_par_heure = defaultdict(float)
@@ -84,7 +134,7 @@ class StatDeVente(MDCard):
         heures_groupees = sorted(donnees_par_heure.keys())
         montant_groupes = [donnees_par_heure[h] for h in heures_groupees]
 
-        couleurs_palette = ['#e74c3c','#a5a5a6']
+        couleurs_palette = ['#1abc9c','#16a085']
         couleurs_alternees = [couleurs_palette[i %len(couleurs_palette)] for i in range(len(heures_groupees))]
 
 
@@ -109,7 +159,8 @@ class StatDeVente(MDCard):
         plt.xticks(rotation=45)
         fig.tight_layout()
 
-        self.add_widget(FigureCanvasKivyAgg(fig))
+
+        self.add_widget(FigureCanvasKivyAgg(fig))"""
 
 
 class PourcentagePV(RelativeLayout):
@@ -204,7 +255,7 @@ class ListeVente(ScrollView):
         if self.grid_showed:
             self.remove_widget(self.grid)
             self.grid = None
-        self.grid = GridLayout(cols=4, spacing=2, size_hint_y=None)
+        self.grid = MDGridLayout(cols=4, spacing=2, size_hint_y=None,)
         self.grid.bind(minimum_height=self.grid.setter('height'))
         instance = GestionModel()
         produits = instance.get_produits_vendus
