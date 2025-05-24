@@ -185,6 +185,12 @@ class Historique(ScrollView):
         self.add_widget(self.grid)
         self.grid_showed = True
 
+    def update_historique(self):
+        row = self.instance.get_last_historique
+        for item in row:
+            cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=40)
+            self.grid.add_widget(cell)
+
 
 import os
 

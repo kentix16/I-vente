@@ -20,7 +20,8 @@ class GestionModel:
 
     @property
     def get_heures_stat(self):
-        res = to_database("SELECT date,somme FROM historique WHERE DATE(date)=CURRENT_DATE()")
+        res = to_database("SELECT pv.date_de_vente, (pv.qte*s.pu) as somme from produits_vendu pv JOIN stock s ON "
+                          "s.id_produit=pv.id_produit where DATE(pv.date_de_vente)=CURRENT_DATE()")
         return res
     @property
     def get_somme_total_gagnee(self):

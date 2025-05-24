@@ -1,4 +1,6 @@
+from collections import defaultdict
 from datetime import datetime
+from itertools import cycle
 
 import matplotlib.dates as mdates
 
@@ -68,52 +70,47 @@ class StatDeVente(MDCard):
         super(StatDeVente, self).__init__(**kwargs)
 
     def show_stat_du_jour(self):
-        print("appel du stat du jour")
-
-        # Nettoyage
         self.clear_widgets()
-
-        # Layout pour occuper tout l'espace
-        layout = MDBoxLayout(orientation="vertical", size_hint=(1, 1))
-        self.add_widget(layout)
 
         salemodel = GestionModel()
         rows = salemodel.get_heures_stat
 
-        if not rows:
-            layout.add_widget(Label(text="Aucune donnée aujourd'hui"))
-            return
+        heures = [datetime.strptime(str(row[0]),'%Y-%m-%d %H:%M:%S') for row in rows]
+        montants = [row[1] for row in rows]
+        donnees_par_heure = defaultdict(float)
+        for heure,montant in zip(heures,montants):
+                heure_arrondie=heure.replace(minute=0,second=0,microsecond=0)
+                donnees_par_heure[heure_arrondie] +=montant
+        heures_groupees = sorted(donnees_par_heure.keys())
+        montant_groupes = [donnees_par_heure[h] for h in heures_groupees]
 
-        heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
-        somme = [row[1] for row in rows]
+        couleurs_palette = ['#e74c3c','#a5a5a6']
+        couleurs_alternees = [couleurs_palette[i %len(couleurs_palette)] for i in range(len(heures_groupees))]
 
-        fig, ax = plt.subplots()
-        ax.plot(heures, somme, color='green', linewidth=2)
+
+        fig, ax = plt.subplots(figsize=(10,5))
+        bars = ax.bar(heures_groupees, montant_groupes, width=0.035, color=couleurs_alternees,edgecolor='black',linewidth=0.5)
+
+        for bar,montant in zip(bars,montant_groupes):
+            height=bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2.0, height +0.5 , f"{montant:.0f}", ha='center',va='bottom',fontsize=9,color="#333")
+
+
+
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
         fig.autofmt_xdate()
-        self.stat_showed = True
-
-        ax.set_title("Shopify Inc", fontsize=16)
+        ax.grid(True,linestyle='--',alpha=0.4)
+        fig.patch.set_facecolor("#f7f7f7")
+        ax.set_facecolor('#f0f0f0')
+        #ax.set_title("Shopify Inc", fontsize=16)
         ax.set_ylabel("Prix ($)", fontsize=12)
         ax.set_xlabel("Date", fontsize=12)
-        ax.grid(True)
-
-        # Rotation des dates
         plt.xticks(rotation=45)
-
-        # Afficher le graphique
         fig.tight_layout()
+
         self.add_widget(FigureCanvasKivyAgg(fig))
 
-        ax.set_title("Statistiques journalières")
-        ax.set_ylabel("Somme")
-        ax.set_xlabel("Heure")
-        ax.grid(True)
-
-        canvas = FigureCanvasKivyAgg(fig)
-        layout.add_widget(canvas)  # <- canvas est dans un layout qui remplit le MDCard
-        self.widget_showed = True
 
 class PourcentagePV(RelativeLayout):
     widget_showed = False

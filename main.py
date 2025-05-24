@@ -10,7 +10,7 @@ class MyScreenManager(NavigationScreenManager):
         self.ids.mainscreen.ids.salespage.ids.listevente.show_products_sale()
         self.ids.mainscreen.ids.salespage.update_total_de_ventes()
         self.ids.mainscreen.ids.salespage.update_somme_total_gagnee()
-        self.ids.mainscreen.ids.salespage.ids.stattoday.show_stat()
+        self.ids.mainscreen.ids.salespage.ids.statedevente.show_stat_du_jour()
         self.ids.mainscreen.ids.salespage.update_produits_en_rupture()
         self.ids.mainscreen.ids.salespage.ids.pourcentagepv.show_pourcentage_pv()
         self.ids.mainscreen.ids.salespage.ids.statedevente.show_stat_du_jour()
