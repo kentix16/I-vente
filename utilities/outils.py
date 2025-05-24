@@ -2,7 +2,7 @@
 class Connexion:
     host='localhost'
     user='root'
-    password='abcd'
+    password='1234567'
 
 
 

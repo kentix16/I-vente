@@ -5,6 +5,7 @@
 #:import products_page controllers.products_page
 #:import wallet_page controllers.wallet_page
 #:import expenses_page controllers.expenses_page
+#:import statistics_page controllers.statistics_page
 
 
 MyScreenManager:
@@ -20,6 +21,8 @@ MyScreenManager:
         id:walletscreen
     ExpensesScreen:
         id:expensesscreen
+    StatsScreen:
+        id:statsscreen
 
 
 <MainScreen@Screen>:
@@ -96,5 +99,20 @@ MyScreenManager:
                     AppBar:
                     ExpensesPage:
                         id:expensespage
+
+        Gradient:
+<StatsScreen@Screen>:
+    name: "StatsPage"
+    MDNavigationLayout:
+        ScreenManager:
+            id: nav_screen_manager
+
+            Screen:
+                name: "sales_home"
+                PrincipalScreen:
+                    md_bg_color:248/255,247/255,242/255,1
+                    AppBar:
+                    StatsPage:
+                        id:statsspage
 
         Gradient:
