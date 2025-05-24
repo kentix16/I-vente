@@ -29,11 +29,11 @@ class SelectYear(MDLabel):
     text = current_year
 
 
-
 class ExpensesPage(MDBoxLayout):
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         device_orientation = self.check_orientation
+
     ORIENTATION = Literal["portrait", "landscape"]
     time_picker_horizontal: MDTimePickerDialHorizontal = ObjectProperty(
         allownone=True
@@ -49,9 +49,8 @@ class ExpensesPage(MDBoxLayout):
         allownone=True
     )
 
-
     def check_orientation(
-        self, instance: ThemeManager, orientation: ORIENTATION
+            self, instance: ThemeManager, orientation: ORIENTATION
     ):
         if orientation == "portrait" and self.time_picker_horizontal:
             self.time_picker_horizontal.dismiss()
@@ -110,13 +109,15 @@ class ExpensesPage(MDBoxLayout):
         ]
         date_dialog.bind(on_ok=self.on_ok_date)
         date_dialog.open()
-    def on_ok_date(self,instance_date_picker):
-        date =instance_date_picker.get_date()[0]
+
+    def on_ok_date(self, instance_date_picker):
+        date = instance_date_picker.get_date()[0]
         self.ids.listedepense.show_expenses(date)
         instance_date_picker.dismiss()
+
     def show_modal_date_picker(self, *args):
 
-        date_dialog =  MDModalDatePicker(mode="range")
+        date_dialog = MDModalDatePicker(mode="range")
         # You have to control the position of the date picker dialog yourself.
         date_dialog.pos = [
             self.ids.date_button.center_x - date_dialog.width / 2,
@@ -124,61 +125,79 @@ class ExpensesPage(MDBoxLayout):
         ]
         date_dialog.bind(on_ok=self.on_ok_periode)
         date_dialog.open()
-    def on_ok_periode(self,instance_date_picker):
-        date_debut=instance_date_picker.get_date()[0]
+
+    def on_ok_periode(self, instance_date_picker):
+        date_debut = instance_date_picker.get_date()[0]
         date_fin = instance_date_picker.get_date()[-1]
-        self.ids.listedepense.show_expenses(date_debut,date_fin)
+        self.ids.listedepense.show_expenses(date_debut, date_fin)
         instance_date_picker.dismiss()
 
     def show_year(self):
-        select_month_card=self.ids.select_month_year
+        select_month_card = self.ids.select_month_year
         year_dialog = MDDialog(
             MDDialogContentContainer(
                 MDDivider(),
                 select_month_card
-                ),
+            ),
 
         )
         year_dialog.open()
+
     def add_expense(self):
         nom = self.ids.nom_depense.text
         somme = self.ids.somme_depense.text
+
         def get_id_depense_and_increment():
             gestionmodel = GestionModel()
             try:
                 lastrow = gestionmodel.get_last_row_depense
             except:
-                lastrow='DEP000'
+                lastrow = 'DEP000'
             number = int(lastrow[3:])
-            number+=1
-            new_id='DEP'+f'{number:03d}'
+            number += 1
+            new_id = 'DEP' + f'{number:03d}'
             print(new_id)
             return new_id
+
         id = get_id_depense_and_increment()
         to_database("INSERT INTO depense(id_dep,nom_dep,somme_dep) VALUES(%s,%s,%s)",
-                    (id,nom,somme))
+                    (id, nom, somme))
         self.ids.listedepense.show_expenses()
         self.ids.labelsommeportefeuille.update_somme_portefeuille()
 
+
 class LabelSommePortefeuille(Label):
-    somme_portefeuille=StringProperty('')
-    def __init__(self,**kwargs):
-        super(LabelSommePortefeuille,self).__init__(**kwargs)
+    somme_portefeuille = StringProperty('')
+
+    def __init__(self, **kwargs):
+        super(LabelSommePortefeuille, self).__init__(**kwargs)
         #self.text = 'je ne sais pas'
         self.update_somme_portefeuille()
+
     def update_somme_portefeuille(self):
         gestionmodel = GestionModel()
         self.somme_portefeuille = str(gestionmodel.get_somme_portefeuille)
+
+
 class ListeDepense(ScrollView):
     grid_showed = False
     grid = None
     instance = GestionModel()
-    def __init__(self,**kwargs):
-        super(ListeDepense,self).__init__(**kwargs)
+    desc = False
+    sort_by = 'date_dep'
 
-    def show_expenses(self, date=None, date_fin=None, sort_by='date_dep', sort_order='desc'):
-        if self.grid_showed:
-            self.remove_widget(self.grid)
+    def __init__(self, **kwargs):
+        super(ListeDepense, self).__init__(**kwargs)
+
+    def show_expenses(self, date=None, date_fin=None, order=None):
+        if self.grid_showed: self.remove_widget(self.grid)
+        if not order:
+            order ={'date_dep': False}
+            self.desc=False
+        if self.sort_by != list(order.keys())[0]:
+            self.sort_by = list(order.keys())[0]
+            self.desc = False
+        else: self.desc = not self.desc
 
         self.grid = GridLayout(cols=3, spacing=2, size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter('height'))
@@ -192,11 +211,11 @@ class ListeDepense(ScrollView):
                 height=30,
                 bold=True
             )
-            btn.bind(on_press=lambda instance, col=column: self.show_expenses(date, date_fin, sort_by=col))
+            btn.bind(on_press=lambda instance, col=column: self.show_expenses(date, date_fin, order={col: self.desc}))
             self.grid.add_widget(btn)
 
         # DONNÉES
-        depenses = self.instance.get_expenses(date, date_fin, sort_by, sort_order)
+        depenses = self.instance.get_expenses(order, date, date_fin)
         for row in depenses:
             for item in row:
                 cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=40)
@@ -210,6 +229,7 @@ class ListeDepense(ScrollView):
         for item in row:
             cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=40)
             self.grid.add_widget(cell)
+
 
 import os
 

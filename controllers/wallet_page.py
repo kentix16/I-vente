@@ -148,13 +148,17 @@ class Historique(ScrollView):
     grid_showed = False
     grid = None
     instance = GestionModel()
+    desc = True
+    sort_by = 'date'
     def __init__(self,**kwargs):
         super(Historique,self).__init__(**kwargs)
 
-    def show_historique(self, date=None, date_fin=None, sort_by='date', sort_order='desc'):
-        if self.grid_showed:
-            self.remove_widget(self.grid)
-            self.grid = None
+    def show_historique(self, date=None, date_fin=None, order = None):
+        if self.grid_showed:self.remove_widget(self.grid)
+        if not order: order = {'date':True}
+        if self.sort_by == list(order.keys())[0]:self.desc = not self.desc
+        else:self.sort_by = list(order.keys())[0]
+
 
         self.grid = GridLayout(cols=3, spacing=2, size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter('height'))
@@ -168,11 +172,11 @@ class Historique(ScrollView):
                 height=30,
                 bold=True
             )
-            btn.bind(on_press=lambda instance, col=column: self.show_historique(date, date_fin, sort_by=col))
+            btn.bind(on_press=lambda instance, col=column: self.show_historique(date, date_fin, order={col:self.desc}))
             self.grid.add_widget(btn)
 
         # DONNÉES
-        depenses = self.instance.get_historique(date, date_fin, sort_by, sort_order)
+        depenses = self.instance.get_historique(order,date, date_fin)
         for row in depenses:
             for item in row:
                 cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=40)

@@ -88,8 +88,11 @@ class GestionModel:
         res = to_database('SELECT id_type from type_produit where nom_type=%s',(type,))
         return res[0][0]
 
-    def get_expenses(self, date=None, date_fin=None, sort_by='date_dep', sort_order='desc'):
-        order_clause = f"ORDER BY {sort_by} {sort_order}"
+    def get_expenses(self,order, date=None, date_fin=None):
+        desc = list(order.values())[0]
+        order_by = list(order.keys())[0]
+        order_clause = f"ORDER BY {order_by}"
+        if desc: order_clause+=' DESC'
         query_base = "SELECT date_dep, nom_dep, somme_dep FROM depense"
 
         if date:
@@ -102,8 +105,12 @@ class GestionModel:
             res = to_database(f'{query_base} {order_clause}')
         return res
 
-    def get_historique(self, date=None, date_fin=None, sort_by='date', sort_order='desc'):
-        order_clause = f"ORDER BY {sort_by} {sort_order}"
+    def get_historique(self,order, date=None, date_fin=None):
+        desc = list(order.values())[0]
+        order_by = list(order.keys())[0]
+        order_clause = f"ORDER BY {order_by}"
+        if desc:order_clause+=' DESC'
+
         if date:
             if not date_fin:
                 res = to_database(f'SELECT * FROM historique WHERE DATE(date)=%s {order_clause}', (date,))

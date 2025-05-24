@@ -1,4 +1,4 @@
-from kivy.app import App
+"""from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 
 import matplotlib.pyplot as plt
@@ -34,3 +34,6 @@ class PieChartApp(App):
 
 if __name__ == '__main__':
     PieChartApp().run()
+"""
+booleen = False
+print(not not not not not booleen)

@@ -48,7 +48,6 @@ KV = '''
 
 ResponsiveView:
 '''
-<<<<<<< HEAD
 class StatToday(MDCard):
     stat_showed = False
     def __init__(self,**kwargs):
@@ -62,7 +61,6 @@ class StatToday(MDCard):
         somme = [valeur[1] for valeur in rows]
 
         fig,ax = plt.subplots(figsize=(10, 6))
-=======
 class StatDeVente(MDCard):
     widget_showed = False
 
@@ -90,12 +88,10 @@ class StatDeVente(MDCard):
         somme = [row[1] for row in rows]
 
         fig, ax = plt.subplots()
->>>>>>> 1c02eee (update_stat_et_order)
         ax.plot(heures, somme, color='green', linewidth=2)
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
         fig.autofmt_xdate()
-<<<<<<< HEAD
         self.stat_showed = True
 
         ax.set_title("Shopify Inc", fontsize=16)
@@ -110,7 +106,6 @@ class StatDeVente(MDCard):
         fig.tight_layout()
         self.add_widget(FigureCanvasKivyAgg(fig))
 
-=======
         ax.set_title("Statistiques journalières")
         ax.set_ylabel("Somme")
         ax.set_xlabel("Heure")
@@ -119,7 +114,6 @@ class StatDeVente(MDCard):
         canvas = FigureCanvasKivyAgg(fig)
         layout.add_widget(canvas)  # <- canvas est dans un layout qui remplit le MDCard
         self.widget_showed = True
->>>>>>> 1c02eee (update_stat_et_order)
 
 class PourcentagePV(RelativeLayout):
     widget_showed = False
