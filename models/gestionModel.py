@@ -19,6 +19,10 @@ class GestionModel:
 
 
     @property
+    def get_heures_stat(self):
+        res = to_database("SELECT date,somme FROM historique WHERE DATE(date)=CURRENT_DATE()")
+        return res
+    @property
     def get_somme_total_gagnee(self):
         res = to_database("SELECT SUM(pv.qte*s.pu) FROM produits_vendu pv JOIN stock s ON s.id_produit=pv.id_produit WHERE DATE(date_de_vente)=CURRENT_DATE()")
         return res[0][0]
@@ -84,22 +88,30 @@ class GestionModel:
         res = to_database('SELECT id_type from type_produit where nom_type=%s',(type,))
         return res[0][0]
 
-    def get_expenses(self,date=None,date_fin=None):
-        if date :
-            if not date_fin: res = to_database('SELECT date_dep,nom_dep,somme_dep FROM depense WHERE date(date_dep)=%s ORDER BY date_dep DESC',
-                                   (date,))
-            else:res=to_database('SELECT date_dep,nom_dep,somme_dep FROM depense WHERE date(date_dep) BETWEEN %s AND %s ORDER BY date_dep DESC',
-                                 (date,date_fin))
-        else: res = to_database('SELECT date_dep,nom_dep,somme_dep FROM depense ORDER BY date_dep DESC')
+    def get_expenses(self, date=None, date_fin=None, sort_by='date_dep', sort_order='desc'):
+        order_clause = f"ORDER BY {sort_by} {sort_order}"
+        query_base = "SELECT date_dep, nom_dep, somme_dep FROM depense"
+
+        if date:
+            if not date_fin:
+                res = to_database(f'{query_base} WHERE DATE(date_dep)=%s {order_clause}', (date,))
+            else:
+                res = to_database(f'{query_base} WHERE DATE(date_dep) BETWEEN %s AND %s {order_clause}',
+                                  (date, date_fin))
+        else:
+            res = to_database(f'{query_base} {order_clause}')
         return res
 
-    def get_historique(self,date=None,date_fin=None):
-        if date :
-            if not date_fin: res = to_database('SELECT * FROM historique WHERE DATE(date)=%s order by date desc',
-                                   (date,))
-            else:res=to_database('SELECT * FROM historique WHERE DATE(date) BETWEEN %s AND %s order by date desc',
-                                 (date,date_fin))
-        else: res = to_database('SELECT * FROM historique order by date desc')
+    def get_historique(self, date=None, date_fin=None, sort_by='date', sort_order='desc'):
+        order_clause = f"ORDER BY {sort_by} {sort_order}"
+        if date:
+            if not date_fin:
+                res = to_database(f'SELECT * FROM historique WHERE DATE(date)=%s {order_clause}', (date,))
+            else:
+                res = to_database(f'SELECT * FROM historique WHERE DATE(date) BETWEEN %s AND %s {order_clause}',
+                                  (date, date_fin))
+        else:
+            res = to_database(f'SELECT * FROM historique {order_clause}')
         return res
 
     @property

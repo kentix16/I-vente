@@ -4,6 +4,7 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import ObjectProperty, StringProperty
+from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
@@ -150,33 +151,35 @@ class Historique(ScrollView):
     def __init__(self,**kwargs):
         super(Historique,self).__init__(**kwargs)
 
-
-    def show_historique(self,date=None,date_fin=None):
+    def show_historique(self, date=None, date_fin=None, sort_by='date', sort_order='desc'):
         if self.grid_showed:
             self.remove_widget(self.grid)
             self.grid = None
-        self.grid = GridLayout(cols=3,spacing=2,size_hint_y=None)
+
+        self.grid = GridLayout(cols=3, spacing=2, size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter('height'))
-        depenses = self.instance.get_historique(date,date_fin)
-        titles = ('DATE','NOM','SOMME')
-        for i in enumerate(titles):
-            cell = Label(text=i[1], color=(0, 0, 0, 1), bold=True, size_hint=(1, None), height=20)
-            if i[0]==4:
-                cell.size_hint=(.45,None)
-            self.grid.add_widget(cell)
+
+        # TITRES CLIQUABLES
+        titles = [('DATE', 'date'), ('SOMME', 'somme'), ('NOM', 'mouvement')]
+        for text, column in titles:
+            btn = Button(
+                text=text,
+                size_hint=(1, None),
+                height=30,
+                bold=True
+            )
+            btn.bind(on_press=lambda instance, col=column: self.show_historique(date, date_fin, sort_by=col))
+            self.grid.add_widget(btn)
+
+        # DONNÉES
+        depenses = self.instance.get_historique(date, date_fin, sort_by, sort_order)
         for row in depenses:
-            for item in range(len(row)):
-                cell = Label(text = f'{row[item]}',color=(.2,.2,.2,1),size_hint=(1,None),height=20)
+            for item in row:
+                cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=40)
                 self.grid.add_widget(cell)
+
         self.add_widget(self.grid)
         self.grid_showed = True
-    def update_historique(self):
-        row = self.instance.get_last_historique
-        for item in row:
-            cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=20)
-            self.grid.add_widget(cell)
-
-
 
 
 import os

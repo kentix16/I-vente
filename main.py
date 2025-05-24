@@ -13,6 +13,7 @@ class MyScreenManager(NavigationScreenManager):
         self.ids.mainscreen.ids.salespage.ids.stattoday.show_stat()
         self.ids.mainscreen.ids.salespage.update_produits_en_rupture()
         self.ids.mainscreen.ids.salespage.ids.pourcentagepv.show_pourcentage_pv()
+        self.ids.mainscreen.ids.salespage.ids.statedevente.show_stat_du_jour()
         self.ids.expensesscreen.ids.expensespage.ids.labelsommeportefeuille.update_somme_portefeuille()
         self.ids.expensesscreen.ids.expensespage.ids.listedepense.update_expenses()
         self.ids.walletscreen.ids.walletpage.ids.historique.update_historique()
