@@ -177,6 +177,7 @@ class ListeDepense(ScrollView):
         super(ListeDepense,self).__init__(**kwargs)
 
     def show_expenses(self, date=None, date_fin=None, sort_by='date_dep', sort_order='desc'):
+        abcd=True
         if self.grid_showed:
             self.remove_widget(self.grid)
 
