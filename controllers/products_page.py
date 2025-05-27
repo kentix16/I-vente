@@ -1,6 +1,8 @@
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.properties import StringProperty, ListProperty
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
@@ -13,6 +15,8 @@ from kivymd.uix.label import MDLabel
 from kivy.lang import Builder
 from functools import partial
 import os
+
+from kivymd.uix.recycleview import MDRecycleView
 from kivymd.uix.sliverappbar import MDSliverAppbarContent
 
 from models.gestionModel import GestionModel
@@ -155,12 +159,17 @@ class Content(MDSliverAppbarContent):
     def __init__(self, **kwargs):
         super(Content, self).__init__(**kwargs)
         #Méthode pour initialiser et peupler le contenu du sliver en toute sécurité.
+        self._search_trigger= Clock.create_trigger(self.search_order_delayed,0.3)
+
     def on_kv_post(self, base_widget):
         productsearchbar = self.ids.search_textfield.text
         productslist = self.ids.listproducts
         productslist.show_products(productsearchbar)
 
     def search_order(self):
+        self._search_trigger()
+
+    def search_order_delayed(self,*args):
         productsearchbar = self.ids.search_textfield.text
         productslist=self.ids.listproducts
         productslist.show_products(productsearchbar)
@@ -218,62 +227,27 @@ class ListProducts(ScrollView):
         self.add_widget(self.grid)
         self.grid_showed = True"""
 
-    def remove_product(self, instance, nom_produit):
+    def remove_product(self, nom_produit):
         App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.delectproduct.ids.nom_produit_vente.text = nom_produit
     def show_products(self, order=""):
-        if self.grid_showed:
-            self.remove_widget(self.grid)
-            self.grid = None
-
-        self.grid = GridLayout(cols=5, spacing=5, padding=5, size_hint_y=None)
-        self.grid.bind(minimum_height=self.grid.setter('height'))
-
-        instance = GestionModel()
-        produits = instance.get_produits(order)
-
-        titles = ('', 'PRODUITS', 'PU', 'QT', 'TYPE')
-        for index, title in enumerate(titles):
-            cell = MDLabel(
-                text=title,
-                theme_text_color="Custom",
-                text_color=(0, 0, 0, 1),
-                bold=True,
-                halign="center",
-                size_hint=(.2, None) if index == 0 else (1, None),
-                height=30
-            )
-            self.grid.add_widget(cell)
+        produits= GestionModel().get_produits(order)
+        data=[]
 
         for row in produits:
-            btn = MDButton(
- MDButtonText(
- text="vendre ✖",
-     theme_text_color="Custom",
-     text_color=(1, 0, 0, 1),
- ),
+            data.append({
+                'nom_produit': str(row[0]),
+                'pu': str(row[1]),
+                'qt': str(row[2]),
+                'type': str(row[3]),
 
+            })
+        self.ids.rv.data = data
 
-                size_hint=(.2, None),
-                height=30,
-                #on_release=partial(self.remove_product, row[1])
-            )
-            btn.bind(on_press=partial(self.remove_product, nom_produit=row[0]))
-            print(row[1])
-            self.grid.add_widget(btn)
-
-            for item in row:
-                cell = MDLabel(
-                    text=str(item),
-                    theme_text_color="Custom",
-                    text_color=(.2, .2, .2, 1),
-                    halign="center",
-                    size_hint=(1, None),
-                    height=30
-                )
-                self.grid.add_widget(cell)
-
-        self.add_widget(self.grid)
-        self.grid_showed = True
+class ProductRow(BoxLayout):
+    nom_produit=StringProperty()
+    type=StringProperty()
+    qt=StringProperty()
+    prix_unitaire=StringProperty()
 
 class DeleteProduct(MDCard):
     def __init__(self,**kwargs):

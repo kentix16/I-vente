@@ -292,3 +292,30 @@
         size_hint: 1, None
         height: 400
 
+<ListProducts>:
+    MDRecycleView:
+        id: rv
+        viewclass:"ProductRow"
+        key_size:"height"
+        RecycleBoxLayout:
+            default_size: None, dp(40)
+            default_size_hint: 1, None
+            size_hint_y:None
+            height: self.minimum_height
+            orientation:"vertical"
+<ProductRow>:
+    orientation:"horizontal"
+    spacing:dp(20)
+    MDIconButton:
+        icon:"package-down"
+        size_hint:None,None
+        size:dp(40),dp(40)
+        on_release: self.parent.parent.parent.parent.remove_product(root.nom_produit)
+    MDLabel:
+        text:root.nom_produit
+    MDLabel:
+        text:root.prix_unitaire
+    MDLabel:
+        text:root.qt
+    MDLabel:
+        text:root.type
