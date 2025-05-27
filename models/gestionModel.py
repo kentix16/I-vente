@@ -3,13 +3,17 @@ from utilities.databases import to_database
 
 class GestionModel:
 
-    @property
-    def get_pourcentage_produits_vendus(self):
-        res = to_database("""SELECT s.nom,ROUND((SUM(pv.qte)/(select sum(qte) 
+
+    def get_pourcentage_produits_vendus(self,date=None):
+        if date:res = to_database("""SELECT s.nom,ROUND((SUM(pv.qte)/(select sum(qte) 
         from produits_vendu WHERE DATE(date_de_vente)=CURRENT_DATE()))*100,2) as pourcentage
          from stock s inner join produits_vendu pv on pv.id_produit=s.id_produit WHERE 
-         DATE(pv.date_de_vente)= CURRENT_DATE() group by s.nom;
-                           
+         DATE(pv.date_de_vente)= % group by s.nom;        
+                          """,(date,))
+        else:res = to_database("""SELECT s.nom,ROUND((SUM(pv.qte)/(select sum(qte) 
+        from produits_vendu WHERE DATE(date_de_vente)=CURRENT_DATE()))*100,2) as pourcentage
+         from stock s inner join produits_vendu pv on pv.id_produit=s.id_produit WHERE 
+         DATE(pv.date_de_vente)= CURRENT_DATE() group by s.nom;         
                           """)
         return res
     @property
@@ -23,13 +27,13 @@ class GestionModel:
         res = to_database("SELECT pv.date_de_vente, (pv.qte*s.pu) as somme from produits_vendu pv JOIN stock s ON "
                           "s.id_produit=pv.id_produit where DATE(pv.date_de_vente)=CURRENT_DATE()")
         return res
-    @property
-    def get_somme_total_gagnee(self):
-        res = to_database("SELECT SUM(pv.qte*s.pu) FROM produits_vendu pv JOIN stock s ON s.id_produit=pv.id_produit WHERE DATE(date_de_vente)=CURRENT_DATE()")
+    def get_somme_total_gagnee(self,date=None):
+        if date:res = to_database("SELECT SUM(pv.qte*s.pu) FROM produits_vendu pv JOIN stock s ON s.id_produit=pv.id_produit WHERE DATE(date_de_vente)=%s",(date,))
+        else:res = to_database("SELECT SUM(pv.qte*s.pu) FROM produits_vendu pv JOIN stock s ON s.id_produit=pv.id_produit WHERE DATE(date_de_vente)=CURRENT_DATE()")
         return res[0][0]
-    @property
-    def get_total_de_ventes(self):
-        res = to_database("SELECT SUM(qte) as total FROM produits_vendu WHERE DATE(date_de_vente)=CURRENT_DATE()")
+    def get_total_de_ventes(self,date=None):
+        if date: res = to_database("SELECT SUM(qte) as total FROM produits_vendu WHERE DATE(date_de_vente)=%s",(date,))
+        else: res = to_database("SELECT SUM(qte) as total FROM produits_vendu WHERE DATE(date_de_vente)=CURRENT_DATE()")
         return res[0][0]
     @property
     def get_produits_en_rupture(self):
@@ -126,3 +130,20 @@ class GestionModel:
     def get_somme_portefeuille(self):
         res = to_database('SELECT sum(CASE WHEN mouvement=\'dépense\' THEN -somme ELSE somme END) from historique')
         return res[0][0]
+
+    def get_heures_stat_global(self, date):
+        res = to_database("SELECT pv.date_de_vente, (pv.qte*s.pu) as somme from produits_vendu pv JOIN stock s ON "
+                          "s.id_produit=pv.id_produit where DATE(pv.date_de_vente)=%s",(date,))
+        return res
+
+    def get_pourcentage_depense(self, date,date_fin):
+        if  date:
+            if date_fin:res = to_database('SELECT nom_dep,SUM(somme_dep) from depense where date(date_dep) BETWEEN %s AND %s group by nom_dep',
+                              (date,date_fin))
+            else:
+                res = to_database('SELECT nom_dep,SUM(somme_dep) from depense where date(date_dep)=%s group by nom_dep',
+                              (date,))
+        else:
+            res  = to_database('SELECT nom_dep,SUM(somme_dep) from depense where date(date_dep)=CURRENT_DATE() group by nom_dep')
+
+        return res

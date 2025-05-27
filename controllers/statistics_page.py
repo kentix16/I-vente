@@ -67,13 +67,13 @@ class StatDeVenteGlobal(MDCard):
     def __init__(self, **kwargs):
         super(StatDeVenteGlobal, self).__init__(**kwargs)
 
-    def show_stat_global(self):
+    def show_stat_global(self,date=None):
         if self.widget_showed:
-            return
-        self.clear_widgets()
+            self.clear_widgets()
 
         salemodel = GestionModel()
-        rows = salemodel.get_heures_stat
+        if date:rows = salemodel.get_heures_stat_global(date)
+        else:rows = salemodel.get_heures_stat
 
         heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
         montants = [row[1] for row in rows]
@@ -117,49 +117,8 @@ class StatDeVenteGlobal(MDCard):
         fig.tight_layout()
 
         self.add_widget(FigureCanvasKivyAgg(fig))
+        self.widget_showed = True
 
-    """def show_stat_du_jour(self):
-        self.clear_widgets()
-
-        salemodel = GestionModel()
-        rows = salemodel.get_heures_stat
-
-        heures = [datetime.strptime(str(row[0]),'%Y-%m-%d %H:%M:%S') for row in rows]
-        montants = [row[1] for row in rows]
-        donnees_par_heure = defaultdict(float)
-        for heure,montant in zip(heures,montants):
-                heure_arrondie=heure.replace(minute=0,second=0,microsecond=0)
-                donnees_par_heure[heure_arrondie] +=montant
-        heures_groupees = sorted(donnees_par_heure.keys())
-        montant_groupes = [donnees_par_heure[h] for h in heures_groupees]
-
-        couleurs_palette = ['#1abc9c','#16a085']
-        couleurs_alternees = [couleurs_palette[i %len(couleurs_palette)] for i in range(len(heures_groupees))]
-
-
-        fig, ax = plt.subplots(figsize=(10,5))
-        bars = ax.bar(heures_groupees, montant_groupes, width=0.035, color=couleurs_alternees,edgecolor='black',linewidth=0.5)
-
-        for bar,montant in zip(bars,montant_groupes):
-            height=bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, height +0.5 , f"{montant:.0f}", ha='center',va='bottom',fontsize=9,color="#333")
-
-
-
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-        ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
-        fig.autofmt_xdate()
-        ax.grid(True,linestyle='--',alpha=0.4)
-        fig.patch.set_facecolor("#f7f7f7")
-        ax.set_facecolor('#f0f0f0')
-        #ax.set_title("Shopify Inc", fontsize=16)
-        ax.set_ylabel("Prix ($)", fontsize=12)
-        ax.set_xlabel("Date", fontsize=12)
-        plt.xticks(rotation=45)
-        fig.tight_layout()
-
-
-        self.add_widget(FigureCanvasKivyAgg(fig))"""
 
 
 class PourcentagePV(RelativeLayout):
@@ -168,12 +127,12 @@ class PourcentagePV(RelativeLayout):
     def __init__(self, **kwargs):
         super(PourcentagePV, self).__init__(**kwargs)
 
-    def show_pourcentage_pv(self):
+    def show_pourcentage_pv(self,date=None):
         if self.widget_showed: self.clear_widgets()
         labels = []
         sizes = []
         instance = GestionModel()
-        produits = instance.get_pourcentage_produits_vendus
+        produits = instance.get_pourcentage_produits_vendus(date)
         for row in produits:
             labels.append(row[0])
             sizes.append(row[1])
@@ -274,11 +233,14 @@ class StatsPage(MDBoxLayout):
             self.ids.date_button.center_x - date_dialog.width / 2,
             self.ids.date_button.y - (date_dialog.height + dp(32)),
         ]
-        date_dialog.bind(on_ok=self.on_ok_date)
+        date_dialog.bind(on_select_day=self.on_ok_date)
         date_dialog.open()
-    def on_ok_date(self,instance_date_picker):
+    def on_ok_date(self,instance_date_picker,number_day):
         date  =instance_date_picker.get_date()[0]
-        self.ids.historique.show_historique(date)
+        self.ids.statedeventeglobal.show_stat_global(date)
+        self.update_somme_total_gagnee(date)
+        self.update_total_de_ventes(date)
+        self.ids.pourcentagedepense.show_pourcentage_depense(date)
         instance_date_picker.dismiss()
 
     def show_modal_date_picker(self, *args):
@@ -291,13 +253,24 @@ class StatsPage(MDBoxLayout):
         ]
         date_dialog.bind(on_ok=self.on_ok_periode)
         date_dialog.open()
+    def on_ok_periode(self,instance_date_picker):
+        date = instance_date_picker.get_date()[0]
+        date_fin = instance_date_picker.get_date()[-1]
+        self.ids.statedeventeglobal.show_stat_global(date)
+        self.update_somme_total_gagnee(date)
+        self.update_total_de_ventes(date)
+        self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
+        instance_date_picker.dismiss()
 
-    def update_total_de_ventes(self):
-        total_de_ventes = self.gestionmodel.get_total_de_ventes
+
+
+
+    def update_total_de_ventes(self,date=None):
+        total_de_ventes = self.gestionmodel.get_total_de_ventes(date)
         self.total_de_ventes = str(total_de_ventes)
 
-    def update_somme_total_gagnee(self):
-        somme_total_gagnee = self.gestionmodel.get_somme_total_gagnee
+    def update_somme_total_gagnee(self,date=None):
+        somme_total_gagnee = self.gestionmodel.get_somme_total_gagnee(date)
         self.somme_total_gagnee = str(somme_total_gagnee) + ' ar'
 
     def update_produits_en_rupture(self):
@@ -348,12 +321,12 @@ class PourcentageDepense(ScrollView):
     def __init__(self, **kwargs):
         super(PourcentageDepense, self).__init__(**kwargs)
 
-    def show_products_sale(self):
+    def show_pourcentage_depense(self,date=None,date_fin=None):
         if self.widget_showed: self.clear_widgets()
         labels = []
         sizes = []
         instance = GestionModel()
-        produits = instance.get_pourcentage_produits_vendus
+        produits = instance.get_pourcentage_depense(date,date_fin)
         for row in produits:
             labels.append(row[0])
             sizes.append(row[1])
