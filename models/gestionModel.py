@@ -38,10 +38,21 @@ class GestionModel:
             return res[0][0]
         else:
             return 0
-    @property
-    def get_produits(self):
-        res = to_database("SELECT s.nom,s.pu,s.qt,t.nom_type FROM stock s JOIN type_produit t ON t.id_type=s.id_type ORDER BY s.nom")
-        return res
+    def get_produits(self, like):
+        if like=="":
+            res = to_database('SELECT s.nom, s.pu, s.qt, t.nom_type FROM stock s JOIN type_produit t ON t.id_type = s.id_type ORDER BY s.nom')
+            return res
+        else:
+            query = """
+                SELECT s.nom, s.pu, s.qt, t.nom_type
+                FROM stock s
+                JOIN type_produit t ON t.id_type = s.id_type
+                WHERE s.nom LIKE %s OR s.pu LIKE %s OR s.qt LIKE %s OR t.nom_type LIKE %s
+                ORDER BY s.nom
+            """
+            wildcard = f"%{like}%"
+            params = (wildcard, wildcard, wildcard, wildcard)
+            return to_database(query, params)
     @property
     def get_produits_vendus(self):
         res = to_database("SELECT pv.id_pv,s.nom,pv.date_de_vente,pv.qte from produits_vendu pv JOIN stock s "
