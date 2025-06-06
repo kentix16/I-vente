@@ -74,7 +74,7 @@ class StatDeVente(MDCard):
         self.clear_widgets()
 
         salemodel = GestionModel()
-        rows = salemodel.get_heures_stat
+        rows = salemodel.get_heures_somme_stat()
 
         heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
         montants = [row[1] for row in rows]
@@ -178,21 +178,43 @@ class PourcentagePV(RelativeLayout):
     def __init__(self, **kwargs):
         super(PourcentagePV, self).__init__(**kwargs)
 
-    def show_pourcentage_pv(self,date=None):
+    def show_pourcentage_pv(self,date=None,date_fin=None):
         if self.widget_showed:self.clear_widgets()
-        labels= []
-        sizes=[]
+        labels = []
+        sizes = []
         instance = GestionModel()
-        produits = instance.get_pourcentage_produits_vendus(date)
+        produits = instance.get_pourcentage_produits_vendus(date, date_fin)
+        if not produits:return None
+
         for row in produits:
             labels.append(row[0])
             sizes.append(row[1])
 
         fig, ax = plt.subplots()
-        ax.pie(sizes,labels=labels, textprops={'fontsize':9},
-               autopct='%1.1f%%', shadow=True, startangle=140)
-        self.add_widget(FigureCanvasKivyAgg(fig))
+
+        if len(labels) <= 10:
+            # Camembert
+            explode = [0.1] + [0] * (len(labels) - 1)  # Explose seulement la première part
+            ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
+                   autopct='%1.1f%%', shadow=True, startangle=140, explode=explode)
+            self.add_widget(FigureCanvasKivyAgg(fig))
+        else:
+            scroll = ScrollView(size_hint=(1,1))
+            grid = GridLayout(cols=2,spacing=4,size_hint_y=None,padding=4)
+            grid.bind(minimum_height=grid.setter('height'))
+            titles = ("PODUITS","%")
+            for i in titles:
+                lbl=Label(text=f'{i}',size_hint_y=20,bold=True,color=[0,0,0,1])
+                grid.add_widget(lbl)
+            for row in produits:
+                for i in row:
+                    lbl=Label(text=f'{i}',size_hint_y=None,height=20,color=[0,0,0,1])
+                    grid.add_widget(lbl)
+            scroll.add_widget(grid)
+            self.add_widget(scroll)
+
         self.widget_showed = True
+
         
 
 class SalesPage(MDBoxLayout):

@@ -1,17 +1,22 @@
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.properties import StringProperty, ListProperty
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.button import MDButton, MDButtonText
 from kivymd.uix.card import MDCard
 from kivymd.uix.expansionpanel import MDExpansionPanel
 from kivymd.uix.label import MDLabel
 from kivy.lang import Builder
 from functools import partial
 import os
+
+from kivymd.uix.recycleview import MDRecycleView
 from kivymd.uix.sliverappbar import MDSliverAppbarContent
 
 from models.gestionModel import GestionModel
@@ -154,33 +159,22 @@ class Content(MDSliverAppbarContent):
     def __init__(self, **kwargs):
         super(Content, self).__init__(**kwargs)
         #Méthode pour initialiser et peupler le contenu du sliver en toute sécurité.
-        """try:
-            # Ajouter des éléments de guitare
-                guitar_models = [
-                    {"brand": "Ibanez", "model": "GRG121DX-BKF", "price": "$445.99"},
-                    {"brand": "Fender", "model": "Stratocaster AM", "price": "$849.99"},
-                    {"brand": "Gibson", "model": "Les Paul Studio", "price": "$1,299.99"},
-                    {"brand": "ESP", "model": "LTD EC-1000", "price": "$999.99"},
-                    {"brand": "PRS", "model": "SE Custom 24", "price": "$789.99"}
-                ]
+        self._search_trigger= Clock.create_trigger(self.search_order_delayed,0.3)
 
-                for guitar in guitar_models:
-                    item = MDListItem(
-                MDListItemLeadingIcon(icon="guitar-electric"),
-                MDListItemHeadlineText(text=guitar["brand"]),
-                MDListItemSupportingText(text=guitar["model"]),
-                MDListItemTertiaryText(text=guitar["price"]),
-                MDListItemTrailingIcon(icon="cart"),
-            )
+    def on_kv_post(self, base_widget):
+        productsearchbar = self.ids.search_textfield.text
+        productslist = self.ids.listproducts
+        productslist.show_products(productsearchbar)
+
+    def search_order(self):
+        self._search_trigger()
+
+    def search_order_delayed(self,*args):
+        productsearchbar = self.ids.search_textfield.text
+        productslist=self.ids.listproducts
+        productslist.show_products(productsearchbar)
 
 
-                    # Ajouter l'élément à la liste
-                    self.add_widget(item)
-                    print(f"Guitare ajoutée: {guitar['brand']} {guitar['model']}")
-
-
-        except Exception as e:
-            print(f"Erreur lors de l'initialisation du contenu: {e}")"""
 
 class ProductsPage(MDBoxLayout):
     def change_screen(self):
@@ -207,35 +201,28 @@ class ListProducts(ScrollView):
     def __init__(self,**kwargs):
         super(ListProducts,self).__init__(**kwargs)
 
-    def show_products(self):
-        if self.grid_showed:
-            self.remove_widget(self.grid)
-            self.grid = None
-        self.grid = GridLayout(cols=5,spacing=2,size_hint_y=None)
-        self.grid.bind(minimum_height=self.grid.setter('height'))
-        instance = GestionModel()
-        produits = instance.get_produits
-        #print(produits)
-        titles = ('','PRODUITS','PU','QT','TYPE')
-        for i in enumerate(titles):
-            cell = Label(text=i[1], color=(0, 0, 0, 1), bold=True, size_hint=(1, None), height=20)
-            if i[0]==0:
-                cell.size_hint=(.2,None)
-            self.grid.add_widget(cell)
+    def remove_product(self, nom_produit):
+        App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.delectproduct.ids.nom_produit_vente.text = nom_produit
+    def show_products(self, order=""):
+        produits= GestionModel().get_produits(order)
+        data=[]
+
         for row in produits:
-            btn = Button(text='v', bold=True, color=(0, 0, 1, 1), size_hint=(.2, None),
-                         height=20, background_color=(0, 0, 1, .1))
-            btn.bind(on_press=partial(self.remove_product, nom_produit=row[0]))
-            self.grid.add_widget(btn)
-            for item in range(len(row)):
-                cell = Label(text = f'{row[item]}',color=(.2,.2,.2,1),size_hint=(1,None),height=20)
-                self.grid.add_widget(cell)
+            data.append({
+                'nom_produit': str(row[0]),
+                'pu': str(row[1]),
+                'qt': str(row[2]),
+                'type': str(row[3]),
 
-        self.add_widget(self.grid)
-        self.grid_showed = True
+            })
+        self.ids.rv.data = data
 
-    def remove_product(self,instance,nom_produit):
-        App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.delectproduct.ids.nom_produit_vente.text=nom_produit
+class ProductRow(BoxLayout):
+    nom_produit=StringProperty()
+    type=StringProperty()
+    qt=StringProperty()
+    prix_unitaire=StringProperty()
+
 class DeleteProduct(MDCard):
     def __init__(self,**kwargs):
         super(DeleteProduct,self).__init__(**kwargs)

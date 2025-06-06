@@ -260,14 +260,62 @@
 
         Content:
             id: content
-            orientation: "vertical"
-            padding: "12dp"
-            theme_bg_color: "Custom"
-            md_bg_color: 218/255,236/255,246/255,1
-            ListProducts:
-                id:listproducts
-                size_hint : 1,None
-                height : 170
-                on_parent:self.show_products()
 
+<Content>:
+    orientation: "vertical"
+    padding: "12dp"
+    theme_bg_color: "Custom"
+    md_bg_color: 218/255,236/255,246/255,1
 
+    MDBoxLayout:
+        id: searchcontainer
+        spacing: dp(7)
+        padding: dp(7)
+        MDTextField:
+            id: search_textfield
+            on_text: root.search_order()
+            size_hint_x: 0.7
+            radius: [5]
+            mode: "filled"
+        MDButton:
+            on_release: root.search_order()
+            size_hint_x: 0.3
+            radius: [5]
+            style: "filled"
+            MDButtonIcon:
+                icon: "magnify"
+            MDButtonText:
+                text: "chercher"
+
+    ListProducts:
+        id: listproducts
+        size_hint: 1, None
+        height: 400
+
+<ListProducts>:
+    MDRecycleView:
+        id: rv
+        viewclass:"ProductRow"
+        key_size:"height"
+        RecycleBoxLayout:
+            default_size: None, dp(40)
+            default_size_hint: 1, None
+            size_hint_y:None
+            height: self.minimum_height
+            orientation:"vertical"
+<ProductRow>:
+    orientation:"horizontal"
+    spacing:dp(20)
+    MDIconButton:
+        icon:"package-down"
+        size_hint:None,None
+        size:dp(40),dp(40)
+        on_release: self.parent.parent.parent.parent.remove_product(root.nom_produit)
+    MDLabel:
+        text:root.nom_produit
+    MDLabel:
+        text:root.prix_unitaire
+    MDLabel:
+        text:root.qt
+    MDLabel:
+        text:root.type

@@ -28,6 +28,8 @@ from kivymd.uix.responsivelayout import MDResponsiveLayout
 from kivymd.uix.screen import MDScreen
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
+
+from controllers.sales_page import PourcentagePV
 from models.gestionModel import GestionModel
 
 # Pour les variantes spécifiques comme SemiBold et Black
@@ -67,13 +69,11 @@ class StatDeVenteGlobal(MDCard):
     def __init__(self, **kwargs):
         super(StatDeVenteGlobal, self).__init__(**kwargs)
 
-    def show_stat_global(self,date=None):
-        if self.widget_showed:
-            self.clear_widgets()
+    def show_stat_global(self,date=None,date_fin=None):
+        self.clear_widgets()
 
         salemodel = GestionModel()
-        if date:rows = salemodel.get_heures_stat_global(date)
-        else:rows = salemodel.get_heures_stat
+        rows = salemodel.get_heures_somme_stat(date,date_fin)
 
         heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
         montants = [row[1] for row in rows]
@@ -100,13 +100,22 @@ class StatDeVenteGlobal(MDCard):
             ax.text(bar.get_x() + bar.get_width() / 2.0, height + 0.5, f"{montant:.0f}", ha='center', va='bottom',
                     fontsize=9, color="#333")
 
-        # Format des dates : ticks majeurs toutes les heures
+        # Forcer l'affichage de 00:00 à 23:00
+        if heures_groupees:
+            jour = heures_groupees[0].date()
+        else:
+            jour = datetime.today().date()
+
+        debut_journee = datetime.combine(jour, datetime.min.time())
+        fin_journee = datetime.combine(jour, datetime.max.time()).replace(hour=23, minute=59, second=59)
+
+        ax.set_xlim(debut_journee, fin_journee)
+
+        # Ticks majeurs toutes les heures
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
 
-        # Optionnel : repères mineurs toutes les 10 minutes
-        # ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=10))
-
+        # Formatage et esthétique
         fig.autofmt_xdate()
         ax.grid(True, linestyle='--', alpha=0.4)
         fig.patch.set_facecolor("#f7f7f7")
@@ -117,36 +126,17 @@ class StatDeVenteGlobal(MDCard):
         fig.tight_layout()
 
         self.add_widget(FigureCanvasKivyAgg(fig))
-        self.widget_showed = True
 
 
 
-class PourcentagePV(RelativeLayout):
+class PourcentagePVG(PourcentagePV):
     widget_showed = False
 
     def __init__(self, **kwargs):
-        super(PourcentagePV, self).__init__(**kwargs)
-
-    def show_pourcentage_pv(self,date=None):
-        if self.widget_showed: self.clear_widgets()
-        labels = []
-        sizes = []
-        instance = GestionModel()
-        produits = instance.get_pourcentage_produits_vendus(date)
-        for row in produits:
-            labels.append(row[0])
-            sizes.append(row[1])
-
-        explode = (0.1, 0, 0, 0)  # mettre en avant la première part
-
-        # Création de la figure
-        fig, ax = plt.subplots()
-        ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
-               autopct='%1.1f%%', shadow=True, startangle=140)
-        # Ajout du canvas dans l'interface Kivy
-        self.add_widget(FigureCanvasKivyAgg(fig))
-        self.widget_showed = True
-
+        super(PourcentagePVG, self).__init__(**kwargs)
+    """def show_pourcentage_pvg(self,date=None,date_fin=None):
+        for i in range(100):print(f"{date} à {date_fin}")
+"""
 
 class StatsPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
@@ -241,6 +231,7 @@ class StatsPage(MDBoxLayout):
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
         self.ids.pourcentagedepense.show_pourcentage_depense(date)
+        self.ids.pourcentagepvg.show_pourcentage_pv(date)
         instance_date_picker.dismiss()
 
     def show_modal_date_picker(self, *args):
@@ -256,9 +247,11 @@ class StatsPage(MDBoxLayout):
     def on_ok_periode(self,instance_date_picker):
         date = instance_date_picker.get_date()[0]
         date_fin = instance_date_picker.get_date()[-1]
-        self.ids.statedeventeglobal.show_stat_global(date)
+        self.ids.statedeventeglobal.show_stat_global(date,date_fin)
+
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
+        self.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
         self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
         instance_date_picker.dismiss()
 
@@ -327,18 +320,33 @@ class PourcentageDepense(ScrollView):
         sizes = []
         instance = GestionModel()
         produits = instance.get_pourcentage_depense(date,date_fin)
-        for row in produits:
-            labels.append(row[0])
-            sizes.append(row[1])
+        if len(produits)<=10:
+            for row in produits:
+                labels.append(row[0])
+                sizes.append(row[1])
 
-        explode = (0.1, 0, 0, 0)  # mettre en avant la première part
+            explode = (0.1, 0, 0, 0)  # mettre en avant la première part
 
-        # Création de la figure
-        fig, ax = plt.subplots()
-        ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
-               autopct='%1.1f%%', shadow=True, startangle=140)
-        # Ajout du canvas dans l'interface Kivy
-        self.add_widget(FigureCanvasKivyAgg(fig))
+            # Création de la figure
+            fig, ax = plt.subplots()
+            ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
+                   autopct='%1.1f%%', shadow=True, startangle=140)
+            # Ajout du canvas dans l'interface Kivy
+            self.add_widget(FigureCanvasKivyAgg(fig))
+        else:
+            scroll = ScrollView(size_hint=(1, 1))
+            grid = GridLayout(cols=2, spacing=4, size_hint_y=None, padding=4)
+            grid.bind(minimum_height=grid.setter('height'))
+            titles = ("DEPENSES", "%")
+            for i in titles:
+                lbl = Label(text=f'{i}', size_hint_y=20, bold=True, color=[0, 0, 0, 1])
+                grid.add_widget(lbl)
+            for row in produits:
+                for i in row:
+                    lbl = Label(text=f'{i}', size_hint_y=None, height=20, color=[0, 0, 0, 1])
+                    grid.add_widget(lbl)
+            scroll.add_widget(grid)
+            self.add_widget(scroll)
         self.widget_showed = True
 
 

@@ -1,7 +1,31 @@
-import os
 import mysql.connector
 from utilities.outils import Connexion as co
 
+def to_database(query, parameters=()):
+    conn = mysql.connector.connect(
+        host=co.host,
+        user=co.user,
+        password=co.password,
+        database='gestion'
+    )
+    c = conn.cursor()
+
+    try:
+        c.execute(query, parameters)
+        query_type = query.strip().split()[0].upper()
+
+        if query_type == 'SELECT':
+            result = c.fetchall()
+        else:
+            conn.commit()
+            result = None
+    finally:
+        c.close()
+        conn.close()
+
+    return result
+
+"""
 def to_database(query,parameters=()):
     conn = mysql.connector.connect(
         host=co.host,
@@ -21,3 +45,4 @@ def to_database(query,parameters=()):
     return res
 
 #print(to_database('SELECT * from client'))
+"""
