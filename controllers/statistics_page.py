@@ -75,13 +75,11 @@ class StatDeVenteGlobal(MDCard):
     def __init__(self, **kwargs):
         super(StatDeVenteGlobal, self).__init__(**kwargs)
 
-    def show_stat_global(self):
-        if self.widget_showed:
-            return
+    def show_stat_global(self,date=None,date_fin=None):
         self.clear_widgets()
 
         salemodel = GestionModel()
-        rows = salemodel.get_heures_stat
+        rows = salemodel.get_heures_somme_stat(date,date_fin)
 
         heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
         montants = [row[1] for row in rows]
@@ -108,13 +106,22 @@ class StatDeVenteGlobal(MDCard):
             ax.text(bar.get_x() + bar.get_width() / 2.0, height + 0.5, f"{montant:.0f}", ha='center', va='bottom',
                     fontsize=9, color="#333")
 
-        # Format des dates : ticks majeurs toutes les heures
+        # Forcer l'affichage de 00:00 à 23:00
+        if heures_groupees:
+            jour = heures_groupees[0].date()
+        else:
+            jour = datetime.today().date()
+
+        debut_journee = datetime.combine(jour, datetime.min.time())
+        fin_journee = datetime.combine(jour, datetime.max.time()).replace(hour=23, minute=59, second=59)
+
+        ax.set_xlim(debut_journee, fin_journee)
+
+        # Ticks majeurs toutes les heures
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
 
-        # Optionnel : repères mineurs toutes les 10 minutes
-        # ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=10))
-
+        # Formatage et esthétique
         fig.autofmt_xdate()
         ax.grid(True, linestyle='--', alpha=0.4)
         fig.patch.set_facecolor("#f7f7f7")
@@ -146,58 +153,16 @@ class StatDeVenteGlobal(MDCard):
 
 
         fig, ax = plt.subplots(figsize=(10,5))
-        bars = ax.bar(heures_groupees, montant_groupes, width=0.035, color=couleurs_alternees,edgecolor='black',linewidth=0.5)
-
-        for bar,montant in zip(bars,montant_groupes):
-            height=bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, height +0.5 , f"{montant:.0f}", ha='center',va='bottom',fontsize=9,color="#333")
-
-
-
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-        ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
-        fig.autofmt_xdate()
-        ax.grid(True,linestyle='--',alpha=0.4)
-        fig.patch.set_facecolor("#f7f7f7")
-        ax.set_facecolor('#f0f0f0')
-        #ax.set_title("Shopify Inc", fontsize=16)
-        ax.set_ylabel("Prix ($)", fontsize=12)
-        ax.set_xlabel("Date", fontsize=12)
-        plt.xticks(rotation=45)
-        fig.tight_layout()
-
-
-        self.add_widget(FigureCanvasKivyAgg(fig))"""
-
-class SalesStatContent(MDBoxLayout):
-    """Composant Sliver qui affiche la liste des guitares."""
-
-    def __init__(self, **kwargs):
-        super(SalesStatContent, self).__init__(**kwargs)
-        #Méthode pour initialiser et peupler le contenu du sliver en toute sécurité.
-        self._search_trigger= Clock.create_trigger(self.search_order_delayed,0.3)
-
-    def on_kv_post(self, base_widget):
-        productsearchbar = self.ids.textfieldproductsold.text
-        productslist = self.ids.pourcentagepvg
-        productslist.show_pourcentage_pv(productsearchbar)
-
-    def search_order(self):
-        self._search_trigger()
-
-    def search_order_delayed(self,*args):
-        productsearchbar = self.ids.textfieldproductsold.text
-        productslist = self.ids.pourcentagepvg
-        productslist.show_pourcentage_pv(productsearchbar)
+        bars = ax.bar(heures_groupees, montant_groupes, width=0.035, color=couleurs_alternees,edgecolor='black',linewidth=0.5)"""
 
 class PourcentagePVG(PourcentagePV):
     widget_showed = False
 
     def __init__(self, **kwargs):
         super(PourcentagePVG, self).__init__(**kwargs)
-
-
-
+    """def show_pourcentage_pvg(self,date=None,date_fin=None):
+        for i in range(100):print(f"{date} à {date_fin}")
+"""
 
 class StatsPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
@@ -284,11 +249,15 @@ class StatsPage(MDBoxLayout):
             self.ids.date_button.center_x - date_dialog.width / 2,
             self.ids.date_button.y - (date_dialog.height + dp(32)),
         ]
-        date_dialog.bind(on_ok=self.on_ok_date)
+        date_dialog.bind(on_select_day=self.on_ok_date)
         date_dialog.open()
-    def on_ok_date(self,instance_date_picker):
+    def on_ok_date(self,instance_date_picker,number_day):
         date  =instance_date_picker.get_date()[0]
-        self.ids.historique.show_historique(date)
+        self.ids.statedeventeglobal.show_stat_global(date)
+        self.update_somme_total_gagnee(date)
+        self.update_total_de_ventes(date)
+        self.ids.pourcentagedepense.show_pourcentage_depense(date)
+        self.ids.pourcentagepvg.show_pourcentage_pv(date)
         instance_date_picker.dismiss()
 
     def show_modal_date_picker(self, *args):
@@ -302,13 +271,17 @@ class StatsPage(MDBoxLayout):
         date_dialog.bind(on_ok=self.on_ok_periode)
         date_dialog.open()
     def on_ok_periode(self,instance_date_picker):
-        date=instance_date_picker.get_date()[0]
-        date_fin=instance_date_picker.get_date()[-1]
+        date = instance_date_picker.get_date()[0]
+        date_fin = instance_date_picker.get_date()[-1]
         self.ids.statedeventeglobal.show_stat_global(date,date_fin)
+
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
-        self.ids.pourcentagepvg.show_pourcentage_pv(date)
+        self.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
         self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
+        instance_date_picker.dismiss()
+
+
 
 
     def update_total_de_ventes(self,date=None):
@@ -358,7 +331,26 @@ class ResponsiveView(MDResponsiveLayout, MDScreen):
 class GradientNavigationDrawer(MDNavigationDrawer):
     pass
 
+class SalesStatContent(MDBoxLayout):
+    """Composant Sliver qui affiche la liste des guitares."""
 
+    def __init__(self, **kwargs):
+        super(SalesStatContent, self).__init__(**kwargs)
+        #Méthode pour initialiser et peupler le contenu du sliver en toute sécurité.
+        self._search_trigger= Clock.create_trigger(self.search_order_delayed,0.3)
+
+    def on_kv_post(self, base_widget):
+        productsearchbar = self.ids.textfieldproductsold.text
+        productslist = self.ids.pourcentagepvg
+        productslist.show_pourcentage_pv(productsearchbar)
+
+    def search_order(self):
+        self._search_trigger()
+
+    def search_order_delayed(self,*args):
+        productsearchbar = self.ids.textfieldproductsold.text
+        productslist=self.ids.pourcentagepvg
+        productslist.show_pourcentage_pv(productsearchbar)
 class PourcentageDepense(ScrollView):
     grid_showed = False
     grid = None
@@ -372,13 +364,14 @@ class PourcentageDepense(ScrollView):
         labels = []
         sizes = []
         instance = GestionModel()
-        produits = instance.get_pourcentage_produits_vendus(date,date_fin)
-        for row in produits:
-            labels.append(row[0])
-            sizes.append(row[1])
+        produits = instance.get_pourcentage_depense(date,date_fin)
+        if len(produits)<=10:
+            for row in produits:
+                labels.append(row[0])
+                sizes.append(row[1])
 
-        explode = (0.1, 0, 0, 0)  # mettre en avant la première part
-        if len(labels)<=10:
+            explode = (0.1, 0, 0, 0)  # mettre en avant la première part
+
             # Création de la figure
             fig, ax = plt.subplots()
             ax.pie(sizes, labels=labels, textprops={'fontsize': 9},

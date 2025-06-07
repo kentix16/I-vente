@@ -190,13 +190,13 @@ class PourcentagePV(RelativeLayout):
             labels.append(row[0])
             sizes.append(row[1])
 
-        fig, ax = plt.subplots()
+        explode = (0.1, 0, 0, 0)  # mettre en avant la première part
 
-        if len(labels) <= 10:
-            # Camembert
-            explode = [0.1] + [0] * (len(labels) - 1)  # Explose seulement la première part
-            ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
-                   autopct='%1.1f%%', shadow=True, startangle=140, explode=explode)
+        if len(produits)<=10:
+            fig, ax = plt.subplots()
+            ax.pie(sizes,labels=labels, textprops={'fontsize':9},
+                   autopct='%1.1f%%', shadow=True, startangle=140)
+            # Ajout du canvas dans l'interface Kivy
             self.add_widget(FigureCanvasKivyAgg(fig))
         else:
             produits = instance.get_pourcentage_produits_vendus()
@@ -209,10 +209,8 @@ class PourcentagePV(RelativeLayout):
                 })
             self.ids.pv.data = data
 
-
         self.widget_showed = True
 
-        
 
 class SalesPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
