@@ -7,9 +7,11 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.widget import Widget
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDButton, MDButtonText
 from kivymd.uix.card import MDCard
+from kivymd.uix.dialog import MDDialog, MDDialogButtonContainer, MDDialogHeadlineText
 from kivymd.uix.expansionpanel import MDExpansionPanel
 from kivymd.uix.label import MDLabel
 from kivy.lang import Builder
@@ -142,6 +144,8 @@ class InsertProductType(MDCard):
             return new_id
         id_type = get_id_produit_vendu_and_increment()
         nom_type = self.ids.typetoinsert.text
+        if not nom_type.isalpha():
+            App.get_running_app().manager.ids.productsscreen.ids.productspage.show_dialog()
         to_database('INSERT INTO type_produit VALUES(%s,%s,"CLI001")',
                     (id_type, nom_type))
 
@@ -175,8 +179,28 @@ class Content(MDSliverAppbarContent):
         productslist.show_products(productsearchbar)
 
 
+class MDFlatButton:
+    pass
+
 
 class ProductsPage(MDBoxLayout):
+    def show_dialog(self):
+        MDDialog(
+            MDDialogHeadlineText(
+                text="Erreur",
+                halign="left",
+            ),
+            MDDialogButtonContainer(
+                Widget(),
+                MDButton(
+                    MDButtonText(text="Annuler"),
+                    style="text",
+                ),
+
+                spacing="8dp",
+            ),
+        ).open()
+
     def change_screen(self):
         screen_manager = self.ids.screen_manager
         screen_manager.current = "screen2"

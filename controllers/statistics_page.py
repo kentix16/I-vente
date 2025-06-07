@@ -160,9 +160,25 @@ class PourcentagePVG(PourcentagePV):
 
     def __init__(self, **kwargs):
         super(PourcentagePVG, self).__init__(**kwargs)
+        Clock.schedule_once(self.delayed_init)
+
     """def show_pourcentage_pvg(self,date=None,date_fin=None):
         for i in range(100):print(f"{date} à {date_fin}")
 """
+
+    def delayed_init(self, dt):
+        # Assure-toi que l'ID 'pv' est bien présent
+        if "pv" in self.ids:
+            self.show_pourcentage_pv(widget=self.ids["pv"])
+        else:
+            print("ERREUR: id 'pv' introuvable dans PourcentagePVG")
+    """def on_parent(self, *args):
+        Clock.schedule_once(self.delayed_init)
+
+    def delayed_init(self, dt):
+        self.show_pourcentage_pv(widget=self.ids.pv,order="")"""
+
+
 
 class StatsPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
@@ -253,6 +269,7 @@ class StatsPage(MDBoxLayout):
         date_dialog.open()
     def on_ok_date(self,instance_date_picker,number_day):
         date  =instance_date_picker.get_date()[0]
+        self.ids.salescontainer.date = date
         self.ids.statedeventeglobal.show_stat_global(date)
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
@@ -273,11 +290,14 @@ class StatsPage(MDBoxLayout):
     def on_ok_periode(self,instance_date_picker):
         date = instance_date_picker.get_date()[0]
         date_fin = instance_date_picker.get_date()[-1]
-        self.ids.statedeventeglobal.show_stat_global(date,date_fin)
 
+        self.ids.salescontainer.date = date
+        self.ids.salescontainer.date_fin = date_fin
+
+        self.ids.statedeventeglobal.show_stat_global(date,date_fin)
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
-        self.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
+        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin,widget=self.ids.salescontainer.ids.pourcentagepvg.ids.pv)
         self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
         instance_date_picker.dismiss()
 
@@ -332,17 +352,44 @@ class GradientNavigationDrawer(MDNavigationDrawer):
     pass
 
 class SalesStatContent(MDBoxLayout):
-    """Composant Sliver qui affiche la liste des guitares."""
 
     def __init__(self, **kwargs):
         super(SalesStatContent, self).__init__(**kwargs)
-        #Méthode pour initialiser et peupler le contenu du sliver en toute sécurité.
+        self.date = None
+        self.date_fin = None
         self._search_trigger= Clock.create_trigger(self.search_order_delayed,0.3)
 
     def on_kv_post(self, base_widget):
+        Clock.schedule_once(self.load_initial_data)
+
+    def load_initial_data(self, dt):
+        order = self.ids.textfieldproductsold.text
+        pv_widget = self.ids.pourcentagepvg.ids.get("pv")
+        if pv_widget:
+            self.ids.pourcentagepvg.show_pourcentage_pv(
+            date=self.date, date_fin=self.date_fin,
+            widget=pv_widget, order=order
+        )
+        else:
+            print("pv introuvable (init)")
+
+    def search_order(self):
+        self._search_trigger()
+
+    def search_order_delayed(self, *args):
+        order = self.ids.textfieldproductsold.text
+        pv_widget = self.ids.pourcentagepvg.ids.get("pv")
+        if pv_widget:
+            self.ids.pourcentagepvg.show_pourcentage_pv(
+            date=self.date, date_fin=self.date_fin,
+            widget=pv_widget, order=order
+        )
+        else:
+            print("pv introuvable (search)")
+    """def on_kv_post(self, base_widget):
         productsearchbar = self.ids.textfieldproductsold.text
         productslist = self.ids.pourcentagepvg
-        productslist.show_pourcentage_pv(productsearchbar)
+        productslist.show_pourcentage_pv(self.ids.pourcentagepvg.ids.pv,productsearchbar)
 
     def search_order(self):
         self._search_trigger()
@@ -350,8 +397,9 @@ class SalesStatContent(MDBoxLayout):
     def search_order_delayed(self,*args):
         productsearchbar = self.ids.textfieldproductsold.text
         productslist=self.ids.pourcentagepvg
-        productslist.show_pourcentage_pv(productsearchbar)
+        productslist.show_pourcentage_pv(self.ids.pourcentagepvg.ids.pv,productsearchbar)"""
 class PourcentageDepense(ScrollView):
+    from utilities.myfunctions import pourcentage
     grid_showed = False
     grid = None
     widget_showed = False
@@ -360,38 +408,6 @@ class PourcentageDepense(ScrollView):
         super(PourcentageDepense, self).__init__(**kwargs)
 
     def show_pourcentage_depense(self,date=None,date_fin=None):
-        if self.widget_showed: self.clear_widgets()
-        labels = []
-        sizes = []
-        instance = GestionModel()
-        produits = instance.get_pourcentage_depense(date,date_fin)
-        if len(produits)<=10:
-            for row in produits:
-                labels.append(row[0])
-                sizes.append(row[1])
-
-            explode = (0.1, 0, 0, 0)  # mettre en avant la première part
-
-            # Création de la figure
-            fig, ax = plt.subplots()
-            ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
-                   autopct='%1.1f%%', shadow=True, startangle=140)
-            # Ajout du canvas dans l'interface Kivy
-            self.add_widget(FigureCanvasKivyAgg(fig))
-        else:
-            scroll = ScrollView(size_hint=(1, 1))
-            grid = GridLayout(cols=2, spacing=4, size_hint_y=None, padding=4)
-            grid.bind(minimum_height=grid.setter('height'))
-            titles = ("DEPENSES", "%")
-            for i in titles:
-                lbl = Label(text=f'{i}', size_hint_y=20, bold=True, color=[0, 0, 0, 1])
-                grid.add_widget(lbl)
-            for row in produits:
-                for i in row:
-                    lbl = Label(text=f'{i}', size_hint_y=None, height=20, color=[0, 0, 0, 1])
-                    grid.add_widget(lbl)
-            scroll.add_widget(grid)
-            self.add_widget(scroll)
-        self.widget_showed = True
+        self.pourcentage('dep',date,date_fin)
 
 

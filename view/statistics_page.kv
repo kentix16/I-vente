@@ -180,6 +180,7 @@
 
 
     MDBoxLayout:
+        id:percentstat
         orientation:"vertical"
         size_hint_x: 0.65
         spacing: dp(20)
@@ -214,6 +215,7 @@
                     size_hint:1,1
                     on_parent:self.show_pourcentage_depense()
         MDCard:
+
             style: "elevated"
             theme_bg_color: "Custom"
             size_hint_x: 1
@@ -229,7 +231,7 @@
     MDListItem:
         theme_bg_color: "Custom"
         md_bg_color: 186/255,169/255,155/255,1
-        size_hint_y: 0.2
+        size_hint_y: 0.1
         radius:[20,20,0,0]
         spacing:dp(10)
         padding:dp(10)
@@ -245,6 +247,7 @@
         id: searchproductsold
         spacing: dp(7)
         padding: dp(7)
+        size_hint_y:0.1
         MDTextField:
             id: textfieldproductsold
             on_text: root.search_order()
@@ -262,8 +265,7 @@
                 text: "chercher"
     PourcentagePVG:
         id:pourcentagepvg
-        size_hint:1,1
-        on_parent:self.show_pourcentage_pv()
+        size_hint:0.8,0.8
 
 <PourcentagePVG>:
     MDRecycleView:
@@ -279,6 +281,7 @@
 <ProductRowPV>:
     orientation:"horizontal"
     spacing:dp(20)
+    padding:dp(20)
     MDLabel:
         text:root.product_name
     MDLabel:

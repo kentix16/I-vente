@@ -5,6 +5,12 @@ import math
 
 
 #l=[input() for _ in range((int(input())))]
-emails = ["user@gmail.com", "invalid-email", "test@yahoo.fr"]
-valid_emails = "@" in email for email in emails
-print(valid_emails)
+n=int(input())
+l=[]
+for i in range(n):
+    row=input()
+    l.append(row)
+
+for i in l:
+    m = list(map(lambda x: x.upper() if i.index(x) % 2 == 0 else x.lower(), i))
+    print("".join(m))

@@ -4,26 +4,76 @@ from utilities.databases import to_database
 class GestionModel:
 
 
-    def get_pourcentage_produits_vendus(self,date=None,date_fin=None):
-        if date:
-            if date_fin:
-                res = to_database("""SELECT s.nom,ROUND((SUM(pv.qte)/(select sum(qte) 
-                        from produits_vendu WHERE DATE(date_de_vente) BETWEEN %s AND %s))*100,2) as pourcentage
-                         from stock s inner join produits_vendu pv on pv.id_produit=s.id_produit WHERE 
-                         DATE(pv.date_de_vente) BETWEEN %s AND %s group by s.nom ORDER BY pourcentage DESC;        
-                                          """, (date,date_fin,date,date_fin))
+    def get_pourcentage_produits_vendus(self,date=None,date_fin=None,order=""):
+        if order=="":
+            if date:
+                if date_fin:
+                    res = to_database("""SELECT s.nom,ROUND((SUM(pv.qte)/(select sum(qte) 
+                            from produits_vendu WHERE DATE(date_de_vente) BETWEEN %s AND %s))*100,2) as pourcentage
+                             from stock s inner join produits_vendu pv on pv.id_produit=s.id_produit WHERE 
+                             DATE(pv.date_de_vente) BETWEEN %s AND %s group by s.nom ORDER BY pourcentage DESC;        
+                                              """, (date,date_fin,date,date_fin))
+                else:
+                    res = to_database("""SELECT s.nom,ROUND((SUM(pv.qte)/(select sum(qte) 
+            from produits_vendu WHERE DATE(date_de_vente)=%s))*100,2) as pourcentage
+             from stock s inner join produits_vendu pv on pv.id_produit=s.id_produit WHERE 
+             DATE(pv.date_de_vente)=%s  group by s.nom ORDER BY pourcentage DESC;        
+                              """,(date,date))
+            else:res = to_database("""SELECT s.nom,ROUND((SUM(pv.qte)/(select sum(qte) 
+            from produits_vendu WHERE DATE(date_de_vente)=CURRENT_DATE()))*100,2) as pourcentage
+             from stock s inner join produits_vendu pv on pv.id_produit=s.id_produit WHERE 
+             DATE(pv.date_de_vente)= CURRENT_DATE() group by s.nom ORDER BY pourcentage DESC;         
+                              """)
+            return res
+        else:
+            print("order")
+            like_order = f"%{order}%"
+
+            if date:
+                if date_fin:
+                    query = """
+                        SELECT s.nom,
+                               ROUND((SUM(pv.qte) / (SELECT SUM(qte) FROM produits_vendu
+                                                      WHERE DATE(date_de_vente) BETWEEN %s AND %s)) * 100, 2) AS pourcentage
+                        FROM stock s
+                        INNER JOIN produits_vendu pv ON pv.id_produit = s.id_produit
+                        WHERE DATE(pv.date_de_vente) BETWEEN %s AND %s
+                        GROUP BY s.nom
+                        HAVING s.nom LIKE %s OR CAST(pourcentage AS CHAR) LIKE %s
+                        ORDER BY pourcentage DESC;
+                    """
+                    params = (date, date_fin, date, date_fin, like_order, like_order)
+                else:
+                    query = """
+                        SELECT s.nom,
+                               ROUND((SUM(pv.qte) / (SELECT SUM(qte) FROM produits_vendu
+                                                      WHERE DATE(date_de_vente) = %s)) * 100, 2) AS pourcentage
+                        FROM stock s
+                        INNER JOIN produits_vendu pv ON pv.id_produit = s.id_produit
+                        WHERE DATE(pv.date_de_vente) = %s
+                        GROUP BY s.nom
+                        HAVING s.nom LIKE %s OR CAST(pourcentage AS CHAR) LIKE %s
+                        ORDER BY pourcentage DESC;
+                    """
+                    params = (date, date, like_order, like_order)
             else:
-                res = to_database("""SELECT s.nom,ROUND((SUM(pv.qte)/(select sum(qte) 
-        from produits_vendu WHERE DATE(date_de_vente)=%s))*100,2) as pourcentage
-         from stock s inner join produits_vendu pv on pv.id_produit=s.id_produit WHERE 
-         DATE(pv.date_de_vente)=%s group by s.nom ORDER BY pourcentage DESC;        
-                          """,(date,date))
-        else:res = to_database("""SELECT s.nom,ROUND((SUM(pv.qte)/(select sum(qte) 
-        from produits_vendu WHERE DATE(date_de_vente)=CURRENT_DATE()))*100,2) as pourcentage
-         from stock s inner join produits_vendu pv on pv.id_produit=s.id_produit WHERE 
-         DATE(pv.date_de_vente)= CURRENT_DATE() group by s.nom ORDER BY pourcentage DESC;         
-                          """)
-        return res
+                query = """
+                    SELECT s.nom,
+                           ROUND((SUM(pv.qte) / (SELECT SUM(qte) FROM produits_vendu
+                                                  WHERE DATE(date_de_vente) = CURRENT_DATE())) * 100, 2) AS pourcentage
+                    FROM stock s
+                    INNER JOIN produits_vendu pv ON pv.id_produit = s.id_produit
+                    WHERE DATE(pv.date_de_vente) = CURRENT_DATE()
+                    GROUP BY s.nom
+                    HAVING s.nom LIKE %s OR CAST(pourcentage AS CHAR) LIKE %s
+                    ORDER BY pourcentage DESC;
+                """
+                params = (like_order, like_order)
+
+            print("Requête exécutée avec order:", order)
+            return to_database(query, params)
+
+
     @property
     def get_heures_stat(self):
         res = to_database("SELECT date_de_vente, qte FROM produits_vendu WHERE date(date_de_vente)=CURRENT_DATE()")

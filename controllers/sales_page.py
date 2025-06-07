@@ -173,44 +173,20 @@ class StatDeVente(MDCard):
 
 
 class PourcentagePV(RelativeLayout):
+    from utilities.myfunctions import pourcentage
     widget_showed = False
 
     def __init__(self, **kwargs):
         super(PourcentagePV, self).__init__(**kwargs)
 
-    def show_pourcentage_pv(self,date=None,date_fin=None):
-        if self.widget_showed:self.clear_widgets()
-        labels = []
-        sizes = []
-        instance = GestionModel()
-        produits = instance.get_pourcentage_produits_vendus(date, date_fin)
-        if not produits:return None
-
-        for row in produits:
-            labels.append(row[0])
-            sizes.append(row[1])
-
-        explode = (0.1, 0, 0, 0)  # mettre en avant la première part
-
-        if len(produits)<=10:
-            fig, ax = plt.subplots()
-            ax.pie(sizes,labels=labels, textprops={'fontsize':9},
-                   autopct='%1.1f%%', shadow=True, startangle=140)
-            # Ajout du canvas dans l'interface Kivy
-            self.add_widget(FigureCanvasKivyAgg(fig))
+    def show_pourcentage_pv(self,date=None,date_fin=None,widget=None,order=""):
+        print("ids disponibles dans PourcentagePVG:", self.ids.keys())
+        if widget:
+            self.pourcentage('pv', date, date_fin, widget, order=order)
         else:
-            produits = instance.get_pourcentage_produits_vendus()
-            data = []
+            print(" pas de id pv")
 
-            for row in produits:
-                data.append({
-                    'product_name': str(row[0]),
-                    'sale_percent': str(row[1])
-                })
-            self.ids.pv.data = data
-
-        self.widget_showed = True
-
+        
 
 class SalesPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
