@@ -160,7 +160,26 @@ class StatDeVenteGlobal(MDCard):
 
 
         self.add_widget(FigureCanvasKivyAgg(fig))"""
+class SalesStatContent(MDBoxLayout):
+    """Composant Sliver qui affiche la liste des guitares."""
 
+    def __init__(self, **kwargs):
+        super(SalesStatContent, self).__init__(**kwargs)
+        #Méthode pour initialiser et peupler le contenu du sliver en toute sécurité.
+        self._search_trigger= Clock.create_trigger(self.search_order_delayed,0.3)
+
+    def on_kv_post(self, base_widget):
+        productsearchbar = self.ids.textfieldproductsold.text
+        productslist = self.ids.pourcentagepv
+        productslist.show_products(productsearchbar)
+
+    def search_order(self):
+        self._search_trigger()
+
+    def search_order_delayed(self,*args):
+        productsearchbar = self.ids.textfieldproductsold.text
+        productslist = self.ids.pourcentagepv
+        productslist.show_products(productsearchbar)
 
 class PourcentagePV(RelativeLayout):
     widget_showed = False
