@@ -306,6 +306,7 @@ class GradientNavigationDrawer(MDNavigationDrawer):
 
 
 class PourcentageDepense(ScrollView):
+    from utilities.myfunctions import pourcentage
     grid_showed = False
     grid = None
     widget_showed = False
@@ -314,38 +315,6 @@ class PourcentageDepense(ScrollView):
         super(PourcentageDepense, self).__init__(**kwargs)
 
     def show_pourcentage_depense(self,date=None,date_fin=None):
-        if self.widget_showed: self.clear_widgets()
-        labels = []
-        sizes = []
-        instance = GestionModel()
-        produits = instance.get_pourcentage_depense(date,date_fin)
-        if len(produits)<=10:
-            for row in produits:
-                labels.append(row[0])
-                sizes.append(row[1])
-
-            explode = (0.1, 0, 0, 0)  # mettre en avant la première part
-
-            # Création de la figure
-            fig, ax = plt.subplots()
-            ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
-                   autopct='%1.1f%%', shadow=True, startangle=140)
-            # Ajout du canvas dans l'interface Kivy
-            self.add_widget(FigureCanvasKivyAgg(fig))
-        else:
-            scroll = ScrollView(size_hint=(1, 1))
-            grid = GridLayout(cols=2, spacing=4, size_hint_y=None, padding=4)
-            grid.bind(minimum_height=grid.setter('height'))
-            titles = ("DEPENSES", "%")
-            for i in titles:
-                lbl = Label(text=f'{i}', size_hint_y=20, bold=True, color=[0, 0, 0, 1])
-                grid.add_widget(lbl)
-            for row in produits:
-                for i in row:
-                    lbl = Label(text=f'{i}', size_hint_y=None, height=20, color=[0, 0, 0, 1])
-                    grid.add_widget(lbl)
-            scroll.add_widget(grid)
-            self.add_widget(scroll)
-        self.widget_showed = True
+        self.pourcentage('dep',date,date_fin)
 
 
