@@ -248,7 +248,6 @@ class StatsPage(MDBoxLayout):
         date = instance_date_picker.get_date()[0]
         date_fin = instance_date_picker.get_date()[-1]
         self.ids.statedeventeglobal.show_stat_global(date,date_fin)
-
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
         self.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
