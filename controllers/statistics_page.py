@@ -11,6 +11,7 @@ from kivy.lang import Builder
 from kivy.graphics import Mesh, Color, Rectangle
 from kivy.metrics import dp
 from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.relativelayout import RelativeLayout
@@ -28,6 +29,8 @@ from kivymd.uix.responsivelayout import MDResponsiveLayout
 from kivymd.uix.screen import MDScreen
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
+
+from controllers.sales_page import PourcentagePV
 from models.gestionModel import GestionModel
 
 # Pour les variantes spécifiques comme SemiBold et Black
@@ -61,6 +64,11 @@ import os
 
 kv_path = os.path.join(os.path.dirname(__file__), '..', 'view', 'statistics_page.kv')
 Builder.load_file(kv_path)
+
+class ProductRowPV(BoxLayout):
+    product_name=StringProperty()
+    sale_percent=StringProperty()
+
 
 class StatDeVenteGlobal(MDCard):
     widget_showed = False
@@ -160,6 +168,7 @@ class StatDeVenteGlobal(MDCard):
 
 
         self.add_widget(FigureCanvasKivyAgg(fig))"""
+
 class SalesStatContent(MDBoxLayout):
     """Composant Sliver qui affiche la liste des guitares."""
 
@@ -170,42 +179,24 @@ class SalesStatContent(MDBoxLayout):
 
     def on_kv_post(self, base_widget):
         productsearchbar = self.ids.textfieldproductsold.text
-        productslist = self.ids.pourcentagepv
-        productslist.show_products(productsearchbar)
+        productslist = self.ids.pourcentagepvg
+        productslist.show_pourcentage_pv(productsearchbar)
 
     def search_order(self):
         self._search_trigger()
 
     def search_order_delayed(self,*args):
         productsearchbar = self.ids.textfieldproductsold.text
-        productslist = self.ids.pourcentagepv
-        productslist.show_products(productsearchbar)
+        productslist = self.ids.pourcentagepvg
+        productslist.show_pourcentage_pv(productsearchbar)
 
-class PourcentagePV(RelativeLayout):
+class PourcentagePVG(PourcentagePV):
     widget_showed = False
 
     def __init__(self, **kwargs):
-        super(PourcentagePV, self).__init__(**kwargs)
+        super(PourcentagePVG, self).__init__(**kwargs)
 
-    def show_pourcentage_pv(self):
-        if self.widget_showed: self.clear_widgets()
-        labels = []
-        sizes = []
-        instance = GestionModel()
-        produits = instance.get_pourcentage_produits_vendus
-        for row in produits:
-            labels.append(row[0])
-            sizes.append(row[1])
 
-        explode = (0.1, 0, 0, 0)  # mettre en avant la première part
-
-        # Création de la figure
-        fig, ax = plt.subplots()
-        ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
-               autopct='%1.1f%%', shadow=True, startangle=140)
-        # Ajout du canvas dans l'interface Kivy
-        self.add_widget(FigureCanvasKivyAgg(fig))
-        self.widget_showed = True
 
 
 class StatsPage(MDBoxLayout):
@@ -310,13 +301,22 @@ class StatsPage(MDBoxLayout):
         ]
         date_dialog.bind(on_ok=self.on_ok_periode)
         date_dialog.open()
+    def on_ok_periode(self,instance_date_picker):
+        date=instance_date_picker.get_date()[0]
+        date_fin=instance_date_picker.get_date()[-1]
+        self.ids.statedeventeglobal.show_stat_global(date,date_fin)
+        self.update_somme_total_gagnee(date)
+        self.update_total_de_ventes(date)
+        self.ids.pourcentagepvg.show_pourcentage_pv(date)
+        self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
 
-    def update_total_de_ventes(self):
-        total_de_ventes = self.gestionmodel.get_total_de_ventes
+
+    def update_total_de_ventes(self,date=None):
+        total_de_ventes = self.gestionmodel.get_total_de_ventes(date)
         self.total_de_ventes = str(total_de_ventes)
 
-    def update_somme_total_gagnee(self):
-        somme_total_gagnee = self.gestionmodel.get_somme_total_gagnee
+    def update_somme_total_gagnee(self,date=None):
+        somme_total_gagnee = self.gestionmodel.get_somme_total_gagnee(date)
         self.somme_total_gagnee = str(somme_total_gagnee) + ' ar'
 
     def update_produits_en_rupture(self):
@@ -367,24 +367,38 @@ class PourcentageDepense(ScrollView):
     def __init__(self, **kwargs):
         super(PourcentageDepense, self).__init__(**kwargs)
 
-    def show_products_sale(self):
+    def show_pourcentage_depense(self,date=None,date_fin=None):
         if self.widget_showed: self.clear_widgets()
         labels = []
         sizes = []
         instance = GestionModel()
-        produits = instance.get_pourcentage_produits_vendus
+        produits = instance.get_pourcentage_produits_vendus(date,date_fin)
         for row in produits:
             labels.append(row[0])
             sizes.append(row[1])
 
         explode = (0.1, 0, 0, 0)  # mettre en avant la première part
-
-        # Création de la figure
-        fig, ax = plt.subplots()
-        ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
-               autopct='%1.1f%%', shadow=True, startangle=140)
-        # Ajout du canvas dans l'interface Kivy
-        self.add_widget(FigureCanvasKivyAgg(fig))
+        if len(labels)<=10:
+            # Création de la figure
+            fig, ax = plt.subplots()
+            ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
+                   autopct='%1.1f%%', shadow=True, startangle=140)
+            # Ajout du canvas dans l'interface Kivy
+            self.add_widget(FigureCanvasKivyAgg(fig))
+        else:
+            scroll = ScrollView(size_hint=(1, 1))
+            grid = GridLayout(cols=2, spacing=4, size_hint_y=None, padding=4)
+            grid.bind(minimum_height=grid.setter('height'))
+            titles = ("DEPENSES", "%")
+            for i in titles:
+                lbl = Label(text=f'{i}', size_hint_y=20, bold=True, color=[0, 0, 0, 1])
+                grid.add_widget(lbl)
+            for row in produits:
+                for i in row:
+                    lbl = Label(text=f'{i}', size_hint_y=None, height=20, color=[0, 0, 0, 1])
+                    grid.add_widget(lbl)
+            scroll.add_widget(grid)
+            self.add_widget(scroll)
         self.widget_showed = True
 
 

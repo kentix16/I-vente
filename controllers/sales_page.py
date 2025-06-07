@@ -74,7 +74,7 @@ class StatDeVente(MDCard):
         self.clear_widgets()
 
         salemodel = GestionModel()
-        rows = salemodel.get_heures_stat
+        rows = salemodel.get_heures_somme_stat()
 
         heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
         montants = [row[1] for row in rows]
@@ -101,13 +101,22 @@ class StatDeVente(MDCard):
             ax.text(bar.get_x() + bar.get_width() / 2.0, height + 0.5, f"{montant:.0f}", ha='center', va='bottom',
                     fontsize=9, color="#333")
 
-        # Format des dates : ticks majeurs toutes les heures
+        # Forcer l'affichage de 00:00 à 23:00
+        if heures_groupees:
+            jour = heures_groupees[0].date()
+        else:
+            jour = datetime.today().date()
+
+        debut_journee = datetime.combine(jour, datetime.min.time())
+        fin_journee = datetime.combine(jour, datetime.max.time()).replace(hour=23, minute=59, second=59)
+
+        ax.set_xlim(debut_journee, fin_journee)
+
+        # Ticks majeurs toutes les heures
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
 
-        # Optionnel : repères mineurs toutes les 10 minutes
-        #ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=10))
-
+        # Formatage et esthétique
         fig.autofmt_xdate()
         ax.grid(True, linestyle='--', alpha=0.4)
         fig.patch.set_facecolor("#f7f7f7")
@@ -169,25 +178,40 @@ class PourcentagePV(RelativeLayout):
     def __init__(self, **kwargs):
         super(PourcentagePV, self).__init__(**kwargs)
 
-    def show_pourcentage_pv(self):
+    def show_pourcentage_pv(self,date=None,date_fin=None):
         if self.widget_showed:self.clear_widgets()
-        labels= []
-        sizes=[]
+        labels = []
+        sizes = []
         instance = GestionModel()
-        produits = instance.get_pourcentage_produits_vendus
+        produits = instance.get_pourcentage_produits_vendus(date, date_fin)
+        if not produits:return None
+
         for row in produits:
             labels.append(row[0])
             sizes.append(row[1])
 
-        explode = (0.1, 0, 0, 0)  # mettre en avant la première part
-
-        # Création de la figure
         fig, ax = plt.subplots()
-        ax.pie(sizes,labels=labels, textprops={'fontsize':9},
-               autopct='%1.1f%%', shadow=True, startangle=140)
-        # Ajout du canvas dans l'interface Kivy
-        self.add_widget(FigureCanvasKivyAgg(fig))
+
+        if len(labels) <= 10:
+            # Camembert
+            explode = [0.1] + [0] * (len(labels) - 1)  # Explose seulement la première part
+            ax.pie(sizes, labels=labels, textprops={'fontsize': 9},
+                   autopct='%1.1f%%', shadow=True, startangle=140, explode=explode)
+            self.add_widget(FigureCanvasKivyAgg(fig))
+        else:
+            produits = instance.get_pourcentage_produits_vendus()
+            data = []
+
+            for row in produits:
+                data.append({
+                    'product_name': str(row[0]),
+                    'sale_percent': str(row[1])
+                })
+            self.ids.pv.data = data
+
+
         self.widget_showed = True
+
         
 
 class SalesPage(MDBoxLayout):
@@ -203,10 +227,10 @@ class SalesPage(MDBoxLayout):
         self.update_produits_en_rupture()
 
     def update_total_de_ventes(self):
-        total_de_ventes = self.gestionmodel.get_total_de_ventes
+        total_de_ventes = self.gestionmodel.get_total_de_ventes()
         self.total_de_ventes = str(total_de_ventes)
     def update_somme_total_gagnee(self):
-        somme_total_gagnee = self.gestionmodel.get_somme_total_gagnee
+        somme_total_gagnee = self.gestionmodel.get_somme_total_gagnee()
         self.somme_total_gagnee = str(somme_total_gagnee)+' ar'
     def update_produits_en_rupture(self):
         produits_en_rupture = self.gestionmodel.get_produits_en_rupture

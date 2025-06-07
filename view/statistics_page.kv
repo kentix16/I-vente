@@ -212,7 +212,7 @@
                 PourcentageDepense:
                     id:pourcentagedepense
                     size_hint:1,1
-                    on_parent:self.show_products_sale()
+                    on_parent:self.show_pourcentage_depense()
         MDCard:
             style: "elevated"
             theme_bg_color: "Custom"
@@ -238,9 +238,9 @@
 
         MDListItemLeadingIcon:
             icon: "sale"
-
         MDListItemHeadlineText:
             text: "pourcentage de vente des produits"
+
     MDBoxLayout:
         id: searchproductsold
         spacing: dp(7)
@@ -260,15 +260,15 @@
                 icon: "magnify"
             MDButtonText:
                 text: "chercher"
-    PourcentagePV:
-        id:pourcentagepv
+    PourcentagePVG:
+        id:pourcentagepvg
         size_hint:1,1
         on_parent:self.show_pourcentage_pv()
 
-<PourcentagePV>:
+<PourcentagePVG>:
     MDRecycleView:
         id: pv
-        viewclass:"ProductRow"
+        viewclass:"ProductRowPV"
         key_size:"height"
         RecycleBoxLayout:
             default_size: None, dp(40)
@@ -276,7 +276,7 @@
             size_hint_y:None
             height: self.minimum_height
             orientation:"vertical"
-<ProductRow>:
+<ProductRowPV>:
     orientation:"horizontal"
     spacing:dp(20)
     MDLabel:

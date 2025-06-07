@@ -200,32 +200,6 @@ class ListProducts(ScrollView):
     grid = None
     def __init__(self,**kwargs):
         super(ListProducts,self).__init__(**kwargs)
-    """def show_products(self,order=""):
-        if self.grid_showed:
-            self.remove_widget(self.grid)
-            self.grid = None
-        self.grid = GridLayout(cols=5,spacing=2,size_hint_y=None)
-        self.grid.bind(minimum_height=self.grid.setter('height'))
-        instance = GestionModel()
-        produits = instance.get_produits(order)
-        #print(produits)
-        titles = ('','PRODUITS','PU','QT','TYPE')
-        for i in enumerate(titles):
-            cell = Label(text=i[1], color=(0, 0, 0, 1), bold=True, size_hint=(1, None), height=20)
-            if i[0]==0:
-                cell.size_hint=(.2,None)
-            self.grid.add_widget(cell)
-        for row in produits:
-            btn = Button(text='v', bold=True, color=(0, 0, 1, 1), size_hint=(.2, None),
-                         height=20, background_color=(0, 0, 1, .1))
-            btn.bind(on_press=partial(self.remove_product, nom_produit=row[0]))
-            self.grid.add_widget(btn)
-            for item in range(len(row)):
-                cell = Label(text = f'{row[item]}',color=(.2,.2,.2,1),size_hint=(1,None),height=20)
-                self.grid.add_widget(cell)
-
-        self.add_widget(self.grid)
-        self.grid_showed = True"""
 
     def remove_product(self, nom_produit):
         App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.delectproduct.ids.nom_produit_vente.text = nom_produit
