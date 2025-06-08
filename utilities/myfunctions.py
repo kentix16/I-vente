@@ -14,6 +14,10 @@ def pourcentage(self,nom_pourcentage,date=None,date_fin=None,widgetcontainer=Non
     if nom_pourcentage=='pv':
         produits = instance.get_pourcentage_produits_vendus(date, date_fin,order)
         print("Résultat produits:", produits)
+        if widgetcontainer:
+            print("l'ordre est!",order)
+            print("Résultat date:", date)
+            print("Résultat date_fin:", date_fin)
 
     if nom_pourcentage=='dep':
         produits = instance.get_pourcentage_depense(date,date_fin)
@@ -33,6 +37,7 @@ def pourcentage(self,nom_pourcentage,date=None,date_fin=None,widgetcontainer=Non
         self.add_widget(FigureCanvasKivyAgg(fig))
     else:
         if widgetcontainer:
+
             data = []
 
             for row in produits:
@@ -42,6 +47,7 @@ def pourcentage(self,nom_pourcentage,date=None,date_fin=None,widgetcontainer=Non
                 })
             # App.manager.statsscreen.statsspage.percentstat
             widgetcontainer.data = data
+            self.add_widget(widgetcontainer)
         else:
             print("widget introuvable")
 

@@ -269,12 +269,14 @@ class StatsPage(MDBoxLayout):
         date_dialog.open()
     def on_ok_date(self,instance_date_picker,number_day):
         date  =instance_date_picker.get_date()[0]
+
         self.ids.salescontainer.date = date
+        self.ids.salescontainer.date_fin = None
         self.ids.statedeventeglobal.show_stat_global(date)
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
         self.ids.pourcentagedepense.show_pourcentage_depense(date)
-        self.ids.pourcentagepvg.show_pourcentage_pv(date)
+        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date,widget=self.ids.salescontainer.ids.pourcentagepvg.ids.pv)
         instance_date_picker.dismiss()
 
     def show_modal_date_picker(self, *args):
