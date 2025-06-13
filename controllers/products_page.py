@@ -3,9 +3,7 @@ from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.properties import StringProperty, ListProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
+
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -15,10 +13,8 @@ from kivymd.uix.dialog import MDDialog, MDDialogButtonContainer, MDDialogHeadlin
 from kivymd.uix.expansionpanel import MDExpansionPanel
 from kivymd.uix.label import MDLabel
 from kivy.lang import Builder
-from functools import partial
 import os
 
-from kivymd.uix.recycleview import MDRecycleView
 from kivymd.uix.sliverappbar import MDSliverAppbarContent
 
 from models.gestionModel import GestionModel

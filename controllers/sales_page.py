@@ -1,15 +1,9 @@
 from collections import defaultdict
 from datetime import datetime
-from itertools import cycle
 
-import matplotlib.dates as mdates
-
-from kivy.clock import Clock
 from kivy.core.text import LabelBase
 from kivy.lang import Builder
-from kivy.graphics import Mesh, Color, Rectangle
 from kivy.properties import ListProperty, StringProperty, NumericProperty
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.scrollview import ScrollView
@@ -179,14 +173,9 @@ class PourcentagePV(RelativeLayout):
     def __init__(self, **kwargs):
         super(PourcentagePV, self).__init__(**kwargs)
 
-    def show_pourcentage_pv(self,date=None,date_fin=None,widget=None,order=""):
+    def show_pourcentage_pv(self,date=None,date_fin=None,order=""):
         print("ids disponibles dans PourcentagePVG:", self.ids.keys())
-        if widget:
-            self.pourcentage('pv', date, date_fin, widget, order=order)
-        else:
-            print(" pas de id pv")
-
-        
+        self.pourcentage('pv', date, date_fin, order=order)
 
 class SalesPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')

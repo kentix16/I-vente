@@ -3,11 +3,14 @@ from utilities.outils import Connexion as co
 
 def to_database(query, parameters=()):
     conn = mysql.connector.connect(
-        host=co.host,
-        user=co.user,
-        password=co.password,
-        database='gestion'
+        host='localhost',
+        user='root',
+        password='1234567',
+        database="gestion",
+        port=3307
     )
+
+    print("✅ Connexion réussie à MySQL !")
     c = conn.cursor()
 
     try:

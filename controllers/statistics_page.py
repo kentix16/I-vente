@@ -1,25 +1,16 @@
 from collections import defaultdict
 from datetime import datetime
-from itertools import cycle
 from typing import Literal
-
-import matplotlib.dates as mdates
-
 from kivy.clock import Clock
 from kivy.core.text import LabelBase
 from kivy.lang import Builder
-from kivy.graphics import Mesh, Color, Rectangle
 from kivy.metrics import dp
-from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty
+from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
-from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.theming import ThemeManager
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
-from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivy_garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivymd.uix.label import MDLabel
@@ -29,11 +20,8 @@ from kivymd.uix.responsivelayout import MDResponsiveLayout
 from kivymd.uix.screen import MDScreen
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
-
 from controllers.sales_page import PourcentagePV
 from models.gestionModel import GestionModel
-
-# Pour les variantes spécifiques comme SemiBold et Black
 LabelBase.register(name="OutfitSemiBold", fn_regular="font/Outfit-SemiBold.ttf")
 LabelBase.register(name="OutfitBlack", fn_regular="font/Outfit-Black.ttf")
 
@@ -169,7 +157,7 @@ class PourcentagePVG(PourcentagePV):
     def delayed_init(self, dt):
         # Assure-toi que l'ID 'pv' est bien présent
         if "pv" in self.ids:
-            self.show_pourcentage_pv(widget=self.ids["pv"])
+            self.show_pourcentage_pv()
         else:
             print("ERREUR: id 'pv' introuvable dans PourcentagePVG")
     """def on_parent(self, *args):
@@ -177,8 +165,6 @@ class PourcentagePVG(PourcentagePV):
 
     def delayed_init(self, dt):
         self.show_pourcentage_pv(widget=self.ids.pv,order="")"""
-
-
 
 class StatsPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
@@ -276,7 +262,7 @@ class StatsPage(MDBoxLayout):
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
         self.ids.pourcentagedepense.show_pourcentage_depense(date)
-        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date,widget=self.ids.salescontainer.ids.pourcentagepvg.ids.pv)
+        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date)
         instance_date_picker.dismiss()
 
     def show_modal_date_picker(self, *args):
@@ -299,7 +285,7 @@ class StatsPage(MDBoxLayout):
         self.ids.statedeventeglobal.show_stat_global(date,date_fin)
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
-        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin,widget=self.ids.salescontainer.ids.pourcentagepvg.ids.pv)
+        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
         self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
         instance_date_picker.dismiss()
 
@@ -369,8 +355,7 @@ class SalesStatContent(MDBoxLayout):
         pv_widget = self.ids.pourcentagepvg.ids.get("pv")
         if pv_widget:
             self.ids.pourcentagepvg.show_pourcentage_pv(
-            date=self.date, date_fin=self.date_fin,
-            widget=pv_widget, order=order
+            date=self.date, date_fin=self.date_fin, order=order
         )
         else:
             print("pv introuvable (init)")
@@ -383,32 +368,17 @@ class SalesStatContent(MDBoxLayout):
         pv_widget = self.ids.pourcentagepvg.ids.get("pv")
         if pv_widget:
             self.ids.pourcentagepvg.show_pourcentage_pv(
-            date=self.date, date_fin=self.date_fin,
-            widget=pv_widget, order=order
+            date=self.date, date_fin=self.date_fin, order=order
         )
         else:
             print("pv introuvable (search)")
-    """def on_kv_post(self, base_widget):
-        productsearchbar = self.ids.textfieldproductsold.text
-        productslist = self.ids.pourcentagepvg
-        productslist.show_pourcentage_pv(self.ids.pourcentagepvg.ids.pv,productsearchbar)
-
-    def search_order(self):
-        self._search_trigger()
-
-    def search_order_delayed(self,*args):
-        productsearchbar = self.ids.textfieldproductsold.text
-        productslist=self.ids.pourcentagepvg
-        productslist.show_pourcentage_pv(self.ids.pourcentagepvg.ids.pv,productsearchbar)"""
 class PourcentageDepense(ScrollView):
     from utilities.myfunctions import pourcentage
     grid_showed = False
     grid = None
     widget_showed = False
-
     def __init__(self, **kwargs):
         super(PourcentageDepense, self).__init__(**kwargs)
-
     def show_pourcentage_depense(self,date=None,date_fin=None):
         self.pourcentage('dep',date,date_fin)
 
