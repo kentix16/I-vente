@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 
 from models.gestionModel import GestionModel
 
-def pourcentage(self,nom_pourcentage,date=None,date_fin=None,order=""):
+def pourcentage(self,nom_pourcentage="pv",date=None,date_fin=None,order=""):
     if self.widget_showed: self.clear_widgets()
     labels = []
     sizes = []
@@ -31,16 +31,17 @@ def pourcentage(self,nom_pourcentage,date=None,date_fin=None,order=""):
         self.add_widget(FigureCanvasKivyAgg(fig))
 
     else:
-        data = []
+        if nom_pourcentage == 'pv':
+            data = []
 
-        for row in produits:
-            data.append({
-                'product_name': str(row[0]),
-                'sale_percent': str(row[1])
-            })
-        App.get_running_app().manager.ids.statsscreen.ids.statsspage.ids.salescontainer.ids.pourcentagepvg.ids.pv.data = data
-        App.get_running_app().manager.ids.statsscreen.ids.statsspage.ids.salescontainer.ids.pourcentagepvg.clear_widgets()
-        App.get_running_app().manager.ids.statsscreen.ids.statsspage.ids.salescontainer.ids.pourcentagepvg.add_widget(App.get_running_app().manager.ids.statsscreen.ids.statsspage.ids.salescontainer.ids.pourcentagepvg.ids.pv)
+            for row in produits:
+                data.append({
+                    'product_name': str(row[0]),
+                    'sale_percent': str(row[1])
+                })
+            App.get_running_app().manager.ids.statsscreen.ids.statsspage.ids.salescontainer.ids.pourcentagepvg.ids.pv.data = data
+            App.get_running_app().manager.ids.statsscreen.ids.statsspage.ids.salescontainer.ids.pourcentagepvg.clear_widgets()
+            App.get_running_app().manager.ids.statsscreen.ids.statsspage.ids.salescontainer.ids.pourcentagepvg.add_widget(App.get_running_app().manager.ids.statsscreen.ids.statsspage.ids.salescontainer.ids.pourcentagepvg.ids.pv)
 
 
     self.widget_showed = True

@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
 
+import numpy as np
 from kivy.core.text import LabelBase
 from kivy.lang import Builder
 from kivy.properties import ListProperty, StringProperty, NumericProperty
@@ -66,8 +67,61 @@ class StatDeVente(MDCard):
 
     def show_stat_du_jour(self):
         self.clear_widgets()
-
         salemodel = GestionModel()
+        heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN")
+        heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX")
+        heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN")
+        heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX")
+
+        # Vérifie que les valeurs sont valides
+        if not all([heure_min_vente, heure_max_vente, heure_min_dep, heure_max_dep]):
+            self.add_widget(Label(text="Aucune donnée disponible pour cette période."))
+            return
+
+        heure_min = f"{min(heure_min_vente, heure_min_dep):02d}:00:00"
+        heure_max = f"{max(heure_max_vente, heure_max_dep):02d}:00:00"
+
+        ventes = salemodel.get_heures_somme_stat(heure_min=heure_min, heure_max=heure_max)
+        depense = salemodel.get_heures_depense_stat(heure_min=heure_min, heure_max=heure_max)
+
+        if not ventes or not depense:
+            self.add_widget(Label(text="Aucune donnée à afficher."))
+            return
+
+        dates_ventes = [row[0] for row in ventes]
+        montants = [row[1] for row in ventes]
+        depense_vals = [row[1] for row in depense]
+        for i in range(20):
+            for i in dates_ventes:
+                print(i)
+
+        min_len = min(len(dates_ventes), len(montants), len(depense_vals))
+        if min_len == 0:
+            self.add_widget(Label(text="Pas de données suffisantes pour générer le graphique."))
+            return
+
+        dates = dates_ventes[:min_len]
+        montants = montants[:min_len]
+        depense_vals = depense_vals[:min_len]
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+        x = np.arange(min_len)
+        bar_width = 0.35
+
+        ax.bar(x - bar_width / 2, montants, width=bar_width, label='Vente', color='turquoise')
+        ax.bar(x + bar_width / 2, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
+
+        ax.set_title("Ventes vs Dépenses")
+        ax.set_xlabel("Heure")
+        ax.set_ylabel("Montant (Ar)")
+        ax.set_xticks(x)
+        ax.set_xticklabels([str(d) for d in dates], rotation=45)
+        ax.legend()
+        ax.grid(axis='y', linestyle="--", alpha=0.7)
+        fig.tight_layout()
+
+        self.add_widget(FigureCanvasKivyAgg(fig))
+        """salemodel = GestionModel()
         rows = salemodel.get_heures_somme_stat()
 
         heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
@@ -121,7 +175,7 @@ class StatDeVente(MDCard):
         fig.tight_layout()
 
         self.add_widget(FigureCanvasKivyAgg(fig))
-
+"""
     """def show_stat_du_jour(self):
         self.clear_widgets()
 

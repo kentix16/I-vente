@@ -3,15 +3,6 @@
         orientation:"vertical"
         padding: dp(20)  # marge autour des enfants
         spacing: dp(10)  # espace entre enfants
-
-        MDLabel:
-            size_hint_y:0.1
-            text: "Vos statistiques Globales"
-            halign: "left"
-            text_color: 2/255,2/255,88/255,1
-            font_style: "OutfitBlack"
-            role: "medium"
-            bold: True
         MDBoxLayout:
             size_hint_y:0.15
             spacing:dp(7)
@@ -67,7 +58,7 @@
         MDBoxLayout:
             padding: dp(20)
             spacing:dp(20)
-            size_hint_y: 0.20
+            size_hint_y: 0.15
             orientation:"horizontal"
 
             canvas.before:
@@ -172,7 +163,7 @@
             id:statedeventeglobal
             style: "elevated"
             theme_bg_color: "Custom"
-            size_hint_y: 0.55
+            size_hint_y: 0.70
             size_hint_x:1
             radius:[20]
             md_bg_color:1,1,1,1

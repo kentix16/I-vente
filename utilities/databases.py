@@ -10,14 +10,12 @@ def to_database(query, parameters=()):
         port=3307
     )
 
-    print("✅ Connexion réussie à MySQL !")
-    c = conn.cursor()
-
+    c = conn.cursor(buffered=True)
     try:
         c.execute(query, parameters)
         query_type = query.strip().split()[0].upper()
 
-        if query_type == 'SELECT':
+        if query_type in ('SELECT', 'WITH'):
             result = c.fetchall()
         else:
             conn.commit()
@@ -27,6 +25,7 @@ def to_database(query, parameters=()):
         conn.close()
 
     return result
+
 
 """
 def to_database(query,parameters=()):
