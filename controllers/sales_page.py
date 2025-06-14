@@ -184,7 +184,7 @@ class PourcentagePV(RelativeLayout):
         if widget:
             self.pourcentage('pv', date, date_fin, widget, order=order)
         else:
-            print(" pas de id pv")
+            self.pourcentage('pv', date, date_fin)
 
         
 
