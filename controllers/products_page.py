@@ -3,9 +3,7 @@ from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.properties import StringProperty, ListProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
+
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -15,14 +13,13 @@ from kivymd.uix.dialog import MDDialog, MDDialogButtonContainer, MDDialogHeadlin
 from kivymd.uix.expansionpanel import MDExpansionPanel
 from kivymd.uix.label import MDLabel
 from kivy.lang import Builder
-from functools import partial
 import os
 
-from kivymd.uix.recycleview import MDRecycleView
 from kivymd.uix.sliverappbar import MDSliverAppbarContent
 
 from models.gestionModel import GestionModel
 from utilities.databases import to_database
+
 
 # Chemin de votre fichier KV
 kv_path = os.path.join(os.path.dirname(__file__), '..', 'view', 'products_page.kv')
@@ -51,6 +48,7 @@ class MDExpansionPanelThreeLine:
 
 
 class InsertProduct(MDCard):
+    from utilities.myfunctions import show_popup
     product_types = ListProperty()
     selected_product_type = StringProperty()
 
@@ -119,18 +117,33 @@ class InsertProduct(MDCard):
         pu = self.ids.pu.text
         qt = self.ids.qt.text
         type = self.selected_product_type
+        if not (nom and pu and qt):
+            self.show_popup('champ manquant','veuillez compléter les champs manquants')
+            return
+        if not (qt.isnumeric() and pu.isnumeric()):
+            self.show_popup('erreur', 'la quantité et le pu doivent \nêtre des entiers')
+            return
+        if not type:
+            self.show_popup('erreur','aucun type séléctionné')
+            return
         gestionmodel = GestionModel()
         id_type = gestionmodel.get_id_type(type)
         print(id_product,nom,pu,qt,type)
-        to_database('INSERT INTO stock VALUES (%s,%s,%s,%s,%s)',
+        try:to_database('INSERT INTO stock VALUES (%s,%s,%s,%s,%s)',
                     (id_product, nom, pu, id_type, qt))
+        except:
+            message = 'duplicata de nom de produit '+str(nom)
+            self.show_popup(title='erreur',message=message)
+            return
         self.ids.nom.text = ''
         self.ids.pu.text = ''
         self.ids.qt.text = ''
-        self.parent.parent.parent.parent.ids.sliver_box.ids.listproducts.show_products()
+        manager = App.get_running_app().manager
+        manager.ids.productsscreen.ids.productspage.ids.sliver_box.ids.content.ids.listproducts.show_products()
 
 
 class InsertProductType(MDCard):
+    from utilities.myfunctions import show_popup
     def add_type(self):
         def get_id_produit_vendu_and_increment():
             gestionmodel = GestionModel()
@@ -146,8 +159,14 @@ class InsertProductType(MDCard):
         nom_type = self.ids.typetoinsert.text
         if not nom_type.isalpha():
             App.get_running_app().manager.ids.productsscreen.ids.productspage.show_dialog()
-        to_database('INSERT INTO type_produit VALUES(%s,%s,"CLI001")',
+        try:
+            to_database('INSERT INTO type_produit VALUES(%s,%s,"CLI001")',
                     (id_type, nom_type))
+        except:
+            message = f'Duplicata du type {nom_type}'
+            self.show_popup('erreur',message)
+            return
+        
 
         App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.insertproduct.load_product_types()
         self.ids.typetoinsert.text=''
@@ -158,7 +177,6 @@ class GuitarItem(MDListItem):
     pass
 
 class Content(MDSliverAppbarContent):
-    """Composant Sliver qui affiche la liste des guitares."""
 
     def __init__(self, **kwargs):
         super(Content, self).__init__(**kwargs)
@@ -248,13 +266,16 @@ class ProductRow(BoxLayout):
     prix_unitaire=StringProperty()
 
 class DeleteProduct(MDCard):
+    from utilities.myfunctions import show_popup
     def __init__(self,**kwargs):
         super(DeleteProduct,self).__init__(**kwargs)
 
     def sale_product(self):
         nom = self.ids.nom_produit_vente.text
-        qt=self.ids.qt_produit_vente.text
-        print(nom,qt)
+        try:qt=int(self.ids.qt_produit_vente.text)
+        except:
+            self.show_popup('erreur','qt invalide')
+            return None
         to_database('UPDATE stock SET qt=qt-%s WHERE nom=%s',(qt,nom))
         self.add_to_produit_vendu(qt,nom)
 
@@ -274,11 +295,13 @@ class DeleteProduct(MDCard):
         try:
             id_produit_vendu = to_database('SELECT id_produit FROM stock WHERE nom=%s',(nom,))
             to_database('INSERT INTO produits_vendu VALUES(%s,CURRENT_TIMESTAMP,%s,%s)', (id_prov,qt,id_produit_vendu[0][0]))
+            App.get_running_app().manager.update_all()
         except:
-            for i in range(1000):print('ce produit n\'existe pas')
+            print('ce produit n\'existe pas')
+            self.show_popup('Erreur','Vente invalide')
         self.ids.nom_produit_vente.text = ''
         self.ids.qt_produit_vente.text = ''
-        App.get_running_app().manager.update_all()
+
 
 
 

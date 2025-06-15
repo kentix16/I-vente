@@ -2,6 +2,7 @@ from font.fonts import register_fonts
 from kivy.properties import ObjectProperty
 from kivymd.app import MDApp
 from navigation_screen_manager import NavigationScreenManager
+import controllers.sales_page  # ou sales_pages si c’est le bon nom
 
 class MyScreenManager(NavigationScreenManager):
     def __init__(self,**kwargs):

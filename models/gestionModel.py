@@ -26,7 +26,6 @@ class GestionModel:
                               """)
             return res
         else:
-            print("order")
             like_order = f"%{order}%"
 
             if date:
@@ -43,6 +42,7 @@ class GestionModel:
                         ORDER BY pourcentage DESC;
                     """
                     params = (date, date_fin, date, date_fin, like_order, like_order)
+
                 else:
                     query = """
                         SELECT s.nom,
@@ -78,21 +78,195 @@ class GestionModel:
     def get_heures_stat(self):
         res = to_database("SELECT date_de_vente, qte FROM produits_vendu WHERE date(date_de_vente)=CURRENT_DATE()")
         return res
+    def get_min_max_heures_vente(self,order="MIN",date=None):
+        if date:
+            query = f"""
+            SELECT COALESCE({order}(HOUR(date_de_vente)), 0)
+            FROM produits_vendu
+            WHERE DATE(date_de_vente) = %s
+        """
+            res = to_database(query, (date,))
+        else:
+            query = f"""
+                       SELECT COALESCE({order}(HOUR(date_de_vente)), 0)
+                       FROM produits_vendu
+                       WHERE DATE(date_de_vente) = CURDATE()
+                   """
+            res = to_database(query)
+        return int(res[0][0]) if res and res[0] else 0
 
+    def get_min_max_heures_dep(self, order="MIN", date=None):
+        if order not in ("MIN", "MAX"):
+            raise ValueError("order doit être 'MIN' ou 'MAX'")
 
+        if date:
+            query = f"""
+                SELECT COALESCE({order}(HOUR(date_dep)), 0)
+                FROM depense
+                WHERE DATE(date_dep) = %s
+            """
+            res = to_database(query, (date,))
+        else:
+            query = f"""
+                SELECT COALESCE({order}(HOUR(date_dep)), 0)
+                FROM depense
+                WHERE DATE(date_dep) = CURDATE()
+            """
+            res = to_database(query)
 
-    def get_heures_somme_stat(self,date=None,date_fin=None):
+        return int(res[0][0]) if res and res[0] else 0
+
+    def get_heures_depense_stat(self, date=None, date_fin=None, heure_min=None, heure_max=None):
         if date:
             if date_fin:
-                res = to_database("SELECT pv.date_de_vente, (pv.qte*s.pu) as somme from produits_vendu pv JOIN stock s ON "
-                          "s.id_produit=pv.id_produit where DATE(pv.date_de_vente) BETWEEN %s AND %s",(date,date_fin,))
+                res = to_database("""
+                    WITH RECURSIVE date_range AS (
+                        SELECT DATE(%s) AS date_jour
+                        UNION ALL
+                        SELECT DATE_ADD(date_jour, INTERVAL 1 DAY)
+                        FROM date_range
+                        WHERE date_jour < %s
+                    )
+                    SELECT 
+                        d.date_jour,
+                        COALESCE(SUM(dep.somme_dep), 0) AS depense_du_jour
+                    FROM date_range d
+                    LEFT JOIN depense dep ON DATE(dep.date_dep) = d.date_jour
+                    GROUP BY d.date_jour
+                    ORDER BY d.date_jour
+                """, (date, date_fin))
             else:
-                res = to_database("SELECT pv.date_de_vente, (pv.qte*s.pu) as somme from produits_vendu pv JOIN stock s ON "
-                          "s.id_produit=pv.id_produit where DATE(pv.date_de_vente)=%s",(date,))
+                res = to_database("""
+                    WITH RECURSIVE interval_time AS (
+                        SELECT CAST(CONCAT(%s, ' ', %s) AS DATETIME) AS time_slot
+                        UNION ALL
+                        SELECT DATE_ADD(time_slot, INTERVAL 1 HOUR)
+                        FROM interval_time
+                        WHERE time_slot < CAST(CONCAT(%s, ' ', %s) AS DATETIME)
+                    ),
+                    dep_sum AS (
+                        SELECT 
+                            DATE_FORMAT(date_dep, '%Y-%m-%d %H:00:00') AS rounded_hour,
+                            SUM(somme_dep) AS somme
+                        FROM depense
+                        WHERE date_dep >= CAST(CONCAT(%s, ' ', %s) AS DATETIME)
+                          AND date_dep < CAST(CONCAT(%s, ' ', %s) AS DATETIME)
+                        GROUP BY rounded_hour
+                    )
+                    SELECT 
+                        it.time_slot,
+                        COALESCE(ds.somme, 0) AS depense
+                    FROM interval_time it
+                    LEFT JOIN dep_sum ds 
+                        ON ds.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00:00')
+                    ORDER BY it.time_slot
+                """, (date, heure_min, date, heure_max, date, heure_min, date, heure_max))
         else:
-            res = to_database("SELECT pv.date_de_vente, (pv.qte*s.pu) as somme from produits_vendu pv JOIN stock s ON "
-                          "s.id_produit=pv.id_produit where DATE(pv.date_de_vente)=CURRENT_DATE()")
+            res = to_database("""
+                WITH RECURSIVE interval_time AS (
+                    SELECT CAST(CONCAT(CURDATE(), ' ', %s) AS DATETIME) AS time_slot
+                    UNION ALL
+                    SELECT DATE_ADD(time_slot, INTERVAL 1 HOUR)
+                    FROM interval_time
+                    WHERE time_slot < CAST(CONCAT(CURDATE(), ' ', %s) AS DATETIME)
+                ),
+                dep_sum AS (
+                    SELECT 
+                        DATE_FORMAT(date_dep, '%Y-%m-%d %H:00:00') AS rounded_hour,
+                        SUM(somme_dep) AS somme
+                    FROM depense
+                    WHERE date_dep >= CAST(CONCAT(CURDATE(), ' ', %s) AS DATETIME)
+                      AND date_dep < CAST(CONCAT(CURDATE(), ' ', %s) AS DATETIME)
+                    GROUP BY rounded_hour
+                )
+                SELECT 
+                    it.time_slot,
+                    COALESCE(ds.somme, 0) AS depense
+                FROM interval_time it
+                LEFT JOIN dep_sum ds 
+                    ON ds.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00:00')
+                ORDER BY it.time_slot
+            """, (heure_min, heure_max, heure_min, heure_max))
+
         return res
+
+    def get_heures_somme_stat(self, date=None, date_fin=None, heure_min=None, heure_max=None):
+        if date:
+            if date_fin:
+                res = to_database("""
+                    WITH RECURSIVE date_range AS (
+                        SELECT DATE(%s) AS date_jour
+                        UNION ALL
+                        SELECT DATE_ADD(date_jour, INTERVAL 1 DAY)
+                        FROM date_range
+                        WHERE date_jour < %s
+                    )
+                    SELECT 
+                        d.date_jour,
+                        COALESCE(SUM(pv.qte * s.pu), 0) AS vente_du_jour
+                    FROM date_range d
+                    LEFT JOIN produits_vendu pv ON DATE(pv.date_de_vente) = d.date_jour
+                    LEFT JOIN stock s ON s.id_produit = pv.id_produit
+                    GROUP BY d.date_jour
+                    ORDER BY d.date_jour
+                """, (date, date_fin))
+            else:
+                res = to_database("""
+                    WITH RECURSIVE interval_time AS (
+                        SELECT CAST(CONCAT(%s, ' ', %s) AS DATETIME) AS time_slot
+                        UNION ALL
+                        SELECT DATE_ADD(time_slot, INTERVAL 1 HOUR)
+                        FROM interval_time
+                        WHERE time_slot < CAST(CONCAT(%s, ' ', %s) AS DATETIME)
+                    ),
+                    vente_sum AS (
+                        SELECT 
+                            DATE_FORMAT(pv.date_de_vente, '%Y-%m-%d %H:00:00') AS rounded_hour,
+                            SUM(pv.qte * s.pu) AS somme
+                        FROM produits_vendu pv
+                        LEFT JOIN stock s ON s.id_produit = pv.id_produit
+                        WHERE pv.date_de_vente >= CAST(CONCAT(%s, ' ', %s) AS DATETIME)
+                          AND pv.date_de_vente < CAST(CONCAT(%s, ' ', %s) AS DATETIME)
+                        GROUP BY rounded_hour
+                    )
+                    SELECT 
+                        it.time_slot,
+                        COALESCE(vs.somme, 0) AS vente
+                    FROM interval_time it
+                    LEFT JOIN vente_sum vs 
+                        ON vs.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00:00')
+                    ORDER BY it.time_slot
+                """, (date, heure_min, date, heure_max, date, heure_min, date, heure_max))
+        else:
+            res = to_database("""
+                WITH RECURSIVE interval_time AS (
+                    SELECT CAST(CONCAT(CURDATE(), ' ', %s) AS DATETIME) AS time_slot
+                    UNION ALL
+                    SELECT DATE_ADD(time_slot, INTERVAL 1 HOUR)
+                    FROM interval_time
+                    WHERE time_slot < CAST(CONCAT(CURDATE(), ' ', %s) AS DATETIME)
+                ),
+                vente_sum AS (
+                    SELECT 
+                        DATE_FORMAT(pv.date_de_vente, '%Y-%m-%d %H:00:00') AS rounded_hour,
+                        SUM(pv.qte * s.pu) AS somme
+                    FROM produits_vendu pv
+                    LEFT JOIN stock s ON s.id_produit = pv.id_produit
+                    WHERE pv.date_de_vente >= CAST(CONCAT(CURDATE(), ' ', %s) AS DATETIME)
+                      AND pv.date_de_vente < CAST(CONCAT(CURDATE(), ' ', %s) AS DATETIME)
+                    GROUP BY rounded_hour
+                )
+                SELECT 
+                    it.time_slot,
+                    COALESCE(vs.somme, 0) AS vente
+                FROM interval_time it
+                LEFT JOIN vente_sum vs 
+                    ON vs.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00:00')
+                ORDER BY it.time_slot
+            """, (heure_min, heure_max, heure_min, heure_max))
+
+        return res
+
     def get_somme_total_gagnee(self,date=None):
         if date:res = to_database("SELECT SUM(pv.qte*s.pu) FROM produits_vendu pv JOIN stock s ON s.id_produit=pv.id_produit WHERE DATE(date_de_vente)=%s",(date,))
         else:res = to_database("SELECT SUM(pv.qte*s.pu) FROM produits_vendu pv JOIN stock s ON s.id_produit=pv.id_produit WHERE DATE(date_de_vente)=CURRENT_DATE()")

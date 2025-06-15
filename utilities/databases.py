@@ -1,20 +1,19 @@
 import mysql.connector
-from utilities.outils import Connexion as co
 
 def to_database(query, parameters=()):
     conn = mysql.connector.connect(
-        host=co.host,
-        user=co.user,
-        password=co.password,
-        database='gestion'
+        host='localhost',
+        user='root',
+        password='1234567',
+        database="gestion",
     )
-    c = conn.cursor()
 
+    c = conn.cursor(buffered=True)
     try:
         c.execute(query, parameters)
         query_type = query.strip().split()[0].upper()
 
-        if query_type == 'SELECT':
+        if query_type in ('SELECT', 'WITH'):
             result = c.fetchall()
         else:
             conn.commit()
@@ -24,6 +23,7 @@ def to_database(query, parameters=()):
         conn.close()
 
     return result
+
 
 """
 def to_database(query,parameters=()):

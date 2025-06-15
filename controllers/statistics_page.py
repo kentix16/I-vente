@@ -1,25 +1,19 @@
 from collections import defaultdict
 from datetime import datetime
-from itertools import cycle
 from typing import Literal
 
-import matplotlib.dates as mdates
-
+import numpy as np
 from kivy.clock import Clock
 from kivy.core.text import LabelBase
 from kivy.lang import Builder
-from kivy.graphics import Mesh, Color, Rectangle
 from kivy.metrics import dp
-from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty
+from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
-from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.theming import ThemeManager
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
-from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivy_garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivymd.uix.label import MDLabel
@@ -29,11 +23,8 @@ from kivymd.uix.responsivelayout import MDResponsiveLayout
 from kivymd.uix.screen import MDScreen
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
-
 from controllers.sales_page import PourcentagePV
 from models.gestionModel import GestionModel
-
-# Pour les variantes spécifiques comme SemiBold et Black
 LabelBase.register(name="OutfitSemiBold", fn_regular="font/Outfit-SemiBold.ttf")
 LabelBase.register(name="OutfitBlack", fn_regular="font/Outfit-Black.ttf")
 
@@ -75,16 +66,74 @@ class StatDeVenteGlobal(MDCard):
     def __init__(self, **kwargs):
         super(StatDeVenteGlobal, self).__init__(**kwargs)
 
-    def show_stat_global(self,date=None,date_fin=None):
+    def show_stat_global(self, date=None, date_fin=None):
         self.clear_widgets()
 
         salemodel = GestionModel()
-        rows = salemodel.get_heures_somme_stat(date,date_fin)
 
-        heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
-        montants = [row[1] for row in rows]
+        if date_fin:
+            ventes = salemodel.get_heures_somme_stat(date, date_fin)
+            depense = salemodel.get_heures_depense_stat(date, date_fin)
+        else:
+            heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=date)
+            heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=date)
+            heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=date)
+            heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=date)
 
+            # Vérifie que les valeurs sont valides
+            if not all([heure_min_vente, heure_max_vente, heure_min_dep, heure_max_dep]):
+                self.add_widget(Label(text="Aucune donnée disponible pour cette période."))
+                return
+
+            heure_min = f"{min(heure_min_vente, heure_min_dep):02d}:00:00"
+            heure_max = f"{max(heure_max_vente, heure_max_dep):02d}:00:00"
+
+            ventes = salemodel.get_heures_somme_stat(date, heure_min=heure_min, heure_max=heure_max)
+            depense = salemodel.get_heures_depense_stat(date, heure_min=heure_min, heure_max=heure_max)
+
+        if not ventes or not depense:
+            self.add_widget(Label(text="Aucune donnée à afficher."))
+            return
+
+        dates_ventes = [row[0] for row in ventes]
+        montants = [row[1] for row in ventes]
+        depense_vals = [row[1] for row in depense]
+        for i in range(20):
+            for i in dates_ventes:
+                print(i)
+
+        min_len = min(len(dates_ventes), len(montants), len(depense_vals))
+        if min_len == 0:
+            self.add_widget(Label(text="Pas de données suffisantes pour générer le graphique."))
+            return
+
+        dates = dates_ventes[:min_len]
+        montants = montants[:min_len]
+        depense_vals = depense_vals[:min_len]
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+        x = np.arange(min_len)
+        bar_width = 0.35
+
+        ax.bar(x - bar_width / 2, montants, width=bar_width, label='Vente', color='turquoise')
+        ax.bar(x + bar_width / 2, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
+
+        ax.set_title("Ventes vs Dépenses")
+        ax.set_xlabel("Jour" if date_fin else "Heure")
+        ax.set_ylabel("Montant (Ar)")
+        ax.set_xticks(x)
+        ax.set_xticklabels([d.strftime('%H:%M:%S') if hasattr(d,"%d/%m" ) else str(d) for d in dates], rotation=45)
+        ax.legend()
+        ax.grid(axis='y', linestyle="--", alpha=0.7)
+        fig.tight_layout()
+
+        self.add_widget(FigureCanvasKivyAgg(fig))
+
+
+        """montants = [row[1] for row in ventes]
         # Grouper par tranche de 10 minutes
+        heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in ventes]
+
         donnees_par_10min = defaultdict(float)
         for heure, montant in zip(heures, montants):
             minute = (heure.minute // 10) * 10
@@ -131,29 +180,9 @@ class StatDeVenteGlobal(MDCard):
         plt.xticks(rotation=45)
         fig.tight_layout()
 
-        self.add_widget(FigureCanvasKivyAgg(fig))
+        self.add_widget(FigureCanvasKivyAgg(fig))"""
+        widget_showed = True
 
-    """def show_stat_du_jour(self):
-        self.clear_widgets()
-
-        salemodel = GestionModel()
-        rows = salemodel.get_heures_stat
-
-        heures = [datetime.strptime(str(row[0]),'%Y-%m-%d %H:%M:%S') for row in rows]
-        montants = [row[1] for row in rows]
-        donnees_par_heure = defaultdict(float)
-        for heure,montant in zip(heures,montants):
-                heure_arrondie=heure.replace(minute=0,second=0,microsecond=0)
-                donnees_par_heure[heure_arrondie] +=montant
-        heures_groupees = sorted(donnees_par_heure.keys())
-        montant_groupes = [donnees_par_heure[h] for h in heures_groupees]
-
-        couleurs_palette = ['#1abc9c','#16a085']
-        couleurs_alternees = [couleurs_palette[i %len(couleurs_palette)] for i in range(len(heures_groupees))]
-
-
-        fig, ax = plt.subplots(figsize=(10,5))
-        bars = ax.bar(heures_groupees, montant_groupes, width=0.035, color=couleurs_alternees,edgecolor='black',linewidth=0.5)"""
 
 class PourcentagePVG(PourcentagePV):
     widget_showed = False
@@ -169,7 +198,7 @@ class PourcentagePVG(PourcentagePV):
     def delayed_init(self, dt):
         # Assure-toi que l'ID 'pv' est bien présent
         if "pv" in self.ids:
-            self.show_pourcentage_pv(widget=self.ids["pv"])
+            self.show_pourcentage_pv()
         else:
             print("ERREUR: id 'pv' introuvable dans PourcentagePVG")
     """def on_parent(self, *args):
@@ -177,8 +206,6 @@ class PourcentagePVG(PourcentagePV):
 
     def delayed_init(self, dt):
         self.show_pourcentage_pv(widget=self.ids.pv,order="")"""
-
-
 
 class StatsPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
@@ -276,7 +303,7 @@ class StatsPage(MDBoxLayout):
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
         self.ids.pourcentagedepense.show_pourcentage_depense(date)
-        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date,widget=self.ids.salescontainer.ids.pourcentagepvg.ids.pv)
+        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date)
         instance_date_picker.dismiss()
 
     def show_modal_date_picker(self, *args):
@@ -299,7 +326,7 @@ class StatsPage(MDBoxLayout):
         self.ids.statedeventeglobal.show_stat_global(date,date_fin)
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
-        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin,widget=self.ids.salescontainer.ids.pourcentagepvg.ids.pv)
+        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
         self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
         instance_date_picker.dismiss()
 
@@ -369,8 +396,7 @@ class SalesStatContent(MDBoxLayout):
         pv_widget = self.ids.pourcentagepvg.ids.get("pv")
         if pv_widget:
             self.ids.pourcentagepvg.show_pourcentage_pv(
-            date=self.date, date_fin=self.date_fin,
-            widget=pv_widget, order=order
+            date=self.date, date_fin=self.date_fin, order=order
         )
         else:
             print("pv introuvable (init)")
@@ -383,32 +409,17 @@ class SalesStatContent(MDBoxLayout):
         pv_widget = self.ids.pourcentagepvg.ids.get("pv")
         if pv_widget:
             self.ids.pourcentagepvg.show_pourcentage_pv(
-            date=self.date, date_fin=self.date_fin,
-            widget=pv_widget, order=order
+            date=self.date, date_fin=self.date_fin, order=order
         )
         else:
             print("pv introuvable (search)")
-    """def on_kv_post(self, base_widget):
-        productsearchbar = self.ids.textfieldproductsold.text
-        productslist = self.ids.pourcentagepvg
-        productslist.show_pourcentage_pv(self.ids.pourcentagepvg.ids.pv,productsearchbar)
-
-    def search_order(self):
-        self._search_trigger()
-
-    def search_order_delayed(self,*args):
-        productsearchbar = self.ids.textfieldproductsold.text
-        productslist=self.ids.pourcentagepvg
-        productslist.show_pourcentage_pv(self.ids.pourcentagepvg.ids.pv,productsearchbar)"""
 class PourcentageDepense(ScrollView):
     from utilities.myfunctions import pourcentage
     grid_showed = False
     grid = None
     widget_showed = False
-
     def __init__(self, **kwargs):
         super(PourcentageDepense, self).__init__(**kwargs)
-
     def show_pourcentage_depense(self,date=None,date_fin=None):
         self.pourcentage('dep',date,date_fin)
 
