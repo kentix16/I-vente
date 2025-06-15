@@ -76,17 +76,26 @@ class StatDeVenteGlobal(MDCard):
             depense = salemodel.get_heures_depense_stat(date, date_fin)
         else:
             heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=date)
-            heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=date)
+            heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=date)+1
             heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=date)
-            heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=date)
+            heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=date)+1
 
             # Vérifie que les valeurs sont valides
-            if not all([heure_min_vente, heure_max_vente, heure_min_dep, heure_max_dep]):
+            """if not all([heure_min_vente, heure_max_vente, heure_min_dep, heure_max_dep]):
                 self.add_widget(Label(text="Aucune donnée disponible pour cette période."))
-                return
+                return"""
 
             heure_min = f"{min(heure_min_vente, heure_min_dep):02d}:00:00"
             heure_max = f"{max(heure_max_vente, heure_max_dep):02d}:00:00"
+            """for i in range(40):
+                print("heure min vente", heure_min_vente)
+                print("heure max vente", heure_max_vente)
+                print("heure min dep", heure_min_dep)
+                print("heure max dep", heure_max_dep)
+                print("heure min totlal",heure_min)
+
+                print("heure max totlal",heure_max)"""
+
 
             ventes = salemodel.get_heures_somme_stat(date, heure_min=heure_min, heure_max=heure_max)
             depense = salemodel.get_heures_depense_stat(date, heure_min=heure_min, heure_max=heure_max)
@@ -97,10 +106,11 @@ class StatDeVenteGlobal(MDCard):
 
         dates_ventes = [row[0] for row in ventes]
         montants = [row[1] for row in ventes]
+        """for i in range(100):
+            print("montant",montants)
+            print("date vente", dates_ventes)"""
         depense_vals = [row[1] for row in depense]
-        for i in range(20):
-            for i in dates_ventes:
-                print(i)
+
 
         min_len = min(len(dates_ventes), len(montants), len(depense_vals))
         if min_len == 0:
@@ -122,7 +132,7 @@ class StatDeVenteGlobal(MDCard):
         ax.set_xlabel("Jour" if date_fin else "Heure")
         ax.set_ylabel("Montant (Ar)")
         ax.set_xticks(x)
-        ax.set_xticklabels([d.strftime('%H:%M:%S') if hasattr(d,"%d/%m" ) else str(d) for d in dates], rotation=45)
+        ax.set_xticklabels([d.strftime('%H:%M:%S                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ') if hasattr(d,"%d/%m" ) else str(d) for d in dates], rotation=45)
         ax.legend()
         ax.grid(axis='y', linestyle="--", alpha=0.7)
         fig.tight_layout()
