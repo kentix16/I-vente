@@ -1,5 +1,4 @@
 import mysql.connector
-from utilities.outils import Connexion as co
 
 def to_database(query, parameters=()):
     conn = mysql.connector.connect(
@@ -7,7 +6,6 @@ def to_database(query, parameters=()):
         user='root',
         password='1234567',
         database="gestion",
-        port=3307
     )
 
     c = conn.cursor(buffered=True)

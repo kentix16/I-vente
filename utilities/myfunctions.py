@@ -1,4 +1,8 @@
 from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
 from kivy_garden.matplotlib import FigureCanvasKivyAgg
 from matplotlib import pyplot as plt
 
@@ -45,5 +49,17 @@ def pourcentage(self,nom_pourcentage="pv",date=None,date_fin=None,order=""):
 
 
     self.widget_showed = True
+
+def show_popup(self,title, message):
+    popup = Popup(size_hint=(.4,.4))
+    popup.title = title
+    content = BoxLayout(orientation='vertical')
+    label=Label(text=message)
+    button = Button(text='ok',size_hint=(.3,.3),pos_hint={'right':.94,'y':.012})
+    button.bind(on_press=popup.dismiss)
+    for w in (label,button):content.add_widget(w)
+    popup.content=content
+    popup.open()
+
 
 
