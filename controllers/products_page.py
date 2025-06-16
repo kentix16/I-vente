@@ -166,8 +166,6 @@ class InsertProductType(MDCard):
             message = f'Duplicata du type {nom_type}'
             self.show_popup('erreur',message)
             return
-        
-
         App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.insertproduct.load_product_types()
         self.ids.typetoinsert.text=''
 

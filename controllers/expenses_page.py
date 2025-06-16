@@ -32,13 +32,13 @@ class SelectYear(MDLabel):
 class ExpensesPage(MDBoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        device_orientation = self.check_orientation
+        #device_orientation = self.check_orientation
         from components.components import check_orientation
         from components.components import open_time_picker_horizontal
         from components.components import open_time_picker_vertical
         from components.components import show_date_picker
 
-        self.check_orientation()
+        #self.check_orientation()
 
     def open_time_picker_horizontal(self):
         self.open_time_picker_horizontal
