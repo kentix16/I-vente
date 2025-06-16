@@ -1,3 +1,5 @@
+from kivy.core.window import Window
+from utilities.platform_view import mobileview
 from font.fonts import register_fonts
 from kivy.properties import ObjectProperty
 from kivymd.app import MDApp
@@ -20,11 +22,24 @@ class MyScreenManager(NavigationScreenManager):
         self.ids.walletscreen.ids.walletpage.ids.historique.update_historique()
         self.ids.walletscreen.ids.walletpage.ids.labelsommeportefeuille2.update_somme_portefeuille()
 
+
+def on_window_resize(window, width, height):
+
+    for i in range(50):
+        print("mobile")
+    mobileview(window,width,height)
+
+
+
+
 class CompanyManager(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.theme_cls.theme_style = "Light"
         register_fonts(self.theme_cls)  # ⬅️ enregistrement ici
+        Window.bind(on_resize=on_window_resize)
+        print("ken")
+
 
     manager = ObjectProperty(None)
     def build(self):

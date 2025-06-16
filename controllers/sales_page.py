@@ -259,29 +259,6 @@ class DefaultLabel(MDLabel):
         kwargs.setdefault("font_style", "OutfitMedium")
         kwargs.setdefault("role", "medium")
         super().__init__(**kwargs)
-class CommonComponentLabel(MDLabel):
-    pass
-
-
-class MobileView(MDScreen):
-    pass
-
-
-class TabletView(MDScreen):
-    pass
-
-
-class DesktopView(MDScreen):
-    pass
-
-
-class ResponsiveView(MDResponsiveLayout, MDScreen):
-    def __init__(self, **kw):
-        super().__init__(**kw)
-        self.mobile_view = MobileView()
-        self.tablet_view = TabletView()
-        self.desktop_view = DesktopView()
-
 
 class GradientNavigationDrawer(MDNavigationDrawer):
     pass

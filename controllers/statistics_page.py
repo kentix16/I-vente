@@ -1,28 +1,20 @@
-from collections import defaultdict
-from datetime import datetime
-from typing import Literal
-
 import numpy as np
 from kivy.clock import Clock
 from kivy.core.text import LabelBase
 from kivy.lang import Builder
-from kivy.metrics import dp
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
-from kivymd.theming import ThemeManager
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivy_garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivymd.uix.label import MDLabel
-from kivymd.uix.pickers import MDTimePickerDialHorizontal, MDModalDatePicker, MDTimePickerDialVertical, \
-    MDDockedDatePicker
+from kivymd.uix.pickers import MDTimePickerDialHorizontal, MDModalDatePicker
 from kivymd.uix.responsivelayout import MDResponsiveLayout
 from kivymd.uix.screen import MDScreen
 from matplotlib import pyplot as plt
-import matplotlib.dates as mdates
 from controllers.sales_page import PourcentagePV
 from models.gestionModel import GestionModel
 LabelBase.register(name="OutfitSemiBold", fn_regular="font/Outfit-SemiBold.ttf")
@@ -222,6 +214,14 @@ class StatsPage(MDBoxLayout):
     somme_total_gagnee = StringProperty('0 ar')
     produits_en_rupture = StringProperty('0')
     gestionmodel = GestionModel()
+    time_picker_vertical: MDTimePickerDialHorizontal = ObjectProperty(allownone=True)
+    date_picker_horizontal: MDModalDatePicker = ObjectProperty(allownone=True)
+    date_picker_vertical: MDModalDatePicker = ObjectProperty(allownone=True)
+    #from utilities.myfunctions import orientation
+    from utilities.myfunctions import show_time_picker_horizontal
+    from utilities.myfunctions import show_time_picker_vertical
+    from utilities.myfunctions import date_picker
+    from utilities.myfunctions import modal_date_picker
 
     def __init__(self, **kwargs):
         super(StatsPage, self).__init__(**kwargs)
@@ -229,81 +229,20 @@ class StatsPage(MDBoxLayout):
         self.update_somme_total_gagnee()
         self.update_produits_en_rupture()
 
-    ORIENTATION = Literal["portrait", "landscape"]
-    time_picker_horizontal: MDTimePickerDialHorizontal = ObjectProperty(
-        allownone=True
-    )
-    time_picker_vertical: MDTimePickerDialHorizontal = ObjectProperty(
-        allownone=True
-    )
-
-    date_picker_horizontal: MDModalDatePicker = ObjectProperty(
-        allownone=True
-    )
-    date_picker_vertical: MDModalDatePicker = ObjectProperty(
-        allownone=True
-    )
-
-    def check_orientation(
-            self, instance: ThemeManager, orientation: ORIENTATION
-    ):
-        if orientation == "portrait" and self.time_picker_horizontal:
-            self.time_picker_horizontal.dismiss()
-            hour = str(self.time_picker_horizontal.time.hour)
-            minute = str(self.time_picker_horizontal.time.minute)
-            Clock.schedule_once(
-                lambda x: self.open_time_picker_vertical(hour, minute),
-                0.1,
-            )
-        elif orientation == "landscape" and self.time_picker_vertical:
-            self.time_picker_vertical.dismiss()
-            hour = str(self.time_picker_vertical.time.hour)
-            minute = str(self.time_picker_vertical.time.minute)
-            Clock.schedule_once(
-                lambda x: self.open_time_picker_horizontal(hour, minute),
-                0.1,
-            )
-        if orientation == "portrait" and self.date_picker_horizontal:
-            self.date_picker_horizontal.dismiss()
-            day = str(self.date_picker_horizontal.date.minute)
-            minute = str(self.date_picker_horizontal.date.minute)
-            Clock.schedule_once(
-                lambda x: self.open_date_picker_vertical(hour, minute),
-                0.1,
-            )
-        elif orientation == "landscape" and self.date_picker_vertical:
-            self.date_picker_vertical.dismiss()
-            hour = str(self.date_picker_vertical.date.hour)
-            minute = str(self.date_picker_vertical.date.minute)
-            Clock.schedule_once(
-                lambda x: self.open_date_picker_horizontal(hour, minute),
-                0.1,
-            )
+    """def check_orientation(self):
+        self.orientation()"""
 
     def open_time_picker_horizontal(self, hour, minute):
-        self.time_picker_vertical = None
-        self.time_picker_horizontal = MDTimePickerDialHorizontal(
-            hour=hour, minute=minute
-        )
-        self.time_picker_horizontal.open()
+        self.show_time_picker_horizontal(hour, minute)
 
     def open_time_picker_vertical(self, hour, minute):
-        self.time_picker_horizontal = None
-        self.time_picker_vertical = MDTimePickerDialVertical(
-            hour=hour, minute=minute
-        )
-        self.time_picker_vertical.open()
+        self.show_time_picker_vertical(hour, minute)
 
     def show_date_picker(self):
+        self.date_picker()
 
-        date_dialog = MDDockedDatePicker()
-        # You have to control the position of the date picker dialog yourself.
-        date_dialog.pos = [
-            self.ids.date_button.center_x - date_dialog.width / 2,
-            self.ids.date_button.y - (date_dialog.height + dp(32)),
-        ]
-        date_dialog.bind(on_select_day=self.on_ok_date)
-        date_dialog.open()
+    def show_modal_date_picker(self, *args):
+        self.modal_date_picker()
     def on_ok_date(self,instance_date_picker,number_day):
         date  =instance_date_picker.get_date()[0]
 
@@ -316,16 +255,6 @@ class StatsPage(MDBoxLayout):
         self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date)
         instance_date_picker.dismiss()
 
-    def show_modal_date_picker(self, *args):
-
-        date_dialog = MDModalDatePicker(mode="range")
-        # You have to control the position of the date picker dialog yourself.
-        date_dialog.pos = [
-            self.ids.date_button.center_x - date_dialog.width / 2,
-            self.ids.date_button.y - (date_dialog.height + dp(32)),
-        ]
-        date_dialog.bind(on_ok=self.on_ok_periode)
-        date_dialog.open()
     def on_ok_periode(self,instance_date_picker):
         date = instance_date_picker.get_date()[0]
         date_fin = instance_date_picker.get_date()[-1]
