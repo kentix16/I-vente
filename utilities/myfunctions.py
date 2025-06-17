@@ -2,7 +2,6 @@ from functools import partial
 
 import xlsxwriter
 from kivy.app import App
-from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -11,12 +10,9 @@ from kivy_garden.matplotlib import FigureCanvasKivyAgg
 from matplotlib import pyplot as plt
 
 from models.gestionModel import GestionModel
-from kivy.clock import Clock
 from kivy.metrics import dp
-from kivymd.theming import ThemeManager
 from kivymd.uix.pickers import MDDockedDatePicker, MDTimePickerDialVertical, MDTimePickerDialHorizontal, \
     MDModalDatePicker
-from typing import Literal
 
 from utilities.databases import to_database
 
