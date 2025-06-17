@@ -410,7 +410,7 @@ class GestionModel:
             ' YEAR(date_de_vente)=YEAR(%s) AND MONTH(date_de_vente)=MONTH(%s)-1 ', (date, date))
         for i in (res1[0][0],res2[0][0]):liste.append(i)
         return liste #[0] pour cette anée et [1] pour l'année dernière
-    def get_average_expenses(self,date):
+    def get_average_depense(self,date):
         liste =[]
         res1 = to_database('SELECT AVG(somme_dep) from depense WHERE'
                     ' YEAR(date_dep)=YEAR(%s) AND MONTH(date_dep)=MONTH(%s)',(date,date,))
@@ -419,7 +419,16 @@ class GestionModel:
                            ' YEAR(date_dep)=YEAR(%s) AND MONTH(date_dep)=MONTH(%s)-1', (date, date))
         liste.append(res2[0][0])
         return liste
+    def get_variation_depense(self,date):
+        res = to_database('SELECT SUM(somme_dep) from depense where year(date_dep)=year(%s) and '
+                          'month(date_dep)=month(%s)',(date,date,))
+        res2 = to_database('SELECT SUM(somme_dep) from depense where year(date_dep)=year(%s) and '
+                          'month(date_dep)=month(%s)-1',(date,date,))
+        res = int(res[0][0])
+        res2 = int(res2[0][0])
+        return round(res2/res,2)
 
 
 gestionmodel = GestionModel()
-liste = gestionmodel.get_average_gains('2025-05-2')
+res = gestionmodel.get_variation_depense('2025-05-2')
+print(res)

@@ -1,5 +1,10 @@
+import gc
+
 from kivy.app import App
 from kivy.core.window import Window
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+
 from utilities.platform_view import mobileview
 from font.fonts import register_fonts
 from kivy.properties import ObjectProperty
@@ -7,9 +12,14 @@ from kivymd.app import MDApp
 from navigation_screen_manager import NavigationScreenManager
 import controllers.sales_page  # ou sales_pages si c’est le bon nom
 
+
+adresse_recherchee = '0x000002158F8E9BE0'
+
+
 class MyScreenManager(NavigationScreenManager):
     def __init__(self,**kwargs):
         super(MyScreenManager,self).__init__(**kwargs)
+
     def update_all(self):
         self.ids.mainscreen.ids.salespage.ids.listevente.show_products_sale()
         self.ids.mainscreen.ids.salespage.update_total_de_ventes()

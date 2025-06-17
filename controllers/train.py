@@ -1,18 +1,37 @@
-import xlsxwriter
+import tkinter as tk
+from tkinter import filedialog
 
-def generate_fic_excel(title,column_title, datas,):
-    # Créer un nouveau fichier Excel
-    workbook = xlsxwriter.Workbook(f'{title}.xlsx')
-    worksheet = workbook.add_worksheet()
-    for i in range(len(column_title)):
-        worksheet.write(0,i,str(column_title[i]))
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
 
-    for data in enumerate(datas):
-        for item in enumerate(data[1]):
-            worksheet.write(data[0]+1,item[0], str(item[1]))
 
-    # Fermer le fichier
-    workbook.close()
+class MonLayout(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(orientation='vertical', **kwargs)
+        self.label = Label(text="Aucun fichier sélectionné")
+        self.add_widget(self.label)
 
-data = [('banane',2),('citron',5),('orange',6),('pommes','8')]
-generate_fic_excel('fruit5',('modeles','quantité'),data)
+        bouton = Button(text="Ouvrir le gestionnaire de fichiers")
+        bouton.bind(on_press=self.ouvrir_fichier)
+        self.add_widget(bouton)
+
+    def ouvrir_fichier(self, instance):
+        # Lancer tkinter de manière cachée juste pour le file dialog
+        root = tk.Tk()
+        root.withdraw()  # Cacher la fenêtre principale de Tkinter
+
+        fichier = filedialog.askopenfilename(title="Choisissez un fichier")
+        if fichier:
+            self.label.text = f"Fichier sélectionné :\n{fichier}"
+        root.destroy()  # Fermer le root tkinter après sélection
+
+
+class MonApp(App):
+    def build(self):
+        return MonLayout()
+
+
+if __name__ == '__main__':
+    MonApp().run()

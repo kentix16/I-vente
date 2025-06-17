@@ -1,6 +1,8 @@
 from functools import partial
+from tkinter import filedialog
 
 import xlsxwriter
+import tkinter as tk
 from kivy.app import App
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -92,7 +94,15 @@ def popup_confirmed(self,nom,qt,pu=None):
     self.popup.dismiss()
     if pu:to_database("update stock set qt=qt+%s pu=%s where nom=%s",(qt,pu,nom))
     else:to_database("update stock set qt=qt+%s where nom=%s",(qt,nom))
+def ouvrir_fichier(self, instance):
+    # Lancer tkinter de manière cachée juste pour le file dialog
+    root = tk.Tk()
+    root.withdraw()  # Cacher la fenêtre principale de Tkinter
 
+    fichier = filedialog.askopenfilename(title="Choisissez un fichier")
+    if fichier:
+        self.label.text = f"Fichier sélectionné :\n{fichier}"
+    root.destroy()  # Fermer le root tkinter après sélection
 
 
 """ORIENTATION = Literal["landscape","portrait"]
