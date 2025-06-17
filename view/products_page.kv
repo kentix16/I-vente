@@ -1,4 +1,3 @@
-
 <InsertProduct>:
     #name:"insert_product"
     size_hint_x: 1
@@ -68,7 +67,7 @@
                 icon: "check-underline-circle"
             MDButtonText:
                 text: "créer le produit"
-<DeleteProduct>:
+<SaleProduct>:
     #name:"delete_product"
 
     size_hint_x: 1
@@ -160,7 +159,7 @@
 
 <ProductNavigation>:
     InsertProduct:
-    DeleteProduct:
+    SaleProduct:
     InsertProductType:
 
 
@@ -215,7 +214,7 @@
 
             MDScreen:
                 name: "screen2"
-                DeleteProduct:
+                SaleProduct:
                     id:delectproduct
             MDScreen:
                 name: "screen3"
@@ -310,7 +309,7 @@
         icon:"package-down"
         size_hint:None,None
         size:dp(40),dp(40)
-        on_release: self.parent.parent.parent.parent.remove_product(root.nom_produit)
+        on_release: self.parent.parent.parent.parent.sell_product(root.nom_produit)
     MDLabel:
         text:root.nom_produit
     MDLabel:
@@ -319,3 +318,8 @@
         text:root.qt
     MDLabel:
         text:root.type
+    MDButton:
+        text:'-'
+        theme_bg_color:'Custom'
+        md_bg_color:.5,.5,.5,.5
+        on_release:self.parent.parent.parent.parent.remove_product(root.nom_produit)

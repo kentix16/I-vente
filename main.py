@@ -1,3 +1,6 @@
+from kivy.app import App
+from kivy.core.window import Window
+from utilities.platform_view import mobileview
 from font.fonts import register_fonts
 from kivy.properties import ObjectProperty
 from kivymd.app import MDApp
@@ -20,11 +23,43 @@ class MyScreenManager(NavigationScreenManager):
         self.ids.walletscreen.ids.walletpage.ids.historique.update_historique()
         self.ids.walletscreen.ids.walletpage.ids.labelsommeportefeuille2.update_somme_portefeuille()
 
+
+def on_window_resize(window, width, height):
+    for i in range(50):print("window resize")
+    manager = App.get_running_app().manager
+    if width <= 700 and height <= 833:
+
+        if manager.ids.mainscreen.ids.salespage.orientation=='vertical':return
+        orientate = "vertical"
+
+    else:
+        if manager.ids.mainscreen.ids.salespage.orientation=='horizontal':return
+        orientate="horizontal"
+    manager = App.get_running_app().manager
+    layouts = [manager.ids.mainscreen.ids.salespage,
+               manager.ids.productsscreen.ids.productspage,
+               manager.ids.walletscreen.ids.walletpage,
+               manager.ids.expensesscreen.ids.expensespage,
+               manager.ids.statsscreen.ids.statsspage]
+
+    for layout in layouts:
+        layout.orientation = orientate
+        """manager.ids.statsscreen.ids.statsspage.ids.sales_card_un.size_hint_x = 1
+        manager.ids.statsscreen.ids.statsspage.ids.sales_card_deux.size_hint_x = 1
+        manager.ids.statsscreen.ids.statsspage.ids.sales_card_un.do_layout()
+        manager.ids.statsscreen.ids.statsspage.ids.sales_card_deux.do_layout()"""
+
+
+
+
 class CompanyManager(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.theme_cls.theme_style = "Light"
         register_fonts(self.theme_cls)  # ⬅️ enregistrement ici
+        Window.bind(on_resize=on_window_resize)
+        print("ken")
+
 
     manager = ObjectProperty(None)
     def build(self):

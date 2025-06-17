@@ -1,22 +1,15 @@
-from datetime import datetime
 import datetime
-
-from dateutil.utils import today
-from kivy.clock import Clock
-from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
-from kivymd.theming import ThemeManager
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.dialog import MDDialog, MDDialogContentContainer
 from kivymd.uix.divider import MDDivider
 from kivymd.uix.label import MDLabel
-from kivymd.uix.pickers import MDTimePickerDialHorizontal, MDTimePickerDialVertical, MDDockedDatePicker
-from typing import Literal
+from kivymd.uix.pickers import MDTimePickerDialHorizontal
 from kivymd.uix.pickers import MDModalDatePicker
 from models.gestionModel import GestionModel
 from utilities.databases import to_database
@@ -30,37 +23,36 @@ class SelectYear(MDLabel):
 
 
 class ExpensesPage(MDBoxLayout):
+    time_picker_vertical: MDTimePickerDialHorizontal = ObjectProperty(allownone=True)
+    date_picker_horizontal: MDModalDatePicker = ObjectProperty(allownone=True)
+    date_picker_vertical: MDModalDatePicker = ObjectProperty(allownone=True)
+    #from utilities.myfunctions import orientation
+    from utilities.myfunctions import show_time_picker_horizontal
+    from utilities.myfunctions import show_time_picker_vertical
+    from utilities.myfunctions import date_picker
+    from utilities.myfunctions import modal_date_picker
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         #device_orientation = self.check_orientation
-        from components.components import check_orientation
-        from components.components import open_time_picker_horizontal
-        from components.components import open_time_picker_vertical
-        from components.components import show_date_picker
 
-        #self.check_orientation()
-
-    def open_time_picker_horizontal(self):
-        self.open_time_picker_horizontal
-    def open_time_picker_vertical(self):
-        self.open_time_picker_vertical
+    """def check_orientation(self):
+        self.orientation()"""
+    def open_time_picker_horizontal(self,hour, minute):
+        self.show_time_picker_horizontal(hour, minute)
+    def open_time_picker_vertical(self,hour, minute):
+        self.show_time_picker_vertical( hour, minute)
     def show_date_picker(self):
-        self.show_date_picker
+        self.date_picker()
+    def show_modal_date_picker(self, *args):
+        self.modal_date_picker()
+
+
     def on_ok_date(self, instance_date_picker):
         date = instance_date_picker.get_date()[0]
         self.ids.listedepense.show_expenses(date)
         instance_date_picker.dismiss()
 
-    def show_modal_date_picker(self, *args):
 
-        date_dialog = MDModalDatePicker(mode="range")
-        # You have to control the position of the date picker dialog yourself.
-        date_dialog.pos = [
-            self.ids.date_button.center_x - date_dialog.width / 2,
-            self.ids.date_button.y - (date_dialog.height + dp(32)),
-        ]
-        date_dialog.bind(on_ok=self.on_ok_periode)
-        date_dialog.open()
 
     def on_ok_periode(self, instance_date_picker):
         date_debut = instance_date_picker.get_date()[0]

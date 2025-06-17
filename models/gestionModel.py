@@ -284,14 +284,14 @@ class GestionModel:
             return 0
     def get_produits(self, like):
         if like=="":
-            res = to_database('SELECT s.nom, s.pu, s.qt, t.nom_type FROM stock s JOIN type_produit t ON t.id_type = s.id_type ORDER BY s.nom')
+            res = to_database('SELECT s.nom, s.pu, s.qt, t.nom_type FROM stock s JOIN type_produit t ON t.id_type = s.id_type WHERE is_showed=1 ORDER BY s.nom')
             return res
         else:
             query = """
                 SELECT s.nom, s.pu, s.qt, t.nom_type
                 FROM stock s
                 JOIN type_produit t ON t.id_type = s.id_type
-                WHERE s.nom LIKE %s OR s.pu LIKE %s OR s.qt LIKE %s OR t.nom_type LIKE %s
+                WHERE (s.nom LIKE %s OR s.pu LIKE %s OR s.qt LIKE %s OR t.nom_type LIKE %s) AND is_showed=1 
                 ORDER BY s.nom
             """
             wildcard = f"%{like}%"
@@ -393,3 +393,33 @@ class GestionModel:
             res = to_database('SELECT nom_dep,(SELECT SUM(somme_dep) FROM depense WHERE date(date_dep)=CURRENT_DATE()) as pourcentage from depense where date(date_dep)=CURRENT_DATE() group by nom_dep')
 
         return res
+
+    def same_pu_stock(self,nom, pu):
+        res = to_database('SELECT pu FROM stock WHERE nom=%s',(nom,))
+        if res[0][0]==pu:return True
+        return False
+
+    def qt_stock(self, nom):
+        return to_database('SELECT qt from stock where nom=%s',(nom,))[0][0]
+    def get_average_gains(self,date):
+        liste = []
+        res1 = to_database('SELECT AVG(pv.qte*s.pu) from produits_vendu pv JOIN stock s ON pv.id_produit=s.id_produit WHERE'
+                    ' YEAR(date_de_vente)=YEAR(%s) AND MONTH(date_de_vente)=MONTH(%s) ',(date,date))
+        res2 = to_database(
+            'SELECT AVG(pv.qte*s.pu) from produits_vendu pv JOIN stock s ON pv.id_produit=s.id_produit WHERE'
+            ' YEAR(date_de_vente)=YEAR(%s) AND MONTH(date_de_vente)=MONTH(%s)-1 ', (date, date))
+        for i in (res1[0][0],res2[0][0]):liste.append(i)
+        return liste #[0] pour cette anée et [1] pour l'année dernière
+    def get_average_expenses(self,date):
+        liste =[]
+        res1 = to_database('SELECT AVG(somme_dep) from depense WHERE'
+                    ' YEAR(date_dep)=YEAR(%s) AND MONTH(date_dep)=MONTH(%s)',(date,date,))
+        liste.append(res1[0][0])
+        res2 = to_database('SELECT AVG(somme_dep) from depense WHERE'
+                           ' YEAR(date_dep)=YEAR(%s) AND MONTH(date_dep)=MONTH(%s)-1', (date, date))
+        liste.append(res2[0][0])
+        return liste
+
+
+gestionmodel = GestionModel()
+liste = gestionmodel.get_average_gains('2025-05-2')

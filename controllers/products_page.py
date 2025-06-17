@@ -48,7 +48,7 @@ class MDExpansionPanelThreeLine:
 
 
 class InsertProduct(MDCard):
-    from utilities.myfunctions import show_popup
+    from utilities.myfunctions import show_popup,show_popup_confirmation
     product_types = ListProperty()
     selected_product_type = StringProperty()
 
@@ -132,8 +132,11 @@ class InsertProduct(MDCard):
         try:to_database('INSERT INTO stock VALUES (%s,%s,%s,%s,%s)',
                     (id_product, nom, pu, id_type, qt))
         except:
-            message = 'duplicata de nom de produit '+str(nom)
-            self.show_popup(title='erreur',message=message)
+            plus=''
+            if not gestionmodel.same_pu_stock(nom,int(pu)):plus=f' \net mettre à jour son pu'
+            message = (f'duplicata du nom de produit.\n'
+                       f'voulez-vous ajouter {qt} à ce produit{plus}?')
+            self.show_popup_confirmation(title='erreur',message=message,nom=nom,pu=pu,qt=qt)
             return
         self.ids.nom.text = ''
         self.ids.pu.text = ''
@@ -241,8 +244,11 @@ class ListProducts(ScrollView):
     def __init__(self,**kwargs):
         super(ListProducts,self).__init__(**kwargs)
 
-    def remove_product(self, nom_produit):
+    def sell_product(self, nom_produit):
         App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.delectproduct.ids.nom_produit_vente.text = nom_produit
+    def remove_product(self,nom_produit):
+        to_database("update stock set is_showed=0 WHERE nom=%s",(nom_produit,))
+        self.show_products()
     def show_products(self, order=""):
         produits= GestionModel().get_produits(order)
         data=[]
@@ -250,7 +256,7 @@ class ListProducts(ScrollView):
         for row in produits:
             data.append({
                 'nom_produit': str(row[0]),
-                'pu': str(row[1]),
+                'prix_unitaire': str(row[1]),
                 'qt': str(row[2]),
                 'type': str(row[3]),
 
@@ -263,18 +269,23 @@ class ProductRow(BoxLayout):
     qt=StringProperty()
     prix_unitaire=StringProperty()
 
-class DeleteProduct(MDCard):
+class SaleProduct(MDCard):
     from utilities.myfunctions import show_popup
     def __init__(self,**kwargs):
-        super(DeleteProduct,self).__init__(**kwargs)
+        super(SaleProduct,self).__init__(**kwargs)
 
     def sale_product(self):
+        gestionmodel = GestionModel()
         nom = self.ids.nom_produit_vente.text
         try:qt=int(self.ids.qt_produit_vente.text)
         except:
             self.show_popup('erreur','qt invalide')
             return None
-        to_database('UPDATE stock SET qt=qt-%s WHERE nom=%s',(qt,nom))
+
+        if gestionmodel.qt_stock(nom)>=qt: to_database('UPDATE stock SET qt=qt-%s WHERE nom=%s',(qt,nom))
+        else:
+            self.show_popup('erreur','quantité insuffisante')
+            return
         self.add_to_produit_vendu(qt,nom)
 
     def add_to_produit_vendu(self,qt,nom):
@@ -299,6 +310,9 @@ class DeleteProduct(MDCard):
             self.show_popup('Erreur','Vente invalide')
         self.ids.nom_produit_vente.text = ''
         self.ids.qt_produit_vente.text = ''
+        App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.sliver_box.ids.content.ids.listproducts.show_products()
+
+
 
 
 
