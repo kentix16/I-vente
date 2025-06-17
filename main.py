@@ -40,11 +40,11 @@ def on_window_resize(window, width, height):
     if width <= 700 and height <= 833:
 
         if manager.ids.mainscreen.ids.salespage.orientation=='vertical':return
-        orientate = "vertical"
+        orientation = "vertical"
 
     else:
         if manager.ids.mainscreen.ids.salespage.orientation=='horizontal':return
-        orientate="horizontal"
+        orientation="horizontal"
     manager = App.get_running_app().manager
     layouts = [manager.ids.mainscreen.ids.salespage,
                manager.ids.productsscreen.ids.productspage,
@@ -53,7 +53,7 @@ def on_window_resize(window, width, height):
                manager.ids.statsscreen.ids.statsspage]
 
     for layout in layouts:
-        layout.orientation = orientate
+        layout.orientation = orientation
         """manager.ids.statsscreen.ids.statsspage.ids.sales_card_un.size_hint_x = 1
         manager.ids.statsscreen.ids.statsspage.ids.sales_card_deux.size_hint_x = 1
         manager.ids.statsscreen.ids.statsspage.ids.sales_card_un.do_layout()

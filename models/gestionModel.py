@@ -1,9 +1,49 @@
+from datetime import datetime
+
 from utilities.databases import to_database
 
 
 class GestionModel:
 
 
+    def get_initial_product(self):
+        query=("""WITH RECURSIVE date_range AS (
+    SELECT DATE_FORMAT(CURDATE(), '%Y-%m-01') AS day
+    UNION ALL
+    SELECT DATE_ADD(day, INTERVAL 1 DAY)
+    FROM date_range
+    WHERE day < CURDATE()
+)
+SELECT 
+    d.day,
+    (COALESCE(s.qt, 0) + COALESCE(pv.qte, 0)) AS quantite_total
+FROM date_range d
+LEFT JOIN produits_vendu pv ON DATE(pv.date_de_vente) = d.day
+LEFT JOIN stock s ON s.id_produit = pv.id_produit;
+""")
+        res=to_database(query)
+        return [int(i[1]) for i in res]
+    def get_sold_product(self):
+        query="""WITH RECURSIVE date_range AS (
+    SELECT DATE_FORMAT(CURDATE(), '%Y-%m-01') AS day
+    UNION ALL
+    SELECT DATE_ADD(day, INTERVAL 1 DAY)
+    FROM date_range
+    WHERE day < CURDATE()
+)
+SELECT 
+    d.day,
+    COALESCE(pv.qte, 0) AS quantite_total
+FROM date_range d
+LEFT JOIN produits_vendu pv ON DATE(pv.date_de_vente) = d.day
+LEFT JOIN stock s ON s.id_produit = pv.id_produit;
+"""
+        res=to_database(query)
+        return [int(i[1]) for i in res]
+    def get_current_stock(self):
+        query=("SELECT qt from stock")
+        res=to_database(query)
+        return [int(i[0]) for i in res]
     def get_pourcentage_produits_vendus(self,date=None,date_fin=None,order=""):
         if order=="":
             if date:
@@ -401,8 +441,9 @@ class GestionModel:
 
     def qt_stock(self, nom):
         return to_database('SELECT qt from stock where nom=%s',(nom,))[0][0]
-    def get_average_gains(self,date):
+    def get_average_gains(self,date=None):
         liste = []
+        if not date: date = datetime.today().strftime('%y-%m-%d')
         res1 = to_database('SELECT AVG(pv.qte*s.pu) from produits_vendu pv JOIN stock s ON pv.id_produit=s.id_produit WHERE'
                     ' YEAR(date_de_vente)=YEAR(%s) AND MONTH(date_de_vente)=MONTH(%s) ',(date,date))
         res2 = to_database(
@@ -410,8 +451,9 @@ class GestionModel:
             ' YEAR(date_de_vente)=YEAR(%s) AND MONTH(date_de_vente)=MONTH(%s)-1 ', (date, date))
         for i in (res1[0][0],res2[0][0]):liste.append(i)
         return liste #[0] pour cette anée et [1] pour l'année dernière
-    def get_average_depense(self,date):
+    def get_average_depense(self,date=None):
         liste =[]
+        if not date:date=datetime.today().strftime('%y-%m-%d')
         res1 = to_database('SELECT AVG(somme_dep) from depense WHERE'
                     ' YEAR(date_dep)=YEAR(%s) AND MONTH(date_dep)=MONTH(%s)',(date,date,))
         liste.append(res1[0][0])
@@ -430,5 +472,5 @@ class GestionModel:
 
 
 gestionmodel = GestionModel()
-res = gestionmodel.get_variation_depense('2025-05-2')
+res = gestionmodel.get_heures_depense_stat(date='2025-03-06',date_fin='2025-03-08')
 print(res)

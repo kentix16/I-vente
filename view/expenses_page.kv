@@ -5,6 +5,7 @@
     spacing:dp(20)
     padding:dp(20)
     MDBoxLayout:
+        size_hint_y:1
         orientation:"vertical"
         spacing:dp(20)
         padding:dp(20)
@@ -18,19 +19,11 @@
                 text:"filtrer par"
                 font_style:"Title"
                 role:"medium"
-            MDButton:
-                theme_bg_color:"Custom"
-                md_bg_color:230/255,255/255,42/255,1
-                radius:[15]
-                on_release:
-                    root.open_time_picker_horizontal("1", "10")
-                MDButtonText:
-                    text:"heure"
 
             MDButton:
                 id:date_button
                 theme_bg_color:"Custom"
-                md_bg_color:230/255,255/255,42/255,1
+                md_bg_color:171/255,219/255,227/255,1
                 radius:[15]
                 on_release:
                     root.show_date_picker()
@@ -39,7 +32,7 @@
 
             MDButton:
                 theme_bg_color:"Custom"
-                md_bg_color:230/255,255/255,42/255,1
+                md_bg_color:171/255,219/255,227/255,1
                 radius:[15]
                 on_release:
                     root.show_modal_date_picker()
@@ -48,7 +41,7 @@
 
             MDButton:
                 theme_bg_color:"Custom"
-                md_bg_color:230/255,255/255,42/255,1
+                md_bg_color:171/255,219/255,227/255,1
                 radius:[15]
                 on_release:
                     root.show_year()
@@ -56,7 +49,7 @@
                     text:"Mois"
             MDButton:
                 theme_bg_color:"Custom"
-                md_bg_color:230/255,255/255,42/255,1
+                md_bg_color:171/255,219/255,227/255,1
                 radius:[15]
                 on_release:
                     root.show_year()
@@ -78,20 +71,20 @@
         orientation:"vertical"
         spacing:dp(20)
         padding:dp(20)
-        size_hint_x:0.3
+        size_hint_x:0.4
 
         MDCard:
-            size_hint_y:0.3
+            size_hint_y:0.2
             style: "elevated"
             elevation:10
             radius:[20]
             theme_bg_color:"Custom"
-            md_bg_color:139/255,139/255,139/255,1
+            md_bg_color:30/255,129/255,176/255,1
             BoxLayout:
                 orientation:'vertical'
                 MDListItem:
                     theme_bg_color: "Custom"
-                    md_bg_color: 214/255,234/255,93/255,1
+                    md_bg_color: [1,1,1,1]
                     size_hint_y: 0.2
                     radius:[20,20,0,0]
                     spacing:dp(10)
@@ -101,10 +94,39 @@
                     MDListItemLeadingIcon:
                         icon: "currency-usd"
                     MDListItemHeadlineText:
-                        text:"somme dans le portefeuille"
+                        text:"comparaison mensuelle"
                 LabelSommePortefeuille:
                     id:labelsommeportefeuille
                     text:self.somme_portefeuille
+        MDCard:
+            style: "elevated"
+            theme_bg_color: "Custom"
+            size_hint_x: 1
+            size_hint_y:0.45
+            md_bg_color: 168,205,230,255
+            radius: [20]
+            elevation: 10
+            BoxLayout:
+                orientation:'vertical'
+                MDListItem:
+                    theme_bg_color: "Custom"
+                    md_bg_color: 186/255,169/255,155/255,1
+                    size_hint_y: 0.1
+                    radius:[20,20,0,0]
+                    spacing:dp(10)
+                    padding:dp(10)
+                    pos_hint: {"y": 0.9}
+                    halign:"center"
+
+                    MDListItemLeadingIcon:
+                        icon: "sale"
+
+                    MDListItemHeadlineText:
+                        text: "Pourcentage des depenses"
+                PourcentageDepense:
+                    id:pourcentagedepense
+                    size_hint:1,1
+                    on_parent:self.show_pourcentage_depense()
         MDCard:
             size_hint_y:1
             style: "elevated"
@@ -133,6 +155,7 @@
                         text_color:1,1,1,1
                         text: "ajouter un dépense"
                 MDTextField:
+                    size_hint:.7, 0.1
                     id:nom_depense
                     mode:"filled"
                     MDTextFieldHelperText:
@@ -140,6 +163,7 @@
                     MDTextFieldHintText:
                         text:"nom de dépense"
                 MDTextField:
+                    size_hint:.7, 0.1
                     id:somme_depense
                     mode:"filled"
                     MDTextFieldHelperText:
@@ -150,6 +174,7 @@
                 MDButton:
                     pos_hint: {"center_x": 0.5, "center_y": 0.5}
                     style: "filled"
+                    size_hint:.7, 0.1
                     on_press:root.add_expense()
                     MDButtonIcon:
                         icon: "check-underline-circle"

@@ -48,9 +48,7 @@ import os
 kv_path = os.path.join(os.path.dirname(__file__), '..', 'view', 'statistics_page.kv')
 Builder.load_file(kv_path)
 
-class ProductRowPV(BoxLayout):
-    product_name=StringProperty()
-    sale_percent=StringProperty()
+
 
 
 class StatDeVenteGlobal(MDCard):
@@ -63,34 +61,17 @@ class StatDeVenteGlobal(MDCard):
 
         salemodel = GestionModel()
 
-        if date_fin:
-            ventes = salemodel.get_heures_somme_stat(date, date_fin)
-            depense = salemodel.get_heures_depense_stat(date, date_fin)
-        else:
-            heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=date)
-            heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=date)+1
-            heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=date)
-            heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=date)+1
 
-            # Vérifie que les valeurs sont valides
-            """if not all([heure_min_vente, heure_max_vente, heure_min_dep, heure_max_dep]):
-                self.add_widget(Label(text="Aucune donnée disponible pour cette période."))
-                return"""
-
-            heure_min = f"{min(heure_min_vente, heure_min_dep):02d}:00:00"
-            heure_max = f"{max(heure_max_vente, heure_max_dep):02d}:00:00"
-            """for i in range(40):
-                print("heure min vente", heure_min_vente)
-                print("heure max vente", heure_max_vente)
-                print("heure min dep", heure_min_dep)
-                print("heure max dep", heure_max_dep)
-                print("heure min totlal",heure_min)
-
-                print("heure max totlal",heure_max)"""
+        heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=date)
+        heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=date)+1
+        heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=date)
+        heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=date)+1
+        heure_min = f"{min(heure_min_vente, heure_min_dep):02d}:00:00"
+        heure_max = f"{max(heure_max_vente, heure_max_dep):02d}:00:00"
 
 
-            ventes = salemodel.get_heures_somme_stat(date, heure_min=heure_min, heure_max=heure_max)
-            depense = salemodel.get_heures_depense_stat(date, heure_min=heure_min, heure_max=heure_max)
+        ventes = salemodel.get_heures_somme_stat(date=date, heure_min=heure_min, heure_max=heure_max)
+        depense = salemodel.get_heures_depense_stat(date=date, heure_min=heure_min, heure_max=heure_max)
 
         if not ventes or not depense:
             self.add_widget(Label(text="Aucune donnée à afficher."))
@@ -98,9 +79,6 @@ class StatDeVenteGlobal(MDCard):
 
         dates_ventes = [row[0] for row in ventes]
         montants = [row[1] for row in ventes]
-        """for i in range(100):
-            print("montant",montants)
-            print("date vente", dates_ventes)"""
         depense_vals = [row[1] for row in depense]
 
 
@@ -120,11 +98,11 @@ class StatDeVenteGlobal(MDCard):
         ax.bar(x - bar_width / 2, montants, width=bar_width, label='Vente', color='turquoise')
         ax.bar(x + bar_width / 2, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
 
-        ax.set_title("Ventes vs Dépenses")
+        ax.set_title("Ventes & Dépenses")
         ax.set_xlabel("Jour" if date_fin else "Heure")
         ax.set_ylabel("Montant (Ar)")
         ax.set_xticks(x)
-        ax.set_xticklabels([d.strftime('%H:%M:%S                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ') if hasattr(d,"%d/%m" ) else str(d) for d in dates], rotation=45)
+        ax.set_xticklabels([d.strftime('%H:%M:%S') if hasattr(d,"%d/%m" ) else str(d) for d in dates], rotation=45)
         ax.legend()
         ax.grid(axis='y', linestyle="--", alpha=0.7)
         fig.tight_layout()
@@ -185,35 +163,13 @@ class StatDeVenteGlobal(MDCard):
         self.add_widget(FigureCanvasKivyAgg(fig))"""
         widget_showed = True
 
-
-class PourcentagePVG(PourcentagePV):
-    widget_showed = False
-
-    def __init__(self, **kwargs):
-        super(PourcentagePVG, self).__init__(**kwargs)
-        Clock.schedule_once(self.delayed_init)
-
-    """def show_pourcentage_pvg(self,date=None,date_fin=None):
-        for i in range(100):print(f"{date} à {date_fin}")
-"""
-
-    def delayed_init(self, dt):
-        # Assure-toi que l'ID 'pv' est bien présent
-        if "pv" in self.ids:
-            self.show_pourcentage_pv()
-        else:
-            print("ERREUR: id 'pv' introuvable dans PourcentagePVG")
-    """def on_parent(self, *args):
-        Clock.schedule_once(self.delayed_init)
-
-    def delayed_init(self, dt):
-        self.show_pourcentage_pv(widget=self.ids.pv,order="")"""
-
 class StatsPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
     somme_total_gagnee = StringProperty('0 ar')
     produits_en_rupture = StringProperty('0')
     gestionmodel = GestionModel()
+    avg_gain = StringProperty('')
+    avg_dep=StringProperty('')
     time_picker_vertical: MDTimePickerDialHorizontal = ObjectProperty(allownone=True)
     date_picker_horizontal: MDModalDatePicker = ObjectProperty(allownone=True)
     date_picker_vertical: MDModalDatePicker = ObjectProperty(allownone=True)
@@ -225,9 +181,13 @@ class StatsPage(MDBoxLayout):
 
     def __init__(self, **kwargs):
         super(StatsPage, self).__init__(**kwargs)
+        gestionmodel=GestionModel()
         self.update_total_de_ventes()
         self.update_somme_total_gagnee()
         self.update_produits_en_rupture()
+        self.avg_gain=f'moyenne gain:{gestionmodel.get_average_gains()[0]}'
+        self.avg_dep= f'moyenne depense:{gestionmodel.get_average_depense()[0]}'
+
 
     """def check_orientation(self):
         self.orientation()"""
@@ -246,27 +206,27 @@ class StatsPage(MDBoxLayout):
     def on_ok_date(self,instance_date_picker,):
         date  =instance_date_picker.get_date()[0]
 
-        self.ids.salescontainer.date = date
-        self.ids.salescontainer.date_fin = None
+        #self.ids.salescontainer.date = date
+        #self.ids.salescontainer.date_fin = None
         self.ids.statedeventeglobal.show_stat_global(date)
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
-        self.ids.pourcentagedepense.show_pourcentage_depense(date)
-        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date)
+        #self.ids.pourcentagedepense.show_pourcentage_depense(date)
+        #self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date)
         instance_date_picker.dismiss()
 
     def on_ok_periode(self,instance_date_picker):
         date = instance_date_picker.get_date()[0]
         date_fin = instance_date_picker.get_date()[-1]
 
-        self.ids.salescontainer.date = date
-        self.ids.salescontainer.date_fin = date_fin
+        #self.ids.salescontainer.date = date
+        #self.ids.salescontainer.date_fin = date_fin
 
         self.ids.statedeventeglobal.show_stat_global(date,date_fin)
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
-        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
-        self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
+        #self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
+        #self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
         instance_date_picker.dismiss()
 
 
@@ -319,47 +279,7 @@ class ResponsiveView(MDResponsiveLayout, MDScreen):
 class GradientNavigationDrawer(MDNavigationDrawer):
     pass
 
-class SalesStatContent(MDBoxLayout):
 
-    def __init__(self, **kwargs):
-        super(SalesStatContent, self).__init__(**kwargs)
-        self.date = None
-        self.date_fin = None
-        self._search_trigger= Clock.create_trigger(self.search_order_delayed,0.3)
 
-    def on_kv_post(self, base_widget):
-        Clock.schedule_once(self.load_initial_data)
-
-    def load_initial_data(self, dt):
-        order = self.ids.textfieldproductsold.text
-        pv_widget = self.ids.pourcentagepvg.ids.get("pv")
-        if pv_widget:
-            self.ids.pourcentagepvg.show_pourcentage_pv(
-            date=self.date, date_fin=self.date_fin, order=order
-        )
-        else:
-            print("pv introuvable (init)")
-
-    def search_order(self):
-        self._search_trigger()
-
-    def search_order_delayed(self, *args):
-        order = self.ids.textfieldproductsold.text
-        pv_widget = self.ids.pourcentagepvg.ids.get("pv")
-        if pv_widget:
-            self.ids.pourcentagepvg.show_pourcentage_pv(
-            date=self.date, date_fin=self.date_fin, order=order
-        )
-        else:
-            print("pv introuvable (search)")
-class PourcentageDepense(ScrollView):
-    from utilities.myfunctions import pourcentage
-    grid_showed = False
-    grid = None
-    widget_showed = False
-    def __init__(self, **kwargs):
-        super(PourcentageDepense, self).__init__(**kwargs)
-    def show_pourcentage_depense(self,date=None,date_fin=None):
-        self.pourcentage('dep',date,date_fin)
 
 
