@@ -50,6 +50,7 @@ class ExpensesPage(MDBoxLayout):
     def on_ok_date(self, instance_date_picker):
         date = instance_date_picker.get_date()[0]
         self.ids.listedepense.show_expenses(date)
+        self.ids.pourcentagedepense.show_pourcentage_depense(date)
         instance_date_picker.dismiss()
 
 
@@ -58,6 +59,7 @@ class ExpensesPage(MDBoxLayout):
         date_debut = instance_date_picker.get_date()[0]
         date_fin = instance_date_picker.get_date()[-1]
         self.ids.listedepense.show_expenses(date_debut, date_fin)
+        self.ids.pourcentagedepense.show_pourcentage_depense(date_debut,date_fin)
         instance_date_picker.dismiss()
 
     def show_year(self):
@@ -158,6 +160,15 @@ class ListeDepense(ScrollView):
             cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=40)
             self.grid.add_widget(cell)
 
+class PourcentageDepense(ScrollView):
+    from utilities.myfunctions import pourcentage
+    grid_showed = False
+    grid = None
+    widget_showed = False
+    def __init__(self, **kwargs):
+        super(PourcentageDepense, self).__init__(**kwargs)
+    def show_pourcentage_depense(self,date=None,date_fin=None):
+        self.pourcentage('dep',date,date_fin)
 
 import os
 

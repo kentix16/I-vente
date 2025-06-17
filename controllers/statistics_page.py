@@ -48,9 +48,7 @@ import os
 kv_path = os.path.join(os.path.dirname(__file__), '..', 'view', 'statistics_page.kv')
 Builder.load_file(kv_path)
 
-class ProductRowPV(BoxLayout):
-    product_name=StringProperty()
-    sale_percent=StringProperty()
+
 
 
 class StatDeVenteGlobal(MDCard):
@@ -185,30 +183,6 @@ class StatDeVenteGlobal(MDCard):
         self.add_widget(FigureCanvasKivyAgg(fig))"""
         widget_showed = True
 
-
-class PourcentagePVG(PourcentagePV):
-    widget_showed = False
-
-    def __init__(self, **kwargs):
-        super(PourcentagePVG, self).__init__(**kwargs)
-        Clock.schedule_once(self.delayed_init)
-
-    """def show_pourcentage_pvg(self,date=None,date_fin=None):
-        for i in range(100):print(f"{date} à {date_fin}")
-"""
-
-    def delayed_init(self, dt):
-        # Assure-toi que l'ID 'pv' est bien présent
-        if "pv" in self.ids:
-            self.show_pourcentage_pv()
-        else:
-            print("ERREUR: id 'pv' introuvable dans PourcentagePVG")
-    """def on_parent(self, *args):
-        Clock.schedule_once(self.delayed_init)
-
-    def delayed_init(self, dt):
-        self.show_pourcentage_pv(widget=self.ids.pv,order="")"""
-
 class StatsPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
     somme_total_gagnee = StringProperty('0 ar')
@@ -252,7 +226,7 @@ class StatsPage(MDBoxLayout):
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
         self.ids.pourcentagedepense.show_pourcentage_depense(date)
-        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date)
+        #self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date)
         instance_date_picker.dismiss()
 
     def on_ok_periode(self,instance_date_picker):
@@ -265,7 +239,7 @@ class StatsPage(MDBoxLayout):
         self.ids.statedeventeglobal.show_stat_global(date,date_fin)
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
-        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
+        #self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
         self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
         instance_date_picker.dismiss()
 
@@ -319,47 +293,7 @@ class ResponsiveView(MDResponsiveLayout, MDScreen):
 class GradientNavigationDrawer(MDNavigationDrawer):
     pass
 
-class SalesStatContent(MDBoxLayout):
 
-    def __init__(self, **kwargs):
-        super(SalesStatContent, self).__init__(**kwargs)
-        self.date = None
-        self.date_fin = None
-        self._search_trigger= Clock.create_trigger(self.search_order_delayed,0.3)
 
-    def on_kv_post(self, base_widget):
-        Clock.schedule_once(self.load_initial_data)
-
-    def load_initial_data(self, dt):
-        order = self.ids.textfieldproductsold.text
-        pv_widget = self.ids.pourcentagepvg.ids.get("pv")
-        if pv_widget:
-            self.ids.pourcentagepvg.show_pourcentage_pv(
-            date=self.date, date_fin=self.date_fin, order=order
-        )
-        else:
-            print("pv introuvable (init)")
-
-    def search_order(self):
-        self._search_trigger()
-
-    def search_order_delayed(self, *args):
-        order = self.ids.textfieldproductsold.text
-        pv_widget = self.ids.pourcentagepvg.ids.get("pv")
-        if pv_widget:
-            self.ids.pourcentagepvg.show_pourcentage_pv(
-            date=self.date, date_fin=self.date_fin, order=order
-        )
-        else:
-            print("pv introuvable (search)")
-class PourcentageDepense(ScrollView):
-    from utilities.myfunctions import pourcentage
-    grid_showed = False
-    grid = None
-    widget_showed = False
-    def __init__(self, **kwargs):
-        super(PourcentageDepense, self).__init__(**kwargs)
-    def show_pourcentage_depense(self,date=None,date_fin=None):
-        self.pourcentage('dep',date,date_fin)
 
 

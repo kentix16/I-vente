@@ -4,6 +4,44 @@ from utilities.databases import to_database
 class GestionModel:
 
 
+    def get_initial_product(self):
+        query=("""WITH RECURSIVE date_range AS (
+    SELECT DATE_FORMAT(CURDATE(), '%Y-%m-01') AS day
+    UNION ALL
+    SELECT DATE_ADD(day, INTERVAL 1 DAY)
+    FROM date_range
+    WHERE day < CURDATE()
+)
+SELECT 
+    d.day,
+    (COALESCE(s.qt, 0) + COALESCE(pv.qte, 0)) AS quantite_total
+FROM date_range d
+LEFT JOIN produits_vendu pv ON DATE(pv.date_de_vente) = d.day
+LEFT JOIN stock s ON s.id_produit = pv.id_produit;
+""")
+        res=to_database(query)
+        return [int(i[1]) for i in res]
+    def get_sold_product(self):
+        query="""WITH RECURSIVE date_range AS (
+    SELECT DATE_FORMAT(CURDATE(), '%Y-%m-01') AS day
+    UNION ALL
+    SELECT DATE_ADD(day, INTERVAL 1 DAY)
+    FROM date_range
+    WHERE day < CURDATE()
+)
+SELECT 
+    d.day,
+    COALESCE(pv.qte, 0) AS quantite_total
+FROM date_range d
+LEFT JOIN produits_vendu pv ON DATE(pv.date_de_vente) = d.day
+LEFT JOIN stock s ON s.id_produit = pv.id_produit;
+"""
+        res=to_database(query)
+        return [int(i[1]) for i in res]
+    def get_current_stock(self):
+        query=("SELECT qt from stock")
+        res=to_database(query)
+        return [int(i[0]) for i in res]
     def get_pourcentage_produits_vendus(self,date=None,date_fin=None,order=""):
         if order=="":
             if date:

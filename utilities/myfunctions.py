@@ -49,10 +49,14 @@ def pourcentage(self,nom_pourcentage="pv",date=None,date_fin=None,order=""):
                     'product_name': str(row[0]),
                     'sale_percent': str(row[1])
                 })
-            pourcentagepvg=App.get_running_app().manager.ids.statsscreen.ids.statsspage.ids.salescontainer.ids.pourcentagepvg
+            pourcentagepvg=App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.productlist.ids.salescontainer.ids.pourcentagepvg
             pourcentagepvg.ids.pv.data = data
             pourcentagepvg.clear_widgets()
             pourcentagepvg.add_widget(pourcentagepvg.ids.pv)
+            """pourcentagepvg=App.get_running_app().manager.ids.statsscreen.ids.statsspage.ids.salescontainer.ids.pourcentagepvg
+            pourcentagepvg.ids.pv.data = data
+            pourcentagepvg.clear_widgets()
+            pourcentagepvg.add_widget(pourcentagepvg.ids.pv)"""
 
 
     self.widget_showed = True

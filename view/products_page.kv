@@ -1,3 +1,5 @@
+#:import components components.components
+
 <InsertProduct>:
     #name:"insert_product"
     size_hint_x: 1
@@ -5,39 +7,52 @@
     style: "elevated"
     elevation: 10
     MDBoxLayout:
+        padding:dp(10)
+        spacing:dp(5)
         orientation:"vertical"
-        spacing:dp(20)
-        padding:dp(20)
-        MDLabel:
+        CLabel:
             text_color:0,0,0,1
             size_hint_y:0.1
             text: "Insertion de votre produit"
-            halign: "left"
-            text_color: 1,1,1,1
-            font_style: "OutfitBlack"
             role: "small"
-            bold: True
         MDTextField:
-            size_hint_x: 0.8  # 80% de la largeur du parent
+            size_hint_x: 0.8
             size_hint_y: None
-            height: "30dp"
+            height: "20dp"
             id:nom
             mode: "filled"
-            size_hint_y:0.25
-
             MDTextFieldHelperText:
                 text: " ex: Pantalon"
                 text_color_focus: "grey"
             MDTextFieldHintText:
                 text: "entrez le nom du produit"
                 text_color_normal: "grey"
-        Spinner:
-            id: product_type_spinner
-            text: "Sélectionner un type"
-            values: root.product_types
-            size_hint: None, None
-            size: "200dp", "48dp"
-            on_text: root.on_product_type_select(self, self.text)
+        MDExpansionPanel:
+            id: panel
+            pos_hint: {"center_x": .5, "center_y": .5}
+            size_hint: 0.9, None
+            height: "200dp"
+
+            MDExpansionPanelHeader:
+
+                MDListItem:
+                    theme_bg_color: "Custom"
+                    md_bg_color: self.theme_cls.surfaceContainerLowColor
+                    ripple_effect: False
+
+                    MDListItemSupportingText:
+                        text: "Supporting text"
+                    TrailingPressedIconButton:
+                        id: chevron
+                        icon: "chevron-right"
+                        on_release: self.parent.parent.parent.parent.parent.parent.tap_expansion_chevron(panel, chevron)
+
+            MDExpansionPanelContent:
+                orientation: "vertical"
+                padding: "12dp", 0, "12dp", 0
+
+
+
 
 
         MDTextField:
@@ -162,71 +177,279 @@
     DeleteProduct:
     InsertProductType:
 
+<DefaultScreen@MDScreen>:
+    MDBoxLayout:
+        MDBoxLayout:
+            orientation:"vertical"
+            spacing:dp(20)
+            padding:dp(20)
+            size_hint_x:0.3
+            size_hint_y:1
+            MDTabsPrimary:
+                id: tabs
+                pos_hint: {"center_x": .5, "center_y": 0.95}
+                radius: [7]
+                #theme_bg_color: "Custom"
+                #md_bg_color: 98/255,156/255,196/255,1
 
+                MDTabsItem:
+                    on_release: root.parent.change_screen_pop()
+                    MDTabsItemText
+                        text: "Insérer un produit"
+                    MDTabsItemIcon
+                        icon: "package-down"
+
+                MDTabsItem:
+                    on_release: root.parent.parent.parent.change_screen()
+                    MDTabsItemText
+                        text: "Vendre un produit"
+                    MDTabsItemIcon
+                        icon: "package-up"
+                MDTabsItem:
+                    on_release: root.parent.parent.parent.change_screen_type()
+                    MDTabsItemText
+                        text: "insérer un type"
+                    MDTabsItemIcon
+                        icon: "package"
+
+            MDScreenManager:
+                id: screen_manager
+
+                MDScreen:
+                    name: "screen1"
+                    InsertProduct:
+                        id:insertproduct
+
+
+
+                MDScreen:
+                    name: "screen2"
+                    DeleteProduct:
+                        id:delectproduct
+                MDScreen:
+                    name: "screen3"
+                    InsertProductType:
+                        id:insertproducttype
+
+
+
+        Sliver:
+            id: sliver_box
+            size_hint_y: 1
+            size_hint_x: 0.65
 
 <ProductsPage>:
-    padding: dp(20)
-    spacing:dp(20)
+    padding: dp(5)
+    spacing:dp(5)
+    orientation:"vertical"
+    MDSegmentedButton:
+        size_hint: 1,.05
+        radius:[20]
 
+        MDSegmentedButtonItem:
+            active: True
+            on_active: root.change_page_screen()
+
+            MDSegmentButtonLabel:
+                text: "option nomrale"
+
+        MDSegmentedButtonItem:
+            on_active: root.change_page_screen_pop();root.ids.productlist.ids.listproducts.show_list()
+
+            MDSegmentButtonLabel:
+                text: "option avancée"
+    MDScreenManager:
+        id: product_sreen_manager
+
+        MDScreen:
+            name: "screenOne"
+            DefaultScreen:
+                id:defaultscreen
+
+
+
+        MDScreen:
+            name: "screenTwo"
+            ProductList:
+                id:productlist
+
+<ProductList>:
+    MDBoxLayout:
+        CCard:
+            size_hint_x:.7
+            CBox:
+                orientation:"vertical"
+                MDBoxLayout:
+                    size_hint_x:1
+                    MDLabel:
+                        text:"stock initiale"
+                        theme_bg_color:"Custom"
+                        md_bg_color:30/255,129/255,176/255,1
+                        text_color:[1,1,1,1]
+                    MDLabel:
+                        text:"produit vendu"
+                        theme_bg_color:"Custom"
+                        md_bg_color:30/255,129/255,176/255,1
+                        text_color:[1,1,1,1]
+                    MDLabel:
+                        text:"produit perimé"
+                        theme_bg_color:"Custom"
+                        md_bg_color:30/255,129/255,176/255,1
+                        text_color:[1,1,1,1]
+                    MDLabel:
+                        text:"reste en stock"
+                        theme_bg_color:"Custom"
+                        md_bg_color:30/255,129/255,176/255,1
+                        text_color:[1,1,1,1]
+                    MDIconButton:
+                        icon: "file-download"  # ou "file-table-box", ou "export"
+                        on_release: app.export_to_excel()
+                        tooltip_text: "Exporter vers Excel"
+
+
+                ProductResume:
+                    id: listproducts
+                    size_hint: 1, None
+                    height: 400
+        MDBoxLayout:
+            size_hint_x:0.3
+            orientation:"vertical"
+            MDBoxLayout:
+                size_hint:1,0.15
+                spacing:dp(7)
+                padding:dp(7)
+
+                MDButton:
+                    id:date_button
+                    theme_bg_color:"Custom"
+                    md_bg_color:171/255,219/255,227/255,1
+                    radius:[15]
+                    on_release:
+                        root.show_date_picker()
+                    MDButtonText:
+                        text:"Date"
+
+                MDButton:
+                    theme_bg_color:"Custom"
+                    md_bg_color:171/255,219/255,227/255,1
+                    radius:[15]
+                    on_release:
+                        root.show_modal_date_picker()
+                    MDButtonText:
+                        text:"Période"
+
+                MDButton:
+                    theme_bg_color:"Custom"
+                    md_bg_color:171/255,219/255,227/255,1
+                    radius:[15]
+                    on_release:
+                        root.show_year()
+                    MDButtonText:
+                        text:"Mois"
+                MDButton:
+                    theme_bg_color:"Custom"
+                    md_bg_color:171/255,219/255,227/255,1
+                    radius:[15]
+                    MDButtonText:
+                        text:"Année"
+            CCard:
+                size_hint_x:1
+                SalesStatContent:
+                    id:salescontainer
+
+
+
+<SalesStatContent>:
+    orientation:'vertical'
+    MDListItem:
+        theme_bg_color: "Custom"
+        md_bg_color: 186/255,169/255,155/255,1
+        size_hint_y: 0.1
+        radius:[20,20,0,0]
+        spacing:dp(10)
+        padding:dp(10)
+        pos_hint: {"y": 0.7}
+        halign:"center"
+
+        MDListItemLeadingIcon:
+            icon: "sale"
+        MDListItemHeadlineText:
+            text: "pourcentage de vente des produits"
 
     MDBoxLayout:
-        orientation:"vertical"
-        spacing:dp(20)
-        padding:dp(20)
-        size_hint_x:0.3
-        size_hint_y:1
-        MDTabsPrimary:
-            id: tabs
-            pos_hint: {"center_x": .5, "center_y": 0.95}
-            radius: [7]
-            #theme_bg_color: "Custom"
-            #md_bg_color: 98/255,156/255,196/255,1
-
-            MDTabsItem:
-                on_release: root.change_screen_pop()
-                MDTabsItemText
-                    text: "Insérer un produit"
-                MDTabsItemIcon
-                    icon: "package-down"
-
-            MDTabsItem:
-                on_release: root.change_screen()
-                MDTabsItemText
-                    text: "Vendre un produit"
-                MDTabsItemIcon
-                    icon: "package-up"
-            MDTabsItem:
-                on_release: root.change_screen_type()
-                MDTabsItemText
-                    text: "insérer un type"
-                MDTabsItemIcon
-                    icon: "package"
-
-        MDScreenManager:
-            id: screen_manager
-
-            MDScreen:
-                name: "screen1"
-                InsertProduct:
-                    id:insertproduct
-
-
-
-            MDScreen:
-                name: "screen2"
-                DeleteProduct:
-                    id:delectproduct
-            MDScreen:
-                name: "screen3"
-                InsertProductType:
-                    id:insertproducttype
+        id: searchproductsold
+        spacing: dp(7)
+        padding: dp(7)
+        size_hint_y:0.1
+        MDTextField:
+            size_hint_y:.1
+            id: textfieldproductsold
+            on_text: root.search_order()
+            size_hint_x: 0.4
+            radius: [5]
+            mode: "filled"
+        MDButton:
+            on_release: root.search_order()
+            size_hint_x: 0.3
+            size_hint_y:.1
+            radius: [5]
+            style: "filled"
+            MDButtonIcon:
+                icon: "magnify"
+            MDButtonText:
+                text: "chercher"
+    PourcentagePVG:
+        id:pourcentagepvg
+        size_hint:1,0.7
+<PourcentagePVG>:
+    MDRecycleView:
+        id: pv
+        viewclass:"ProductRowPV"
+        key_size:"height"
+        RecycleBoxLayout:
+            default_size: None, dp(40)
+            default_size_hint: 1, None
+            size_hint_y:None
+            height: self.minimum_height
+            orientation:"vertical"
+<ProductRowPV>:
+    orientation:"horizontal"
+    spacing:dp(20)
+    padding:dp(20)
+    MDLabel:
+        text:root.product_name
+    MDLabel:
+        text:root.sale_percent
 
 
 
-    Sliver:
-        id: sliver_box
-        size_hint_y: 1
-        size_hint_x: 0.65
+<ProductResume>:
+    MDRecycleView:
+        id: pr
+        viewclass:"Resume"
+        key_size:"height"
+        RecycleBoxLayout:
+            default_size: None, dp(40)
+            default_size_hint: 1, None
+            size_hint_y:None
+            height: self.minimum_height
+            orientation:"vertical"
+
+<Resume>:
+    orientation:"horizontal"
+    spacing:dp(20)
+    padding:dp(20)
+    MDLabel:
+        text:root.initiale
+    MDLabel:
+        text:root.vendu
+    MDLabel:
+        text:root.perime
+    MDLabel:
+        text:root.reste
+
+
+
 
 
 
@@ -273,8 +496,8 @@
         MDTextField:
             id: search_textfield
             on_text: root.search_order()
-            size_hint_x: 0.7
-            radius: [5]
+            size_hint_x: 0.6
+            radius: [15]
             mode: "filled"
         MDButton:
             on_release: root.search_order()
@@ -289,7 +512,12 @@
     ListProducts:
         id: listproducts
         size_hint: 1, None
-        height: 400
+        height: 800
+<Produit>:
+    orientation:"horizontal"
+    spacing:dp(20)
+    MDLabel:
+        text:root.type_produit
 
 <ListProducts>:
     MDRecycleView:
