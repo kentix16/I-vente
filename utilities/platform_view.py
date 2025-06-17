@@ -13,14 +13,14 @@ def mobileview(window,width,height):
     manager.ids.statsscreen.ids.statsspage]
     for layout in layouts:
         layout.orientation=orientate
-        manager.ids.statsscreen.ids.statsspage.id.sales_card_un.size_hint_x=1
-        manager.ids.statsscreen.ids.statsspage.id.sales_card_deux.size_hint_x=1
-        manager.ids.statsscreen.ids.statsspage.id.sales_card_un.do_layout()
-        manager.ids.statsscreen.ids.statsspage.id.sales_card_deux.do_layout()
+        manager.ids.statsscreen.ids.statsspage.ids.sales_card_un.size_hint_x=1
+        manager.ids.statsscreen.ids.statsspage.ids.sales_card_deux.size_hint_x=1
+        #manager.ids.statsscreen.ids.statsspage.ids.sales_card_un.do_layout()
+        #manager.ids.statsscreen.ids.statsspage.ids.sales_card_deux.do_layout()
 
 
 
-        layout.do_layout()
+        #layout.do_layout()
         print(orientate)
     Window.bind(on_resize=mobileview)
 

@@ -217,7 +217,7 @@ class StatsPage(MDBoxLayout):
 
     def show_modal_date_picker(self, *args):
         self.modal_date_picker()
-    def on_ok_date(self,instance_date_picker,number_day):
+    def on_ok_date(self,instance_date_picker,):
         date  =instance_date_picker.get_date()[0]
 
         self.ids.salescontainer.date = date

@@ -6,8 +6,7 @@ def to_database(query, parameters=()):
         user='root',
         password='1234567',
         database="gestion",
-        port=3307
-    )
+        port=3304)
 
     c = conn.cursor(buffered=True)
     try:

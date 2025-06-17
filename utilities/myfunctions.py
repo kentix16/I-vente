@@ -1,3 +1,6 @@
+from functools import partial
+
+import xlsxwriter
 from kivy.app import App
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -14,6 +17,10 @@ from kivymd.theming import ThemeManager
 from kivymd.uix.pickers import MDDockedDatePicker, MDTimePickerDialVertical, MDTimePickerDialHorizontal, \
     MDModalDatePicker
 from typing import Literal
+
+from utilities.databases import to_database
+
+
 def pourcentage(self,nom_pourcentage="pv",date=None,date_fin=None,order=""):
     if self.widget_showed: self.clear_widgets()
     labels = []
@@ -71,6 +78,26 @@ def show_popup(self,title, message):
     for w in (label,button):content.add_widget(w)
     popup.content=content
     popup.open()
+def show_popup_confirmation(self,title,message,nom,qt,pu=None):
+    self.popup = Popup(size_hint=(.4, .4))
+    self.popup.title = title
+    content = BoxLayout(orientation='vertical')
+    label = Label(text=message)
+    boxbutton = BoxLayout(orientation='horizontal')
+    button1 = Button(text='Confirmer', size_hint=(.3, .3), pos_hint={'right': .94, 'y': .012})
+    button1.bind(on_press=partial(self.popup.dismiss,qt,pu))
+    button2 = Button(text='Annuler', size_hint=(.3, .3), pos_hint={'right': .94, 'y': .012})
+    button2.bind(on_press=self.popup_confirmed)
+    for w in (button1,button2):boxbutton.add_widget(w)
+    for w in (label, boxbutton): content.add_widget(w)
+    self.popup.content = content
+    self.popup.open()
+def popup_confirmed(self,nom,qt,pu=None):
+    self.popup.dismiss()
+    if pu:to_database("update stock set qt=qt+%s pu=%s where nom=%s",(qt,pu,nom))
+    else:to_database("update stock set qt=qt+%s where nom=%s",(qt,nom))
+
+
 
 """ORIENTATION = Literal["landscape","portrait"]
 
@@ -143,4 +170,21 @@ def modal_date_picker(self, *args):
     ]
     date_dialog.bind(on_ok=self.on_ok_periode)
     date_dialog.open()
+
+def generate_fic_excel(title,column_title, datas,):
+    # Créer un nouveau fichier Excel
+    workbook = xlsxwriter.Workbook(f'{title}.xlsx')
+    worksheet = workbook.add_worksheet()
+    for i in range(len(column_title)):
+        worksheet.write(0,i,str(column_title[i]))
+
+    for data in enumerate(datas):
+        for item in enumerate(data[1]):
+            worksheet.write(data[0]+1,item[0], str(item[1]))
+
+    # Fermer le fichier
+    workbook.close()
+
+data = [('banane',2),('citron',5),('orange',6),('pommes','8')]
+generate_fic_excel('fruit5',('modeles','quantité'),data)
 
