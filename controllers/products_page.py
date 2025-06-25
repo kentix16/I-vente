@@ -17,14 +17,16 @@ from kivymd.uix.label import MDLabel
 from kivy.lang import Builder
 import os
 
+from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.pickers import MDTimePickerDialHorizontal, MDModalDatePicker
 from kivymd.uix.screen import MDScreen
+from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.sliverappbar import MDSliverAppbarContent
 
 from controllers.sales_page import PourcentagePV
 from models.gestionModel import GestionModel
 from utilities.databases import to_database
-
+from utilities.myfunctions import show_month, show_year
 
 # Chemin de votre fichier KV
 kv_path = os.path.join(os.path.dirname(__file__), '..', 'view', 'products_page.kv')
@@ -64,29 +66,20 @@ class InsertProduct(MDCard):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Ne rien faire ici avec self.ids
-        self.extension(showed=False)
 
-    def tap_expansion_chevron(
-            self, panel: MDExpansionPanel, chevron: TrailingPressedIconButton
-    ):
-        panel.open() if not panel.is_open else panel.close()
-        panel.set_chevron_down(
-            chevron
-        ) if not panel.is_open else panel.set_chevron_up(chevron)
+    def open_menu(self, item):
+        instance = GestionModel()
+        product_types = instance.get_type
+        menu_items = [
+            {
+                "text": f"{i}",
+                "on_release": lambda x=f"{i}": self.menu_callback(x),
+            } for i in product_types
+        ]
+        MDDropdownMenu(caller=item, items=menu_items).open()
 
-    def extension(self,showed=False):
-        if showed=="False":
-            panel=self.ids.panel
-            instance = GestionModel()
-            product_types = instance.get_type
-            for produit in product_types:
-                label=MDLabel(text=f'{produit}', color=(.2, .2, .2, 1), size_hint=(1, None), height=40)
-                panel.MDExpansionPanelContent.add_widget(label)
-            showed=True
-            for i in range(20):
-                print("ao le type")
-        else:
-            return
+    def menu_callback(self, text_item):
+        self.ids.drop_text.text = text_item
     """def on_kv_post(self, base_widget):
         # Cette méthode est appelée automatiquement une fois le KV chargé
         self.load_product_types()
@@ -158,7 +151,7 @@ class InsertProduct(MDCard):
         nom = self.ids.nom.text
         pu = self.ids.pu.text
         qt = self.ids.qt.text
-        type = self.selected_product_type
+        type = self.ids.drop_text.text
         if not (nom and pu and qt):
             self.show_popup('champ manquant','veuillez compléter les champs manquants')
             return
@@ -281,12 +274,12 @@ class ProductsPage(MDBoxLayout):
         screen_manager.current = "screen1"
         screen_manager.transition.direction = "right"
         insert_product = screen_manager.get_screen("screen1").children[0]
-        insert_product.load_product_types()
+        #insert_product.load_product_types()
     def change_screen_type(self):
         screen_manager = self.ids.defaultscreen.ids.screen_manager
         screen_manager.current = "screen3"
         screen_manager.transition.direction = "left"
-class ProductList(MDScreen):
+class ProductList(MDScrollView):
     time_picker_vertical: MDTimePickerDialHorizontal = ObjectProperty(allownone=True)
     date_picker_horizontal: MDModalDatePicker = ObjectProperty(allownone=True)
     date_picker_vertical: MDModalDatePicker = ObjectProperty(allownone=True)
@@ -311,6 +304,24 @@ class ProductList(MDScreen):
     def show_modal_date_picker(self, *args):
         self.modal_date_picker()
 
+    def show_month_picker(self):
+        def on_month_selected(date_debut, date_fin):
+            order = {"date_dep": False}
+            self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date_debut.strftime("%Y-%m-%d"),
+                                                date_fin=date_fin.strftime("%Y-%m-%d"))
+
+        show_month(on_month_selected)
+
+    def show_year_picker(self):
+        def on_year_selected(selected_year):
+            # Utilise l'année sélectionnée pour construire la plage de dates
+            date_debut = f"{selected_year}-01-01"
+            date_fin = f"{selected_year}-12-31"
+            order = {"date_dep": False}
+
+            self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date_debut, date_fin=date_fin)
+
+        show_year(on_year_selected)
     def on_ok_date(self, instance_date_picker,):
         date = instance_date_picker.get_date()[0]
 
@@ -327,7 +338,6 @@ class ProductList(MDScreen):
         self.ids.salescontainer.date_fin = date_fin
 
         self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
-        self.ids.pourcentagedepense.show_pourcentage_depense(date, date_fin)
         instance_date_picker.dismiss()
 
 
@@ -414,7 +424,7 @@ class ListProducts(ScrollView):
         super(ListProducts,self).__init__(**kwargs)
 
     def sell_product(self, nom_produit):
-        App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.delectproduct.ids.nom_produit_vente.text = nom_produit
+        App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.defaultscreen.ids.delectproduct.ids.nom_produit_vente.text = nom_produit
     def remove_product(self,nom_produit):
         to_database("update stock set is_showed=0 WHERE nom=%s",(nom_produit,))
         self.show_products()
@@ -483,7 +493,7 @@ class SaleProduct(MDCard):
             self.show_popup('Erreur','Vente invalide')
         self.ids.nom_produit_vente.text = ''
         self.ids.qt_produit_vente.text = ''
-        App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.sliver_box.ids.content.ids.listproducts.show_products()
+        App.get_running_app().manager.ids.productsscreen.ids.productspage.ids.defaultscreen.ids.sliver_box.ids.content.ids.listproducts.show_products()
 
 
 

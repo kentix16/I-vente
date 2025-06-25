@@ -7,10 +7,9 @@
 #:import expenses_page controllers.expenses_page
 #:import statistics_page controllers.statistics_page
 
-
-MyScreenManager:
 <MyScreenManager@NavigationScreenManager>:
     UserCreationScreen:
+        id:user_creation_screen
     MainScreen:
         id:mainscreen
     LayoutScreen:
@@ -24,10 +23,12 @@ MyScreenManager:
         id:statsscreen
 
 
+
 <MainScreen@Screen>:
     name: "SalesPage"
 
     MDNavigationLayout:
+
         ScreenManager:
             id: nav_screen_manager
 
@@ -35,11 +36,27 @@ MyScreenManager:
                 name: "sales_home"
                 PrincipalScreen:
                     md_bg_color: 212/255,219/255,237/255,1
+
                     AppBar:
-                    SalesPage:
-                        id:salespage
+                    MDScrollView:
+                        id: scroll_1
+                        do_scroll_x: False
+                        do_scroll_y: True
+
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            adaptive_height: True
+                            padding: dp(10)
+                            spacing: dp(10)
+
+                            SalesPage:
+                                id: salespage
+                                size_hint_y: None
+                                height: self.minimum_height
 
         Gradient:
+            id:nav_drawer
+
 <UserCreationScreen@Screen>:
     name: "user_creation"
     BoxLayout:
@@ -65,11 +82,21 @@ MyScreenManager:
                 PrincipalScreen:
                     md_bg_color: 212/255,219/255,237/255,1
                     AppBar:
-                    ProductsPage:
-                        id:productspage
+                    MDScrollView:
+                        do_scroll_x: False
+                        do_scroll_y: True
+                        id:scroll_2
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            adaptive_height: True
+                            ProductsPage:
+                                id:productspage
+                                size_hint_y: None
+                                height: self.minimum_height
 
 
         Gradient:
+            id:nav_drawer
 
 <WalletScreen@Screen>:
     name: "WalletPage"
@@ -82,10 +109,20 @@ MyScreenManager:
                 PrincipalScreen:
                     md_bg_color:248/255,247/255,242/255,1
                     AppBar:
-                    WalletPage:
-                        id:walletpage
+                    MDScrollView:
+                        do_scroll_x: False
+                        do_scroll_y: False
+                        id:scroll_3
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            adaptive_height: True
+                            WalletPage:
+                                id:walletpage
+                                size_hint_y: None
+                                height: self.minimum_height
 
         Gradient:
+            id:nav_drawer
 <ExpensesScreen@Screen>:
     name: "ExpensesPage"
     MDNavigationLayout:
@@ -97,10 +134,20 @@ MyScreenManager:
                 PrincipalScreen:
                     md_bg_color:248/255,247/255,242/255,1
                     AppBar:
-                    ExpensesPage:
-                        id:expensespage
+                    MDScrollView:
+                        do_scroll_x: False
+                        do_scroll_y: False
+                        id:scroll_4
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            adaptive_height: True
+                            ExpensesPage:
+                                id:expensespage
+                                size_hint_y: None
+                                height: self.minimum_height
 
         Gradient:
+            id:nav_drawer
 <StatsScreen@Screen>:
     name: "StatsPage"
     MDNavigationLayout:
@@ -112,7 +159,17 @@ MyScreenManager:
                 PrincipalScreen:
                     md_bg_color:248/255,247/255,242/255,1
                     AppBar:
-                    StatsPage:
-                        id:statsspage
+                    MDScrollView:
+                        do_scroll_x: False
+                        do_scroll_y: False
+                        id:scroll_5
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            adaptive_height: True
+                            StatsPage:
+                                id:statsspage
+                                size_hint_y: None
+                                height: self.minimum_height
 
         Gradient:
+            id:nav_drawer

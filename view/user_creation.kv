@@ -1,11 +1,28 @@
 <UserCreationScreen>:
+    md_bg_color:1,1,1,1
     name: "user_creation"
-    Background:
-        id: background_widget
+    MDBoxLayout:
+
+        Image:
+            id:image_desk
+            source: "images/desk.png"  # Chemin de ton image
+            allow_stretch: True
+            keep_ratio: False
+            size_hint: 1, 1
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        Meme:
+            id: acc
+            size_hint: .4, 1
+            pos_hint: {"center_x": 0.82, "center_y": 0.5}
+    Text:
+        id:text
+
+    Bg_mobile:
+        id:bg_mobile
 
 <Background>:
     Video:
-        source: 'videos/vid_bg.mp4'
+        #source: 'videos/vid_bg.mp4'
         state: 'play'
         options: {'eos': 'loop'}
         allow_stretch: True
@@ -13,42 +30,68 @@
         size_hint: 1, 1
         pos_hint: {"center_x": 0.5, "center_y": 0.5}
 
-
-    Meme:
-        size_hint: None, None
-        size: "350dp", "150dp"
-        pos_hint: {"center_x": 0.5, "center_y": 0.5}
-
-<Meme>:
+<Text@MDBoxLayout>
     spacing: dp(20)
     orientation: "vertical"
-    
+    size_hint:1,1
+    padding:"20dp"
+    adaptive_height:True
+    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+    theme_bg_color:"Custom"
+    md_bg_color:0,0,0,0
+    MDLabel:
+        id:sale_label1
+        text: "entrez le nom de votre companie"
+        halign: "left"
+        theme_text_color: "Primary"
+        role:"small"
     MDTextField:
-        mode: "filled"
+
+        mode: "outlined"
         MDTextFieldHelperText:
             text: " ex: CompagnyManager"
             text_color_focus: "grey"
         MDTextFieldHintText:
-            text: "entrez le nom de votre companie"
+            text: "nom"
             text_color_normal: "grey"
+    MDLabel:
+        text: "entrez l'adresse mail de votre companie"
+        halign: "left"
+        theme_text_color: "Primary"
+        role:"small"
     MDTextField:
-        mode:"filled"
+        mode:"outlined"
         MDTextFieldHelperText:
-            text:"Votre mail"
-        MDTextFieldHintText:
             text:"ex:companymanager@gmail.com"
-    MDTextField:
-        mode:"filled"
-        MDTextFieldHelperText:
-            text:"créez votre mot de passe"
         MDTextFieldHintText:
+            text: "Votre mail"
+    MDLabel:
+        text: "créez votre mot de passe"
+        halign: "left"
+        theme_text_color: "Primary"
+        role:"small"
+    MDTextField:
+        mode:"outlined"
+        MDTextFieldHelperText:
             text:"ex:45/*klm#"
-    
+        MDTextFieldHintText:
+            text:"mot de passe"
+
     MDButton:
+        size_hint_x:.8
         on_release: app.manager.push("SalesPage")
-        pos_hint: {"center_x": 0.5, "center_y": 0.5}
         style: "filled"
+        pos_hint: {"center_x": 0.5}
         MDButtonIcon:
             icon: "check-underline-circle"
         MDButtonText:
             text: "confirmer"
+<Meme>:
+
+    elevation:3
+    style:"elevated"
+    theme_bg_color:"Custom"
+    md_bg_color:1,1,1,1
+    padding:"20dp"
+
+    Text:

@@ -1,12 +1,22 @@
+from datetime import datetime
 from functools import partial
+from tkinter import filedialog
 
 import xlsxwriter
+import tkinter as tk
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
+from kivy.uix.widget import Widget
 from kivy_garden.matplotlib import FigureCanvasKivyAgg
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.button import MDButtonText, MDButton, MDIconButton
+from kivymd.uix.dialog import MDDialogButtonContainer, MDDialogContentContainer, MDDialogSupportingText, \
+    MDDialogHeadlineText, MDDialog
+from kivymd.uix.divider import MDDivider
+from kivymd.uix.label import MDLabel
 from matplotlib import pyplot as plt
 
 from models.gestionModel import GestionModel
@@ -92,7 +102,15 @@ def popup_confirmed(self,nom,qt,pu=None):
     self.popup.dismiss()
     if pu:to_database("update stock set qt=qt+%s pu=%s where nom=%s",(qt,pu,nom))
     else:to_database("update stock set qt=qt+%s where nom=%s",(qt,nom))
+def ouvrir_fichier(self, instance):
+    # Lancer tkinter de manière cachée juste pour le file dialog
+    root = tk.Tk()
+    root.withdraw()  # Cacher la fenêtre principale de Tkinter
 
+    fichier = filedialog.askopenfilename(title="Choisissez un fichier")
+    if fichier:
+        self.label.text = f"Fichier sélectionné :\n{fichier}"
+    root.destroy()  # Fermer le root tkinter après sélection
 
 
 """ORIENTATION = Literal["landscape","portrait"]
@@ -184,3 +202,141 @@ def generate_fic_excel(title,column_title, datas,):
 data = [('banane',2),('citron',5),('orange',6),('pommes','8')]
 generate_fic_excel('fruit5',('modeles','quantité'),data)
 
+def show_year(action):
+    # 1. Crée une seule instance du label
+    year_label = MDLabel(text=str(datetime.now().year), halign="center", theme_text_color="Primary", font_style="Title",
+        size_hint_x=0.6)
+
+    # 2. Fonctions modifiant CE label
+    def increment_year(instance):
+        current = int(year_label.text)
+        if current < datetime.now().year:
+            year_label.text = str(current + 1)
+
+    def decrement_year(instance):
+        current = int(year_label.text)
+        if current > 2000:
+            year_label.text = str(current - 1)
+
+    # 3. Création du dialog avec le label centré
+    dialog = MDDialog(
+        MDDialogHeadlineText(text="Année"),
+        MDDialogContentContainer(
+            MDBoxLayout(MDDivider(),
+            MDBoxLayout(
+                MDIconButton(icon="chevron-left", on_release=decrement_year),
+                year_label,
+                MDIconButton(icon="chevron-right", on_release=increment_year),
+                spacing="20dp",padding="20dp",size_hint_x=1
+            ),
+            MDDivider(),orientation="vertical"),
+
+        ),
+        MDDialogButtonContainer(
+            Widget(),  # Espaceur
+            MDButton(
+                MDButtonText(text="Annuler"),
+                style="text",
+                on_release=lambda x: dialog.dismiss()
+            ),
+            MDButton(
+                MDButtonText(text="OK"),
+                style="text",
+                on_release=lambda x:  (
+        dialog.dismiss(),
+        action(year_label.text)
+    )
+
+            ),
+            spacing="8dp",
+        ),
+    )
+
+    dialog.open()
+
+from datetime import datetime
+import calendar
+
+def show_month(action):
+    # 1. Créer une seule instance du label
+    current_date = datetime.now()
+    current_month = current_date.month
+    current_year = current_date.year
+
+    # Liste des mois
+    mois_noms = [
+        "janvier", "février", "mars", "avril", "mai", "juin",
+        "juillet", "août", "septembre", "octobre", "novembre", "décembre"
+    ]
+
+    # Label initial
+    month_label = MDLabel(
+        text=mois_noms[current_month - 1] + f" {current_year}",
+        halign="center",
+        theme_text_color="Primary",
+        size_hint_x=0.6
+    )
+
+    # Variable de suivi
+    selection = {"mois": current_month, "année": current_year}
+
+    # 2. Fonctions pour modifier le mois
+    def increment_month(instance):
+        if selection["mois"] == 12:
+            selection["mois"] = 1
+            selection["année"] += 1
+        else:
+            selection["mois"] += 1
+        update_label()
+
+    def decrement_month(instance):
+        if selection["mois"] == 1:
+            selection["mois"] = 12
+            selection["année"] -= 1
+        else:
+            selection["mois"] -= 1
+        update_label()
+
+    def update_label():
+        month_label.text = mois_noms[selection["mois"] - 1] + f" {selection['année']}"
+
+    # Fonction pour déclencher action avec la date de début et de fin du mois sélectionné
+    def validate_selection(x):
+        dialog.dismiss()
+        y = selection["année"]
+        m = selection["mois"]
+        start_date = datetime(y, m, 1)
+        end_day = calendar.monthrange(y, m)[1]
+        end_date = datetime(y, m, end_day)
+        action(start_date, end_date)
+
+    # 3. Dialog
+    dialog = MDDialog(
+        MDDialogHeadlineText(text="Mois"),
+        MDDialogContentContainer(
+            MDBoxLayout(MDDivider(),
+            MDBoxLayout(
+                MDIconButton(icon="chevron-left", on_release=decrement_month),
+                month_label,
+                MDIconButton(icon="chevron-right", on_release=increment_month),
+                spacing="20dp", padding="20dp",size_hint_x=1
+            ),
+            MDDivider(), orientation="vertical",size_hint_y=1)
+        ),
+        MDDialogButtonContainer(
+            Widget(),  # Espaceur
+            MDButton(
+                MDButtonText(text="Annuler"),
+                style="text",
+                on_release=lambda x: dialog.dismiss()
+            ),
+            MDButton(
+                MDButtonText(text="OK"),
+                style="text",
+                on_release=validate_selection
+            ),
+            spacing="8dp",
+        ),
+    )
+
+    dialog.open()

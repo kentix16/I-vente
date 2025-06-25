@@ -5,9 +5,11 @@ import numpy as np
 from kivy.core.text import LabelBase
 from kivy.lang import Builder
 from kivy.properties import ListProperty, StringProperty, NumericProperty
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.scrollview import ScrollView
+from kivy.utils import get_color_from_hex
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
 from kivymd.uix.gridlayout import MDGridLayout
@@ -20,32 +22,17 @@ from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
 from models.gestionModel import GestionModel
 
+COLOR_HEADER_BG = get_color_from_hex("#132e49")
+COLOR_HEADER_TEXT = get_color_from_hex("#ffffff")
+COLOR_ROW_EVEN = get_color_from_hex("#ffffff")
+COLOR_ROW_ODD = get_color_from_hex("#245478")
+COLOR_TEXT_EVEN = get_color_from_hex("#132e49")
+COLOR_TEXT_ODD = get_color_from_hex("#ffffff")
+
 # Pour les variantes spécifiques comme SemiBold et Black
 LabelBase.register(name="OutfitSemiBold", fn_regular="font/Outfit-SemiBold.ttf")
 LabelBase.register(name="OutfitBlack", fn_regular="font/Outfit-Black.ttf")
 
-KV = '''
-<CommonComponentLabel>
-    halign: "center"
-
-
-<MobileView>
-    CommonComponentLabel:
-        text: "Mobile"
-
-
-<TabletView>
-    CommonComponentLabel:
-        text: "Table"
-
-
-<DesktopView>
-    CommonComponentLabel:
-        text: "Desktop"
-
-
-ResponsiveView:
-'''
 class StatToday(MDCard):
     stat_showed = False
     def __init__(self,**kwargs):
@@ -67,33 +54,40 @@ class StatDeVente(MDCard):
 
     def show_stat_du_jour(self):
         self.clear_widgets()
+
         salemodel = GestionModel()
-        heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN")
-        heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX")
-        heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN")
-        heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX")
+        heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=None)
+        heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=None) + 1
+        heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=None)
+        heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=None) + 1
 
         # Vérifie que les valeurs sont valides
-        if not all([heure_min_vente, heure_max_vente, heure_min_dep, heure_max_dep]):
+        """if not all([heure_min_vente, heure_max_vente, heure_min_dep, heure_max_dep]):
             self.add_widget(Label(text="Aucune donnée disponible pour cette période."))
-            return
+            return"""
 
         heure_min = f"{min(heure_min_vente, heure_min_dep):02d}:00:00"
         heure_max = f"{max(heure_max_vente, heure_max_dep):02d}:00:00"
 
-        ventes = salemodel.get_heures_somme_stat(heure_min=heure_min, heure_max=heure_max)
-        depense = salemodel.get_heures_depense_stat(heure_min=heure_min, heure_max=heure_max)
+        ventes = salemodel.get_heures_somme_stat(date=None, heure_min=heure_min, heure_max=heure_max)
+        depense = salemodel.get_heures_depense_stat(date=None, heure_min=heure_min, heure_max=heure_max)
 
-        if not ventes or not depense:
-            self.add_widget(Label(text="Aucune donnée à afficher."))
-            return
+
+
 
         dates_ventes = [row[0] for row in ventes]
         montants = [row[1] for row in ventes]
         depense_vals = [row[1] for row in depense]
-        for i in range(20):
-            for i in dates_ventes:
-                print(i)
+
+        if not ventes or not depense or (i==0 for i in montants) or (i==0 for i in depense_vals):
+            image=Image(
+        source="images/pas_encore_vente.png" ,
+        allow_stretch=True,
+        keep_ratio=False,
+        size_hint= (1, 1),
+        pos_hint={"center_x": 0.5, "center_y": 0.5})
+            self.add_widget(image)
+            return
 
         min_len = min(len(dates_ventes), len(montants), len(depense_vals))
         if min_len == 0:
@@ -115,112 +109,14 @@ class StatDeVente(MDCard):
         ax.set_xlabel("Heure")
         ax.set_ylabel("Montant (Ar)")
         ax.set_xticks(x)
-        ax.set_xticklabels([str(d) for d in dates], rotation=45)
+        ax.set_xticklabels([d.strftime('%H:%M') for d in dates], rotation=45)
         ax.legend()
         ax.grid(axis='y', linestyle="--", alpha=0.7)
         fig.tight_layout()
 
         self.add_widget(FigureCanvasKivyAgg(fig))
-        """salemodel = GestionModel()
-        rows = salemodel.get_heures_somme_stat()
 
-        heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in rows]
-        montants = [row[1] for row in rows]
-
-        # Grouper par tranche de 10 minutes
-        donnees_par_10min = defaultdict(float)
-        for heure, montant in zip(heures, montants):
-            minute = (heure.minute // 10) * 10
-            heure_arrondie = heure.replace(minute=minute, second=0, microsecond=0)
-            donnees_par_10min[heure_arrondie] += montant
-
-        heures_groupees = sorted(donnees_par_10min.keys())
-        montant_groupes = [donnees_par_10min[h] for h in heures_groupees]
-
-        couleurs_palette = ['#1abc9c', '#16a085']
-        couleurs_alternees = [couleurs_palette[i % len(couleurs_palette)] for i in range(len(heures_groupees))]
-
-        fig, ax = plt.subplots(figsize=(10, 5))
-        bars = ax.bar(heures_groupees, montant_groupes, width=0.006, color=couleurs_alternees, edgecolor='black',
-                      linewidth=0.5)
-
-        for bar, montant in zip(bars, montant_groupes):
-            height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width() / 2.0, height + 0.5, f"{montant:.0f}", ha='center', va='bottom',
-                    fontsize=9, color="#333")
-
-        # Forcer l'affichage de 00:00 à 23:00
-        if heures_groupees:
-            jour = heures_groupees[0].date()
-        else:
-            jour = datetime.today().date()
-
-        debut_journee = datetime.combine(jour, datetime.min.time())
-        fin_journee = datetime.combine(jour, datetime.max.time()).replace(hour=23, minute=59, second=59)
-
-        ax.set_xlim(debut_journee, fin_journee)
-
-        # Ticks majeurs toutes les heures
-        ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-
-        # Formatage et esthétique
-        fig.autofmt_xdate()
-        ax.grid(True, linestyle='--', alpha=0.4)
-        fig.patch.set_facecolor("#f7f7f7")
-        ax.set_facecolor('#f0f0f0')
-        ax.set_ylabel("Prix ($)", fontsize=12)
-        ax.set_xlabel("Heure", fontsize=12)
-        plt.xticks(rotation=45)
-        fig.tight_layout()
-
-        self.add_widget(FigureCanvasKivyAgg(fig))
-"""
-    """def show_stat_du_jour(self):
-        self.clear_widgets()
-
-        salemodel = GestionModel()
-        rows = salemodel.get_heures_stat
-
-        heures = [datetime.strptime(str(row[0]),'%Y-%m-%d %H:%M:%S') for row in rows]
-        montants = [row[1] for row in rows]
-        donnees_par_heure = defaultdict(float)
-        for heure,montant in zip(heures,montants):
-                heure_arrondie=heure.replace(minute=0,second=0,microsecond=0)
-                donnees_par_heure[heure_arrondie] +=montant
-        heures_groupees = sorted(donnees_par_heure.keys())
-        montant_groupes = [donnees_par_heure[h] for h in heures_groupees]
-
-        couleurs_palette = ['#1abc9c','#16a085']
-        couleurs_alternees = [couleurs_palette[i %len(couleurs_palette)] for i in range(len(heures_groupees))]
-
-
-        fig, ax = plt.subplots(figsize=(10,5))
-        bars = ax.bar(heures_groupees, montant_groupes, width=0.035, color=couleurs_alternees,edgecolor='black',linewidth=0.5)
-
-        for bar,montant in zip(bars,montant_groupes):
-            height=bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2.0, height +0.5 , f"{montant:.0f}", ha='center',va='bottom',fontsize=9,color="#333")
-
-
-
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-        ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
-        fig.autofmt_xdate()
-        ax.grid(True,linestyle='--',alpha=0.4)
-        fig.patch.set_facecolor("#f7f7f7")
-        ax.set_facecolor('#f0f0f0')
-        #ax.set_title("Shopify Inc", fontsize=16)
-        ax.set_ylabel("Prix ($)", fontsize=12)
-        ax.set_xlabel("Date", fontsize=12)
-        plt.xticks(rotation=45)
-        fig.tight_layout()
-
-
-        self.add_widget(FigureCanvasKivyAgg(fig))"""
-
-
-class PourcentagePV(RelativeLayout):
+class PourcentagePV(MDBoxLayout):
     from utilities.myfunctions import pourcentage
     widget_showed = False
 
@@ -280,7 +176,7 @@ class ListeVente(ScrollView):
         # print(produits)
         titles = ('ID', 'PRODUIT', 'DATE', 'QT')
         for i in enumerate(titles):
-            cell = Label(text=i[1], color=(0, 0, 0, 1), bold=True, size_hint=(1, None), height=25)
+            cell = MDLabel(text=i[1],theme_text_color="Custom", text_color=(1, 1, 1, 1),halign="center",valign="middle", bold=True, size_hint=(1, None), height=25,md_bg_color=get_color_from_hex("#132e49"))
             if i[0]==0 or i[0]==1 :
                 cell.size_hint_x=0.5
             elif i[0]==3:

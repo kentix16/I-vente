@@ -4,6 +4,7 @@ from kivy.core.text import LabelBase
 from kivy.lang import Builder
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -17,6 +18,8 @@ from kivymd.uix.screen import MDScreen
 from matplotlib import pyplot as plt
 from controllers.sales_page import PourcentagePV
 from models.gestionModel import GestionModel
+from utilities.myfunctions import show_year, show_month
+
 LabelBase.register(name="OutfitSemiBold", fn_regular="font/Outfit-SemiBold.ttf")
 LabelBase.register(name="OutfitBlack", fn_regular="font/Outfit-Black.ttf")
 
@@ -61,47 +64,33 @@ class StatDeVenteGlobal(MDCard):
 
         salemodel = GestionModel()
 
-        if date_fin:
-            ventes = salemodel.get_heures_somme_stat(date, date_fin)
-            depense = salemodel.get_heures_depense_stat(date, date_fin)
-        else:
-            heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=date)
-            heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=date)+1
-            heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=date)
-            heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=date)+1
 
-            # Vérifie que les valeurs sont valides
-            """if not all([heure_min_vente, heure_max_vente, heure_min_dep, heure_max_dep]):
-                self.add_widget(Label(text="Aucune donnée disponible pour cette période."))
-                return"""
-
-            heure_min = f"{min(heure_min_vente, heure_min_dep):02d}:00:00"
-            heure_max = f"{max(heure_max_vente, heure_max_dep):02d}:00:00"
-            """for i in range(40):
-                print("heure min vente", heure_min_vente)
-                print("heure max vente", heure_max_vente)
-                print("heure min dep", heure_min_dep)
-                print("heure max dep", heure_max_dep)
-                print("heure min totlal",heure_min)
-
-                print("heure max totlal",heure_max)"""
+        heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=date)
+        heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=date)+1
+        heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=date)
+        heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=date)+1
+        heure_min = f"{min(heure_min_vente, heure_min_dep):02d}:00:00"
+        heure_max = f"{max(heure_max_vente, heure_max_dep):02d}:00:00"
 
 
-            ventes = salemodel.get_heures_somme_stat(date, heure_min=heure_min, heure_max=heure_max)
-            depense = salemodel.get_heures_depense_stat(date, heure_min=heure_min, heure_max=heure_max)
+        ventes = salemodel.get_heures_somme_stat(date=date, heure_min=heure_min, heure_max=heure_max)
+        depense = salemodel.get_heures_depense_stat(date=date, heure_min=heure_min, heure_max=heure_max)
 
-        if not ventes or not depense:
-            self.add_widget(Label(text="Aucune donnée à afficher."))
-            return
+
 
         dates_ventes = [row[0] for row in ventes]
         montants = [row[1] for row in ventes]
-        """for i in range(100):
-            print("montant",montants)
-            print("date vente", dates_ventes)"""
         depense_vals = [row[1] for row in depense]
 
-
+        if not ventes or not depense or (montant==0 for montant in montants) or (depense==0  for depense in depense_vals):
+            image = Image(
+                source="images/pas_vente.png",
+                allow_stretch=True,
+                keep_ratio=False,
+                size_hint=(1, 1),
+                pos_hint={"center_x": 0.5, "center_y": 0.5})
+            self.add_widget(image)
+            return
         min_len = min(len(dates_ventes), len(montants), len(depense_vals))
         if min_len == 0:
             self.add_widget(Label(text="Pas de données suffisantes pour générer le graphique."))
@@ -118,11 +107,11 @@ class StatDeVenteGlobal(MDCard):
         ax.bar(x - bar_width / 2, montants, width=bar_width, label='Vente', color='turquoise')
         ax.bar(x + bar_width / 2, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
 
-        ax.set_title("Ventes vs Dépenses")
+        ax.set_title("Ventes & Dépenses")
         ax.set_xlabel("Jour" if date_fin else "Heure")
         ax.set_ylabel("Montant (Ar)")
         ax.set_xticks(x)
-        ax.set_xticklabels([d.strftime('%H:%M:%S                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ') if hasattr(d,"%d/%m" ) else str(d) for d in dates], rotation=45)
+        ax.set_xticklabels([d.strftime('%H:%M:%S') if hasattr(d,"%d/%m" ) else str(d) for d in dates], rotation=45)
         ax.legend()
         ax.grid(axis='y', linestyle="--", alpha=0.7)
         fig.tight_layout()
@@ -188,6 +177,8 @@ class StatsPage(MDBoxLayout):
     somme_total_gagnee = StringProperty('0 ar')
     produits_en_rupture = StringProperty('0')
     gestionmodel = GestionModel()
+    avg_gain = StringProperty('')
+    avg_dep=StringProperty('')
     time_picker_vertical: MDTimePickerDialHorizontal = ObjectProperty(allownone=True)
     date_picker_horizontal: MDModalDatePicker = ObjectProperty(allownone=True)
     date_picker_vertical: MDModalDatePicker = ObjectProperty(allownone=True)
@@ -199,9 +190,13 @@ class StatsPage(MDBoxLayout):
 
     def __init__(self, **kwargs):
         super(StatsPage, self).__init__(**kwargs)
+        gestionmodel=GestionModel()
         self.update_total_de_ventes()
         self.update_somme_total_gagnee()
         self.update_produits_en_rupture()
+        self.avg_gain=f'moyenne gain:{gestionmodel.get_average_gains()[0]}'
+        self.avg_dep= f'moyenne depense:{gestionmodel.get_average_depense()[0]}'
+
 
     """def check_orientation(self):
         self.orientation()"""
@@ -217,15 +212,34 @@ class StatsPage(MDBoxLayout):
 
     def show_modal_date_picker(self, *args):
         self.modal_date_picker()
+
+    def show_month_picker(self):
+        def on_month_selected(date_debut, date_fin):
+            order = {"date_dep": False}
+            self.ids.statedeventeglobal.show_stat_global(date=date_debut.strftime("%Y-%m-%d"),
+                                                date_fin=date_fin.strftime("%Y-%m-%d"))
+
+        show_month(on_month_selected)
+
+    def show_year_picker(self):
+        def on_year_selected(selected_year):
+            # Utilise l'année sélectionnée pour construire la plage de dates
+            date_debut = f"{selected_year}-01-01"
+            date_fin = f"{selected_year}-12-31"
+            order = {"date_dep": False}
+
+            self.ids.statedeventeglobal.show_stat_global(date=date_debut, date_fin=date_fin)
+
+        show_year(on_year_selected)
     def on_ok_date(self,instance_date_picker,):
         date  =instance_date_picker.get_date()[0]
 
-        self.ids.salescontainer.date = date
-        self.ids.salescontainer.date_fin = None
+        #self.ids.salescontainer.date = date
+        #self.ids.salescontainer.date_fin = None
         self.ids.statedeventeglobal.show_stat_global(date)
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
-        self.ids.pourcentagedepense.show_pourcentage_depense(date)
+        #self.ids.pourcentagedepense.show_pourcentage_depense(date)
         #self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date)
         instance_date_picker.dismiss()
 
@@ -233,14 +247,14 @@ class StatsPage(MDBoxLayout):
         date = instance_date_picker.get_date()[0]
         date_fin = instance_date_picker.get_date()[-1]
 
-        self.ids.salescontainer.date = date
-        self.ids.salescontainer.date_fin = date_fin
+        #self.ids.salescontainer.date = date
+        #self.ids.salescontainer.date_fin = date_fin
 
         self.ids.statedeventeglobal.show_stat_global(date,date_fin)
         self.update_somme_total_gagnee(date)
         self.update_total_de_ventes(date)
         #self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
-        self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
+        #self.ids.pourcentagedepense.show_pourcentage_depense(date,date_fin)
         instance_date_picker.dismiss()
 
 

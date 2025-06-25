@@ -2,15 +2,19 @@
     theme_bg_color:"Custom"
     #md_bg_color:139/255,139/255,139/255,1
     md_bg_color:248/255,247/255,242/255,1
+    size_hint_y: None
+    height: self.minimum_height
     spacing:dp(20)
     padding:dp(20)
     MDBoxLayout:
-        size_hint_y:1
         orientation:"vertical"
+        adaptive_height: True
         spacing:dp(20)
         padding:dp(20)
         MDBoxLayout:
-            size_hint_y:0.15
+            size_hint_y: None
+            height: dp(70)
+            orientation: "vertical"
             spacing:dp(7)
             padding:dp(7)
             MDLabel:
@@ -19,62 +23,75 @@
                 text:"filtrer par"
                 font_style:"Title"
                 role:"medium"
+            MDBoxLayout:
+                size_hint_y: None
+                height: dp(70)
+                spacing:dp(7)
+                padding:dp(7)
+                MDButton:
+                    id:date_button
+                    theme_bg_color:"Custom"
+                    md_bg_color:171/255,219/255,227/255,1
+                    radius:[15]
+                    size_hint_y: None
+                    on_release:
+                        root.show_date_picker()
+                    MDButtonText:
+                        text:"Date"
 
-            MDButton:
-                id:date_button
-                theme_bg_color:"Custom"
-                md_bg_color:171/255,219/255,227/255,1
-                radius:[15]
-                on_release:
-                    root.show_date_picker()
-                MDButtonText:
-                    text:"Date"
+                MDButton:
+                    theme_bg_color:"Custom"
+                    md_bg_color:171/255,219/255,227/255,1
+                    radius:[15]
+                    size_hint_y: None
+                    on_release:
+                        root.show_modal_date_picker()
+                    MDButtonText:
+                        text:"Période"
 
-            MDButton:
-                theme_bg_color:"Custom"
-                md_bg_color:171/255,219/255,227/255,1
-                radius:[15]
-                on_release:
-                    root.show_modal_date_picker()
-                MDButtonText:
-                    text:"Période"
-
-            MDButton:
-                theme_bg_color:"Custom"
-                md_bg_color:171/255,219/255,227/255,1
-                radius:[15]
-                on_release:
-                    root.show_year()
-                MDButtonText:
-                    text:"Mois"
-            MDButton:
-                theme_bg_color:"Custom"
-                md_bg_color:171/255,219/255,227/255,1
-                radius:[15]
-                on_release:
-                    root.show_year()
-                MDButtonText:
-                    text:"Année"
+                MDButton:
+                    theme_bg_color:"Custom"
+                    md_bg_color:171/255,219/255,227/255,1
+                    radius:[15]
+                    size_hint_y: None
+                    on_release:
+                        root.show_month_picker()
+                    MDButtonText:
+                        text:"Mois"
+                MDButton:
+                    theme_bg_color:"Custom"
+                    md_bg_color:171/255,219/255,227/255,1
+                    radius:[15]
+                    size_hint_y: None
+                    on_release:
+                        root.show_year_picker()
+                    MDButtonText:
+                        text:"Année"
 
         MDCard:
             size_hint_x:1
-            size_hint_y:0.85
+            size_hint_y: None
+            height: dp(550)
             style: "elevated"
             elevation:10
             radius:[20]
             ListeDepense:
                 id:listedepense
+                size_hint_y: None
+                height: dp(550)
                 size_hint : 1,1
-                #height : 170
                 on_parent:self.show_expenses()
     MDBoxLayout:
+        id:expense_section_2
         orientation:"vertical"
+        adaptive_height: True
         spacing:dp(20)
         padding:dp(20)
         size_hint_x:0.4
 
         MDCard:
-            size_hint_y:0.2
+            size_hint_y: None
+            height: dp(50)
             style: "elevated"
             elevation:10
             radius:[20]
@@ -85,7 +102,8 @@
                 MDListItem:
                     theme_bg_color: "Custom"
                     md_bg_color: [1,1,1,1]
-                    size_hint_y: 0.2
+                    size_hint:1,None
+                    height: dp(40)
                     radius:[20,20,0,0]
                     spacing:dp(10)
                     padding:dp(10)
@@ -96,13 +114,16 @@
                     MDListItemHeadlineText:
                         text:"comparaison mensuelle"
                 LabelSommePortefeuille:
+                    size_hint_y: None
+                    height :"40dp"
                     id:labelsommeportefeuille
                     text:self.somme_portefeuille
         MDCard:
+            size_hint_y: None
+            height: dp(300)
             style: "elevated"
             theme_bg_color: "Custom"
             size_hint_x: 1
-            size_hint_y:0.45
             md_bg_color: 168,205,230,255
             radius: [20]
             elevation: 10
@@ -111,7 +132,8 @@
                 MDListItem:
                     theme_bg_color: "Custom"
                     md_bg_color: 186/255,169/255,155/255,1
-                    size_hint_y: 0.1
+                    size_hint:1,None
+                    height: dp(40)
                     radius:[20,20,0,0]
                     spacing:dp(10)
                     padding:dp(10)
@@ -128,22 +150,22 @@
                     size_hint:1,1
                     on_parent:self.show_pourcentage_depense()
         MDCard:
-            size_hint_y:1
+            size_hint_y: None
+            height: dp(250)
             style: "elevated"
             elevation:10
             radius:[20]
             MDBoxLayout:
                 orientation:"vertical"
-                radius:[20]
-                spacing:dp(30)
                 MDListItem:
                     theme_bg_color: "Custom"
                     md_bg_color: 139/255,139/255,139/255,1
-                    size_hint_y: 0.1
+                    size_hint: 1,None
+                    height: dp(40)
                     radius:[20,20,0,0]
                     spacing:dp(10)
                     padding:dp(10)
-                    pos_hint: {"y": 0.9}
+                    pos_hint: {"center_y": 1}
                     halign:"center"
 
                     MDListItemLeadingIcon:
@@ -155,7 +177,9 @@
                         text_color:1,1,1,1
                         text: "ajouter un dépense"
                 MDTextField:
-                    size_hint:.7, 0.1
+                    size_hint:.7,None
+                    pos_hint:{"center_x":.5}
+                    height: dp(35)
                     id:nom_depense
                     mode:"filled"
                     MDTextFieldHelperText:
@@ -163,7 +187,9 @@
                     MDTextFieldHintText:
                         text:"nom de dépense"
                 MDTextField:
-                    size_hint:.7, 0.1
+                    pos_hint:{"center_x":.5}
+                    size_hint:.7,None
+                    height: dp(35)
                     id:somme_depense
                     mode:"filled"
                     MDTextFieldHelperText:
@@ -174,48 +200,12 @@
                 MDButton:
                     pos_hint: {"center_x": 0.5, "center_y": 0.5}
                     style: "filled"
-                    size_hint:.7, 0.1
+                    size_hint:.7,None
+                    height: dp(35)
                     on_press:root.add_expense()
                     MDButtonIcon:
                         icon: "check-underline-circle"
                     MDButtonText:
                         text: "ajouter le dépense"
 
-
-
-
-<SelectMonth>
-    id:select_month_year
-    style:"elevated"
-    elevation:10
-    radius:[20]
-    size_hint:(0.1,0.1)
-    MDBoxLayout:
-        orientation:"vertical"
-        MDBoxLayout:
-            MDIconButton:
-                icon:"arrow-left-thin"
-            MDButton:
-                pos_hint: {"center_x": 0.5, "center_y": 0.5}
-                style: "filled"
-                MDButtonText:
-                    text: root.year
-            MDIconButton:
-                icon:"arrow-right-thin"
-        MDBoxLayout:
-            MDIconButton:
-                icon:"arrow-left-thin"
-            SelectYear:
-                id:select_year
-                pos_hint: {"center_x": 0.5, "center_y": 0.5}
-                text: "month"
-            MDIconButton:
-                icon:"arrow-right-thin"
-
-
-
-
-    MDScrollView:
-        size_hint:None,None
-        size:"200dp","200dp"
 
