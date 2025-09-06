@@ -1,3 +1,4 @@
+from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, FadeTransition, SlideTransition
 
 
@@ -16,4 +17,18 @@ class NavigationScreenManager(ScreenManager):
             self.transition.direction="right"
             del self.screen_stack[-1]
             self.current=screen_name
+    def toggle(self):
+        App.get_running_app().manager.ids.mainscreen.ids.nav_drawer.set_state("toggle")
+        App.get_running_app().manager.ids.productsscreen.ids.nav_drawer.set_state("toggle")
+        App.get_running_app().manager.ids.walletscreen.ids.nav_drawer.set_state("toggle")
+        App.get_running_app().manager.ids.expensesscreen.ids.nav_drawer.set_state("toggle")
+        App.get_running_app().manager.ids.statsscreen.ids.nav_drawer.set_state("toggle")
+    def close(self):
+        App.get_running_app().manager.ids.mainscreen.ids.nav_drawer.state='close'
+        App.get_running_app().manager.ids.productsscreen.ids.nav_drawer.state='close'
+        App.get_running_app().manager.ids.walletscreen.ids.nav_drawer.state='close'
+        App.get_running_app().manager.ids.expensesscreen.ids.nav_drawer.state='close'
+        App.get_running_app().manager.ids.statsscreen.ids.nav_drawer.state='close'
+
+
 

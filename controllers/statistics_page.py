@@ -4,6 +4,7 @@ from kivy.core.text import LabelBase
 from kivy.lang import Builder
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -17,6 +18,8 @@ from kivymd.uix.screen import MDScreen
 from matplotlib import pyplot as plt
 from controllers.sales_page import PourcentagePV
 from models.gestionModel import GestionModel
+from utilities.myfunctions import show_year, show_month
+
 LabelBase.register(name="OutfitSemiBold", fn_regular="font/Outfit-SemiBold.ttf")
 LabelBase.register(name="OutfitBlack", fn_regular="font/Outfit-Black.ttf")
 
@@ -73,15 +76,21 @@ class StatDeVenteGlobal(MDCard):
         ventes = salemodel.get_heures_somme_stat(date=date, heure_min=heure_min, heure_max=heure_max)
         depense = salemodel.get_heures_depense_stat(date=date, heure_min=heure_min, heure_max=heure_max)
 
-        if not ventes or not depense:
-            self.add_widget(Label(text="Aucune donnée à afficher."))
-            return
+
 
         dates_ventes = [row[0] for row in ventes]
         montants = [row[1] for row in ventes]
         depense_vals = [row[1] for row in depense]
 
-
+        if not ventes or not depense or (montant==0 for montant in montants) or (depense==0  for depense in depense_vals):
+            image = Image(
+                source="images/pas_vente.png",
+                allow_stretch=True,
+                keep_ratio=False,
+                size_hint=(1, 1),
+                pos_hint={"center_x": 0.5, "center_y": 0.5})
+            self.add_widget(image)
+            return
         min_len = min(len(dates_ventes), len(montants), len(depense_vals))
         if min_len == 0:
             self.add_widget(Label(text="Pas de données suffisantes pour générer le graphique."))
@@ -203,6 +212,25 @@ class StatsPage(MDBoxLayout):
 
     def show_modal_date_picker(self, *args):
         self.modal_date_picker()
+
+    def show_month_picker(self):
+        def on_month_selected(date_debut, date_fin):
+            order = {"date_dep": False}
+            self.ids.statedeventeglobal.show_stat_global(date=date_debut.strftime("%Y-%m-%d"),
+                                                date_fin=date_fin.strftime("%Y-%m-%d"))
+
+        show_month(on_month_selected)
+
+    def show_year_picker(self):
+        def on_year_selected(selected_year):
+            # Utilise l'année sélectionnée pour construire la plage de dates
+            date_debut = f"{selected_year}-01-01"
+            date_fin = f"{selected_year}-12-31"
+            order = {"date_dep": False}
+
+            self.ids.statedeventeglobal.show_stat_global(date=date_debut, date_fin=date_fin)
+
+        show_year(on_year_selected)
     def on_ok_date(self,instance_date_picker,):
         date  =instance_date_picker.get_date()[0]
 

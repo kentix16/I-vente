@@ -14,6 +14,7 @@ from kivymd.uix.pickers import MDTimePickerDialHorizontal
 from kivymd.uix.pickers import MDModalDatePicker
 
 from models.gestionModel import GestionModel
+from utilities.myfunctions import show_month, show_year
 
 
 class SelectMonth(MDCard):
@@ -54,6 +55,26 @@ class WalletPage(MDBoxLayout):
 
     def show_modal_date_picker(self, *args):
         self.modal_date_picker()
+
+    def show_month_picker(self):
+        def on_month_selected(date_debut, date_fin):
+            order = {"date_dep": False}
+            self.ids.historique.show_historique(date=date_debut.strftime("%Y-%m-%d"),
+                                                date_fin=date_fin.strftime("%Y-%m-%d"),
+                                                order=order)
+
+        show_month(on_month_selected)
+
+    def show_year_picker(self):
+        def on_year_selected(selected_year):
+            # Utilise l'année sélectionnée pour construire la plage de dates
+            date_debut = f"{selected_year}-01-01"
+            date_fin = f"{selected_year}-12-31"
+            order = {"date_dep": False}
+
+            self.ids.historique.show_historique(date=date_debut, date_fin=date_fin, order=order)
+
+        show_year(on_year_selected)
     def on_ok_date(self,instance_date_picker):
         date  =instance_date_picker.get_date()[0]
         self.ids.historique.show_historique(date)

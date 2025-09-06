@@ -5,8 +5,10 @@
     padding: dp(20)  # marge autour des enfants
     spacing: dp(10)  # espace entre enfants
 <Gradient@MDNavigationDrawer>
+
     radius: [20, 20, 20, 20]
-    size_hint_x: 0.20
+    size_hint_x: None
+    width:"350dp"
     canvas.before:
         Color:
             rgba: 1, 1, 1, 1
@@ -65,7 +67,7 @@
             selected_color: [0, 0, 0, 0.2]
             ripple_color: [0, 0, 0, 0.2]
             md_bg_color:0,0,0,0
-            on_release: print(app.manager)
+            on_release: app.manager.push("SalesPage")
 
             MDNavigationDrawerItemLeadingIcon:
                 icon: "chart-areaspline"
@@ -73,6 +75,7 @@
                 text_color: 1, 1, 1, 1
 
             MDNavigationDrawerItemText:
+                role:"small"
                 text: "statistique du jour"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
@@ -90,6 +93,7 @@
 
             MDNavigationDrawerItemText:
                 text: "Portefeuille"
+                role:"small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
         MDNavigationDrawerItem:
@@ -107,6 +111,7 @@
 
             MDNavigationDrawerItemText:
                 text: "vos produits"
+                role:"small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
@@ -124,6 +129,7 @@
 
             MDNavigationDrawerItemText:
                 text: "Les dépenses"
+                role:"small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
@@ -140,6 +146,7 @@
 
             MDNavigationDrawerItemText:
                 text: "Statistiques"
+                role:"small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
@@ -157,6 +164,7 @@
 
             MDNavigationDrawerItemText:
                 text: "Vos données"
+                role:"small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
@@ -182,6 +190,7 @@
 
             MDNavigationDrawerItemText:
                 text: "Exemples"
+                role:"small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
         MDNavigationDrawerItem:
@@ -207,6 +216,7 @@
 
             MDNavigationDrawerItemText:
                 text: "Votre compte"
+                role:"small"
                 theme_text_color: "Custom"
                 text_color: 140/255,119/255,245/255,1
         MDNavigationDrawerItem:
@@ -218,11 +228,13 @@
 
             MDNavigationDrawerItemLeadingIcon:
                 icon: "logout"
+
                 theme_text_color: "Custom"
                 text_color: 140/255,119/255,245/255,1
 
             MDNavigationDrawerItemText:
                 text: "Déconnexion"
+                role:"small"
                 theme_text_color: "Custom"
                 text_color: 140/255,119/255,245/255,1
 
@@ -236,8 +248,8 @@
         md_bg_color: 1, 1, 1, 1
 
         MDActionTopAppBarButton:
-            on_release:app.manager.pop()
-            icon: "arrow-left"
+            on_release: app.manager.toggle()
+            icon: "menu"
             theme_icon_color: "Custom"
             icon_color: 0, 0, 0, 1   # icône noire
 
@@ -265,3 +277,16 @@
             theme_icon_color: "Custom"
             icon_color: 0, 0, 0, 1
 
+<Bg_mobile@MDNavigationDrawer>
+
+    radius: [20, 20, 20, 20]
+    size_hint_x: 1
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            source: "images/poster_mobile.png"
+            pos: self.pos
+            size: self.size
+    md_bg_color: 0, 0, 0, 0  # Rendre le drawer transparent
+    elevation: 0  # Supprimer l'élévation qui peut causer des bordures

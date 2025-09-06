@@ -1,5 +1,5 @@
 import datetime
-from kivy.metrics import dp
+from datetime import datetime
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
@@ -13,11 +13,12 @@ from kivymd.uix.pickers import MDTimePickerDialHorizontal
 from kivymd.uix.pickers import MDModalDatePicker
 from models.gestionModel import GestionModel
 from utilities.databases import to_database
+from utilities.myfunctions import show_year, show_month
 
 
 class SelectYear(MDLabel):
     i = 2000
-    current_year = datetime.datetime.now().year
+    current_year = datetime.now().year
     range_number = current_year - 2000
     text = current_year
 
@@ -31,9 +32,11 @@ class ExpensesPage(MDBoxLayout):
     from utilities.myfunctions import show_time_picker_vertical
     from utilities.myfunctions import date_picker
     from utilities.myfunctions import modal_date_picker
+    from utilities.myfunctions import show_year
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         #device_orientation = self.check_orientation
+
 
     """def check_orientation(self):
         self.orientation()"""
@@ -46,6 +49,25 @@ class ExpensesPage(MDBoxLayout):
     def show_modal_date_picker(self, *args):
         self.modal_date_picker()
 
+    def show_month_picker(self):
+        def on_month_selected(date_debut, date_fin):
+            order = {"date_dep": False}
+            self.ids.listedepense.show_expenses(date=date_debut.strftime("%Y-%m-%d"),
+                                                date_fin=date_fin.strftime("%Y-%m-%d"),
+                                                order=order)
+
+        show_month(on_month_selected)
+
+    def show_year_picker(self):
+        def on_year_selected(selected_year):
+            # Utilise l'année sélectionnée pour construire la plage de dates
+            date_debut = f"{selected_year}-01-01"
+            date_fin = f"{selected_year}-12-31"
+            order = {"date_dep": False}
+
+            self.ids.listedepense.show_expenses(date=date_debut, date_fin=date_fin, order=order)
+
+        show_year(on_year_selected)
 
     def on_ok_date(self, instance_date_picker):
         date = instance_date_picker.get_date()[0]
@@ -62,7 +84,7 @@ class ExpensesPage(MDBoxLayout):
         self.ids.pourcentagedepense.show_pourcentage_depense(date_debut,date_fin)
         instance_date_picker.dismiss()
 
-    def show_year(self):
+    def show_yearrr(self):
         select_month_card = self.ids.select_month_year
         year_dialog = MDDialog(
             MDDialogContentContainer(
@@ -119,7 +141,7 @@ class ListeDepense(ScrollView):
     def __init__(self, **kwargs):
         super(ListeDepense, self).__init__(**kwargs)
 
-    def show_expenses(self, date=None, date_fin=None, order=None):
+    def show_expenses(self, date=None, date_fin=None,order=None):
         if self.grid_showed: self.remove_widget(self.grid)
         if not order:
             order ={'date_dep': False}

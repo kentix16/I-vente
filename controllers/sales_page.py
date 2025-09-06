@@ -5,9 +5,11 @@ import numpy as np
 from kivy.core.text import LabelBase
 from kivy.lang import Builder
 from kivy.properties import ListProperty, StringProperty, NumericProperty
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.scrollview import ScrollView
+from kivy.utils import get_color_from_hex
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
 from kivymd.uix.gridlayout import MDGridLayout
@@ -20,32 +22,17 @@ from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
 from models.gestionModel import GestionModel
 
+COLOR_HEADER_BG = get_color_from_hex("#132e49")
+COLOR_HEADER_TEXT = get_color_from_hex("#ffffff")
+COLOR_ROW_EVEN = get_color_from_hex("#ffffff")
+COLOR_ROW_ODD = get_color_from_hex("#245478")
+COLOR_TEXT_EVEN = get_color_from_hex("#132e49")
+COLOR_TEXT_ODD = get_color_from_hex("#ffffff")
+
 # Pour les variantes spécifiques comme SemiBold et Black
 LabelBase.register(name="OutfitSemiBold", fn_regular="font/Outfit-SemiBold.ttf")
 LabelBase.register(name="OutfitBlack", fn_regular="font/Outfit-Black.ttf")
 
-KV = '''
-<CommonComponentLabel>
-    halign: "center"
-
-
-<MobileView>
-    CommonComponentLabel:
-        text: "Mobile"
-
-
-<TabletView>
-    CommonComponentLabel:
-        text: "Table"
-
-
-<DesktopView>
-    CommonComponentLabel:
-        text: "Desktop"
-
-
-ResponsiveView:
-'''
 class StatToday(MDCard):
     stat_showed = False
     def __init__(self,**kwargs):
@@ -70,9 +57,9 @@ class StatDeVente(MDCard):
 
         salemodel = GestionModel()
         heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=None)
-        heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=None)+1
+        heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=None) + 1
         heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=None)
-        heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=None)+1
+        heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=None) + 1
 
         # Vérifie que les valeurs sont valides
         """if not all([heure_min_vente, heure_max_vente, heure_min_dep, heure_max_dep]):
@@ -86,14 +73,21 @@ class StatDeVente(MDCard):
         depense = salemodel.get_heures_depense_stat(date=None, heure_min=heure_min, heure_max=heure_max)
 
 
-        if not ventes or not depense:
-            lbl = Label(text="Aucune donnée à afficher.")
-            self.add_widget(lbl)
-            return
+
 
         dates_ventes = [row[0] for row in ventes]
         montants = [row[1] for row in ventes]
         depense_vals = [row[1] for row in depense]
+
+        if not ventes or not depense or (i==0 for i in montants) or (i==0 for i in depense_vals):
+            image=Image(
+        source="images/pas_encore_vente.png" ,
+        allow_stretch=True,
+        keep_ratio=False,
+        size_hint= (1, 1),
+        pos_hint={"center_x": 0.5, "center_y": 0.5})
+            self.add_widget(image)
+            return
 
         min_len = min(len(dates_ventes), len(montants), len(depense_vals))
         if min_len == 0:
@@ -108,8 +102,8 @@ class StatDeVente(MDCard):
         x = np.arange(min_len)
         bar_width = 0.35
 
-        ax.bar(x , montants, width=bar_width, label='Vente', color='turquoise')
-        ax.bar(x, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
+        ax.bar(x - bar_width / 2, montants, width=bar_width, label='Vente', color='turquoise')
+        ax.bar(x + bar_width / 2, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
 
         ax.set_title("Ventes vs Dépenses")
         ax.set_xlabel("Heure")
@@ -122,7 +116,7 @@ class StatDeVente(MDCard):
 
         self.add_widget(FigureCanvasKivyAgg(fig))
 
-class PourcentagePV(RelativeLayout):
+class PourcentagePV(MDBoxLayout):
     from utilities.myfunctions import pourcentage
     widget_showed = False
 
@@ -182,7 +176,7 @@ class ListeVente(ScrollView):
         # print(produits)
         titles = ('ID', 'PRODUIT', 'DATE', 'QT')
         for i in enumerate(titles):
-            cell = Label(text=i[1], color=(0, 0, 0, 1), bold=True, size_hint=(1, None), height=25)
+            cell = MDLabel(text=i[1],theme_text_color="Custom", text_color=(1, 1, 1, 1),halign="center",valign="middle", bold=True, size_hint=(1, None), height=25,md_bg_color=get_color_from_hex("#132e49"))
             if i[0]==0 or i[0]==1 :
                 cell.size_hint_x=0.5
             elif i[0]==3:
