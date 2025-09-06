@@ -472,5 +472,5 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
 
 
 gestionmodel = GestionModel()
-res = gestionmodel.get_heures_depense_stat(date='2025-03-06',date_fin='2025-03-08')
+res = gestionmodel.get_min_max_heures_vente(date='2025-03-06',)
 print(res)

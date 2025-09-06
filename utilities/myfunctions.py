@@ -109,42 +109,6 @@ def ouvrir_fichier(self, instance):
     root.destroy()  # Fermer le root tkinter après sélection
 
 
-"""ORIENTATION = Literal["landscape","portrait"]
-
-def orientation(self, instance: ThemeManager, orientation: ORIENTATION):
-    if orientation == "portrait" and self.time_picker_horizontal:
-        self.time_picker_horizontal.dismiss()
-        hour = str(self.time_picker_horizontal.time.hour)
-        minute = str(self.time_picker_horizontal.time.minute)
-        Clock.schedule_once(
-            lambda x: self.open_time_picker_vertical(hour, minute),
-            0.1,
-        )
-    elif orientation == "landscape" and self.time_picker_vertical:
-        self.time_picker_vertical.dismiss()
-        hour = str(self.time_picker_vertical.time.hour)
-        minute = str(self.time_picker_vertical.time.minute)
-        Clock.schedule_once(
-            lambda x: self.open_time_picker_horizontal(hour, minute),
-            0.1,
-        )
-    if orientation == "portrait" and self.date_picker_horizontal:
-        self.date_picker_horizontal.dismiss()
-        day = str(self.date_picker_horizontal.date.minute)
-        minute = str(self.date_picker_horizontal.date.minute)
-        Clock.schedule_once(
-            lambda x: self.open_date_picker_vertical(hour, minute),
-            0.1,
-        )
-    elif orientation == "landscape" and self.date_picker_vertical:
-        self.date_picker_vertical.dismiss()
-        hour = str(self.date_picker_vertical.date.hour)
-        minute = str(self.date_picker_vertical.date.minute)
-        Clock.schedule_once(
-            lambda x: self.open_date_picker_horizontal(hour, minute),
-            0.1,
-        )
-"""
 def show_time_picker_horizontal(self, hour, minute):
     self.time_picker_vertical = None
     self.time_picker_horizontal = MDTimePickerDialHorizontal(
@@ -181,20 +145,23 @@ def modal_date_picker(self, *args):
     date_dialog.bind(on_ok=self.on_ok_periode)
     date_dialog.open()
 
-def generate_fic_excel(title,column_title, datas,):
+def generate_fic_excel(title, datas,):
     # Créer un nouveau fichier Excel
     workbook = xlsxwriter.Workbook(f'{title}.xlsx')
     worksheet = workbook.add_worksheet()
-    for i in range(len(column_title)):
-        worksheet.write(0,i,str(column_title[i]))
+    colonnes = list(datas[0].keys())
+    for col,titre in enumerate(colonnes):
+        worksheet.write(0,col,titre)
 
-    for data in enumerate(datas):
-        for item in enumerate(data[1]):
-            worksheet.write(data[0]+1,item[0], str(item[1]))
+    for row, data in enumerate(datas):
+        for col,item in enumerate(colonnes):
+            worksheet.write(row+1,col,data[item])
+
 
     # Fermer le fichier
     workbook.close()
 
-data = [('banane',2),('citron',5),('orange',6),('pommes','8')]
-generate_fic_excel('fruit5',('modeles','quantité'),data)
+data = [{"perimé":0,'reste':2},{"perimé":5,'reste':5}]
+generate_fic_excel('dico',data)
+#print(list(data[0].keys()))
 

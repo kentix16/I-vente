@@ -24,7 +24,7 @@ from kivymd.uix.sliverappbar import MDSliverAppbarContent
 from controllers.sales_page import PourcentagePV
 from models.gestionModel import GestionModel
 from utilities.databases import to_database
-
+from utilities.myfunctions import generate_fic_excel
 
 # Chemin de votre fichier KV
 kv_path = os.path.join(os.path.dirname(__file__), '..', 'view', 'products_page.kv')
@@ -286,6 +286,8 @@ class ProductsPage(MDBoxLayout):
         screen_manager = self.ids.defaultscreen.ids.screen_manager
         screen_manager.current = "screen3"
         screen_manager.transition.direction = "left"
+    def export_to_excel(self):
+        pass
 class ProductList(MDScreen):
     time_picker_vertical: MDTimePickerDialHorizontal = ObjectProperty(allownone=True)
     date_picker_horizontal: MDModalDatePicker = ObjectProperty(allownone=True)
@@ -326,8 +328,8 @@ class ProductList(MDScreen):
         self.ids.salescontainer.date = date
         self.ids.salescontainer.date_fin = date_fin
 
-        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date,date_fin)
-        self.ids.pourcentagedepense.show_pourcentage_depense(date, date_fin)
+        self.ids.salescontainer.ids.pourcentagepvg.show_pourcentage_pv(date=date,date_fin=date_fin)
+        #self.ids.pourcentagedepense.show_pourcentage_depense(date, date_fin)
         instance_date_picker.dismiss()
 
 
@@ -389,6 +391,8 @@ class PourcentagePVG(PourcentagePV):
             print("ERREUR: id 'pv' introuvable dans PourcentagePVG")
 
 class ProductResume(ScrollView):
+    from utilities.myfunctions import show_popup
+    data = []
     def __init__(self,**kwargs):
         super(ProductResume,self).__init__(**kwargs)
 
@@ -397,13 +401,18 @@ class ProductResume(ScrollView):
         sold_product=GestionModel().get_sold_product()
         current_stock=GestionModel().get_current_stock()
         minimum=min(len(stock_init),len(sold_product),len(current_stock))
-        data=[]
         for i in range(minimum):
-            data.append({"initiale":str(stock_init[i]),"vendu":str(sold_product[i]),"perime":str(0),"reste":str(current_stock[i])})
+            self.data.append({"initiale":str(stock_init[i]),"vendu":str(sold_product[i]),"perime":str(0),"reste":str(current_stock[i])})
 
-        self.ids.pr.data=data
+        self.ids.pr.data=self.data
         for i in range(2):
             print(self.ids.pr.data)
+    def export_to_excel(self):
+        generate_fic_excel('produits',self.data)
+        self.show_popup('réussi','fotre fichier a bien été exporté')
+
+
+
 
 
 

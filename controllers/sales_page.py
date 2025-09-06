@@ -70,9 +70,9 @@ class StatDeVente(MDCard):
 
         salemodel = GestionModel()
         heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=None)
-        heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=None) + 1
+        heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=None)+1
         heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=None)
-        heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=None) + 1
+        heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=None)+1
 
         # Vérifie que les valeurs sont valides
         """if not all([heure_min_vente, heure_max_vente, heure_min_dep, heure_max_dep]):
@@ -87,7 +87,8 @@ class StatDeVente(MDCard):
 
 
         if not ventes or not depense:
-            self.add_widget(Label(text="Aucune donnée à afficher."))
+            lbl = Label(text="Aucune donnée à afficher.")
+            self.add_widget(lbl)
             return
 
         dates_ventes = [row[0] for row in ventes]
@@ -107,8 +108,8 @@ class StatDeVente(MDCard):
         x = np.arange(min_len)
         bar_width = 0.35
 
-        ax.bar(x - bar_width / 2, montants, width=bar_width, label='Vente', color='turquoise')
-        ax.bar(x + bar_width / 2, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
+        ax.bar(x , montants, width=bar_width, label='Vente', color='turquoise')
+        ax.bar(x, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
 
         ax.set_title("Ventes vs Dépenses")
         ax.set_xlabel("Heure")
