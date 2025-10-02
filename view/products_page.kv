@@ -205,7 +205,7 @@
             orientation: "vertical"
             spacing: dp(20)
             padding: dp(20)
-            size_hint_x: 0.3
+            size_hint_x: 0.4
             adaptive_height:True
             MDTabsPrimary:
                 size_hint_y: None
@@ -262,8 +262,9 @@
             id: sliver_box
             size_hint_y: None
             height: dp(550)
-
-<Sliver@MDScreen>:
+            size_hint_x:.6
+            #md_bg_color: 1, 0, 0, 0.3
+<Sliver@MDScrollView>:
     MDSliverAppbar:
         background_color: 1,1,1,1 # couleur 2d4a50
         hide_appbar: True
@@ -358,11 +359,14 @@
         orientation:"vertical"
         size_hint_x:.1
         MDButton:
-            text:"Vendre"
-            text_bg_color:[0,0,0.2,0]
-            icon: "package-down"
-            icon_size: "60dp"
             on_release: self.parent.parent.parent.parent.parent.sell_product(root.nom_produit)
+            md_bg_color:[0,0,0.2,0]
+            MDButtonIcon:
+                icon: "plus"
+                icon_size: "60dp"
+            MDButtonText:
+                pos_hint: {"center_x": .5, "center_y": .5}
+                text:"Vendre"
         MDIconButton:
             icon: "trash-can-outline"
             icon_size: "60dp"
@@ -482,11 +486,10 @@
             height:dp(500)
             size_hint_x: 0.3
             orientation: "vertical"
-            padding:"20dp"
             MDBoxLayout:
                 size_hint_x:1
                 spacing:dp(7)
-                padding:dp(7)
+                pos_hint: {"center_y": 1.1}
                 adaptive_height:True
                 MDButton:
                     size_hint_y: None
@@ -540,6 +543,7 @@
 
 <SalesStatContent>:
     orientation:'vertical'
+
     MDListItem:
         theme_bg_color: "Custom"
         md_bg_color: 186/255,169/255,155/255,1
@@ -548,7 +552,7 @@
         radius:[20,20,0,0]
         spacing:dp(10)
         padding:dp(10)
-        pos_hint: {"center_y": 1}
+        pos_hint: {"center_y": .8}
 
         MDListItemLeadingIcon:
             icon: "sale"
@@ -560,7 +564,7 @@
         spacing: dp(7)
         padding: dp(7)
         adaptive_height:True
-        pos_hint: {"center_y": 0.8}
+        pos_hint: {"center_y": 0.7}
         MDTextField:
             size_hint_y: None
             height: dp(36)
@@ -571,7 +575,6 @@
             radius: [5]
             mode: "filled"
         MDButton:
-            pos_hint: {"center_y": 0.9}
             size_hint_y: None
             height: dp(36)
             on_release: root.search_order()
@@ -638,30 +641,43 @@
     orientation:"horizontal"
     spacing:dp(20)
     padding:dp(20)
+
     MDLabel:
         size_hint_y: None
         height: dp(36)
         halign: "center"
         valign: "middle"
         text:root.initiale
+    MDDivider:
+        orientation:"vertical"
+        size_hint_x:.05
     MDLabel:
         size_hint_y: None
         height: dp(36)
         halign: "center"
         valign: "middle"
         text:root.vendu
+    MDDivider:
+        orientation:"vertical"
+        size_hint_x:.05
     MDLabel:
         size_hint_y: None
         height: dp(36)
         halign: "center"
         valign: "middle"
         text:root.perime
+    MDDivider:
+        orientation:"vertical"
+        color:0.9569, 0.5373, 0.2078, 1
+        size_hint_x:.05
     MDLabel:
         size_hint_y: None
         height: dp(36)
         halign: "center"
         valign: "middle"
         text:root.reste
+    MDWidget:
+        size_hint_x:.09
 
 
 
