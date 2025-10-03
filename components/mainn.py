@@ -36,13 +36,24 @@ class MyScreenManager(NavigationScreenManager):
 
 
 def on_window_resize(window, width, height):
-    for i in range(50):print("window size",window.height,window.width)
     manager = App.get_running_app().manager
+
+    for i in range(50):
+        print("window size",window.height,window.width)
+        try:
+            print("🎯 test accès :", manager.ids.mainscreen.ids.salespage.orientation)
+        except Exception as e:
+            print("❌ erreur d’accès à salespage:", e)
+
+
+
     if width < 750:
-        if width < 500:
+        if width < 350:
             state = "open"
+            opacity = 0
         else:
             state = "open"
+            opacity = 0
         cols = 1
         orientation = "vertical"
         size_hint = 1
@@ -50,7 +61,7 @@ def on_window_resize(window, width, height):
         scroll = True
         size_hint_1=1
         screen_size=550
-        opacity=0
+
 
         color=0,0,0,0
         poshint={"center_x":.5}
@@ -120,6 +131,7 @@ def on_window_resize(window, width, height):
 
 
 
+
 class CompanyManager(MDApp):
     primary_color = ColorProperty()
     accent_color = ColorProperty()
@@ -127,7 +139,6 @@ class CompanyManager(MDApp):
     bg_dark = ColorProperty()
     text_color = ColorProperty()
     opposite_bg_normal = ColorProperty()
-    drawer_color = ColorProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -141,12 +152,11 @@ class CompanyManager(MDApp):
 
     def set_light_theme_colors(self):
         self.primary_color = get_color_from_hex("#245478")
-        self.accent_color = get_color_from_hex("#ffffff")  # Changé en blanc
+        self.accent_color = get_color_from_hex("#f48935")
         self.bg_normal = get_color_from_hex("#ffffff")
         self.bg_dark = get_color_from_hex("#132e49")
         self.text_color = get_color_from_hex("#000000")
-        self.opposite_bg_normal = get_color_from_hex("#b7e7eb")
-        self.drawer_color = [13 / 255, 71 / 255, 161 / 255, 1]
+        self.opposite_bg_normal = get_color_from_hex("#fcbe8d")
 
     def wait_for_layout(self, dt):
         try:
@@ -159,13 +169,12 @@ class CompanyManager(MDApp):
             Clock.schedule_once(self.wait_for_layout, 0.2)
 
     def set_dark_theme_colors(self):
-        self.primary_color = get_color_from_hex("#0a1929")  # Bleu très nuit
-        self.accent_color = get_color_from_hex("#ffffff")  # Changé en blanc
-        self.bg_normal = get_color_from_hex("#0a1929")  # Bleu très nuit
-        self.bg_dark = get_color_from_hex("#050d14")  # Bleu encore plus foncé
+        self.primary_color = get_color_from_hex("#132e49")
+        self.accent_color = get_color_from_hex("#f48935")
+        self.bg_normal = get_color_from_hex("#132e49")
+        self.bg_dark = get_color_from_hex("#1a1a1a")
         self.text_color = get_color_from_hex("#fcbe8d")
-        self.opposite_bg_normal = get_color_from_hex("#1a3a52")  # Bleu nuit moyen
-        self.drawer_color = [13 / 255, 71 / 255, 161 / 255, 1]
+        self.opposite_bg_normal = get_color_from_hex("#245478")
 
     def damn(self, value=False):
         if value:
@@ -178,15 +187,30 @@ class CompanyManager(MDApp):
     def on_switch_active(self, instance_switch, value):
         self.damn(value)
 
+    """def on_start(self):
+        on_window_resize(Window, Window.width, Window.height)"""
+
     def on_start(self):
-        on_window_resize(Window, Window.width, Window.height)
+        # ⏳ attendre que l'UI soit prête
+        Clock.schedule_once(self.assign_manager_and_resize, 0.1)
+        Clock.schedule_once(self.wait_for_layout, 0.2)
+    def assign_manager_and_resize(self, dt):
+        try:
+            self.manager = self.first.ids.nav_screen_manager_2  # ✅ maintenant accessible
+            on_window_resize(Window, Window.width, Window.height)
 
 
+        except Exception as e:
+            print("[ERROR] assign_manager_and_resize:", e)
+        for i in range(20):
+            print("self.first:", self.first)
+            print("self.first.ids:", self.first.ids)
+            print("self.first.ids.mainscreen:", self.first.ids.get('mainscreen'))
 
     manager = ObjectProperty(None)
     def build(self):
-        self.manager = MyScreenManager()  # Root contenant appbar, nav, etc.
-        return self.manager
+        self.first = Damn()  # Root contenant appbar, nav, etc.
+        return self.first
 
 
 if __name__ == "__main__":

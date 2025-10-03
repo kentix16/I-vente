@@ -1,7 +1,6 @@
 <WalletPage>
     theme_bg_color:"Custom"
     #md_bg_color:139/255,139/255,139/255,1
-    md_bg_color:248/255,247/255,242/255,1
     spacing:dp(20)
     padding:dp(20)
     size_hint_y:None
@@ -121,55 +120,66 @@
                     id:labelsommeportefeuille2
                     text:self.somme_portefeuille
         MDCard:
-            size_hint_y:None
-            height:dp(300)
+            size_hint_y: None
+            height: dp(250)
             style: "elevated"
-            elevation:10
-            radius:[20]
+            elevation: 10
+            radius: [20]
             pos_hint: {"y": 0.4}
+
             MDBoxLayout:
-                height:dp(300)
-                orientation:"vertical"
-                spacing:"20dp"
+                orientation: "vertical"
+                padding: 0
+                spacing: dp(15)
+
+                # En-tête du card
                 MDListItem:
                     theme_bg_color: "Custom"
-                    size_hint: 1,None
-                    height:dp(30)
+                    md_bg_color: 139/255, 139/255, 139/255, 1
+                    size_hint_y: None
+                    height: dp(60)
                     radius:[20,20,0,0]
-                    spacing:dp(10)
-                    padding:dp(10)
-                    pos_hint: {"y": 0.9}
-                    halign:"center"
-                    md_bg_color: 139/255,139/255,139/255,1
-
                     MDListItemLeadingIcon:
                         icon: "swap-horizontal-bold"
-                        icon_color:1,1,1,1
 
                     MDListItemHeadlineText:
-                        theme_text_color: "Custom"
-                        text_color:1,1,1,1
                         text: "effectuer une Transaction"
+                        theme_text_color: "Custom"
+                        text_color: 1, 1, 1, 1
 
+                # Espaceur pour centrer le contenu
+                Widget:
+                    size_hint_y: 0.3
+
+                # Champ de saisie
                 MDTextField:
-                    pos_hint:{"center_x": .5}
-                    size_hint:.7,None
-                    height:dp(40)
-                    id:somme_transaction
-                    mode:"filled"
-                    MDTextFieldHelperText:
-                        text:"ex: 8000"
-                    MDTextFieldHintText:
-                        text:"entrez la somme"
-
-                MDButton:
+                    id: somme_transaction
+                    mode: "filled"
+                    size_hint: 0.85, None
                     pos_hint: {"center_x": 0.5}
-                    size_hint_y:None
-                    height:dp(40)
+
+                    MDTextFieldHintText:
+                        text: "entrez la somme"
+
+                    MDTextFieldHelperText:
+                        text: "ex: 8000"
+                        mode: "persistent"
+
+                # Bouton
+                MDButton:
                     style: "filled"
-                    on_press:root.add()
+                    size_hint: 0.85, None
+                    height: dp(45)
+                    pos_hint: {"center_x": 0.5}
+                    on_press: root.add()
+
                     MDButtonIcon:
                         icon: "check-underline-circle"
+
                     MDButtonText:
                         text: "effectuer la transaction"
+
+                # Espaceur en bas
+                Widget:
+                    size_hint_y: 0.5
 

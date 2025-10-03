@@ -79,15 +79,15 @@ class StatDeVente(MDCard):
         montants = [row[1] for row in ventes]
         depense_vals = [row[1] for row in depense]
 
-        if not ventes or not depense or (i==0 for i in montants) or (i==0 for i in depense_vals):
-            image=Image(
-        source="images/pas_encore_vente.png" ,
-        allow_stretch=True,
-        keep_ratio=False,
-        size_hint= (1, 1),
-        pos_hint={"center_x": 0.5, "center_y": 0.5})
-            self.add_widget(image)
-            return
+       # if not ventes or not depense or (i==0 for i in montants) or (i==0 for i in depense_vals):
+        #    image=Image(
+        #source="images/pas_encore_vente.png" ,
+        #allow_stretch=True,
+        #keep_ratio=False,
+        #size_hint= (1, 1),
+        #pos_hint={"center_x": 0.5, "center_y": 0.5})
+          #  self.add_widget(image)
+           # return
 
         min_len = min(len(dates_ventes), len(montants), len(depense_vals))
         if min_len == 0:

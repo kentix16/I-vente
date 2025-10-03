@@ -24,11 +24,13 @@ class NavigationScreenManager(ScreenManager):
         App.get_running_app().manager.ids.expensesscreen.ids.nav_drawer.set_state("toggle")
         App.get_running_app().manager.ids.statsscreen.ids.nav_drawer.set_state("toggle")
     def close(self):
-        App.get_running_app().manager.ids.mainscreen.ids.nav_drawer.state='close'
-        App.get_running_app().manager.ids.productsscreen.ids.nav_drawer.state='close'
-        App.get_running_app().manager.ids.walletscreen.ids.nav_drawer.state='close'
-        App.get_running_app().manager.ids.expensesscreen.ids.nav_drawer.state='close'
-        App.get_running_app().manager.ids.statsscreen.ids.nav_drawer.state='close'
+        App.get_running_app().manager.ids.mainscreen.ids.nav_drawer.set_state('close')
+        App.get_running_app().manager.ids.productsscreen.ids.nav_drawer.set_state('close')
+        App.get_running_app().manager.ids.walletscreen.ids.nav_drawer.set_state('close')
+        App.get_running_app().manager.ids.expensesscreen.ids.nav_drawer.set_state('close')
+        App.get_running_app().manager.ids.statsscreen.ids.nav_drawer.set_state('close')
+
+
 
 
 

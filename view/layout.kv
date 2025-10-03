@@ -2,41 +2,42 @@
 
 <PrincipalScreen@MDBoxLayout>
     orientation: "vertical"
+    md_bg_color: app.opposite_bg_normal
     padding: dp(20)  # marge autour des enfants
     spacing: dp(10)  # espace entre enfants
 <Gradient@MDNavigationDrawer>
-
     radius: [20, 20, 20, 20]
     size_hint_x: None
-    width:"350dp"
+    width: "350dp"
+    theme_text_color: "Custom"
+    md_bg_color: app.drawer_color
     canvas.before:
         Color:
-            rgba: 1, 1, 1, 1
+            rgba: app.drawer_color
         Rectangle:
-            source: "images/bluebg.jpg"
             pos: self.pos
             size: self.size
-    md_bg_color: 0, 0, 0, 0  # Rendre le drawer transparent
-    elevation: 0  # Supprimer l'élévation qui peut causer des bordures
-
 
     MDNavigationDrawerMenu:
+        pos_hint: {"center_x": .5, "center_y": .5}
         canvas.before:
             Color:
-                rgba: 1, 1, 1, 1
+                rgba: app.drawer_color
             Rectangle:
-                source: "images/bluebg.jpg"
                 pos: self.pos
                 size: self.size
-        pos_hint: {"center_x": .5, "center_y": .5}
-        md_bg_color: 0, 0, 0, 0
-
 
         MDBoxLayout:
             orientation: "vertical"
             adaptive_height: True
             spacing: dp(8)
             padding: [0, dp(10), 0, dp(20)]
+            canvas.before:
+                Color:
+                    rgba: app.drawer_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
             FitImage:
                 source: "assets/logo.png"
@@ -45,7 +46,7 @@
                 pos_hint: {"center_x": .5}
                 radius: [dp(25)]
 
-            DefaultLabel:
+            MDLabel:
                 text: "Mail Pro"
                 font_style: "Display"
                 role: "small"
@@ -61,110 +62,125 @@
         MDNavigationDrawerLabel:
             text: "MENU PRINCIPAL"
             theme_text_color: "Custom"
-            text_color: 1, 1, 1, 0.6
+            text_color: 1, 1, 1, 0.8
 
         MDNavigationDrawerItem:
-            selected_color: [0, 0, 0, 0.2]
-            ripple_color: [0, 0, 0, 0.2]
-            md_bg_color:0,0,0,0
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
+            canvas.before:
+                Color:
+                    rgba: app.drawer_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
             on_release: app.manager.push("SalesPage")
-
             MDNavigationDrawerItemLeadingIcon:
                 icon: "chart-areaspline"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
-
             MDNavigationDrawerItemText:
-                role:"small"
+                role: "small"
                 text: "statistique du jour"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
+
         MDNavigationDrawerItem:
-            selected_color: [0, 0, 0, 0.2]
-            ripple_color: [0, 0, 0, 0.2]
-            md_bg_color:0,0,0,0
-            on_release:app.manager.push("WalletPage")
-
-
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
+            canvas.before:
+                Color:
+                    rgba: app.drawer_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            on_release: app.manager.push("WalletPage")
             MDNavigationDrawerItemLeadingIcon:
                 icon: "wallet"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
-
             MDNavigationDrawerItemText:
                 text: "Portefeuille"
-                role:"small"
+                role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
-        MDNavigationDrawerItem:
-            selected_color: [0, 0, 0, 0.2]
-            ripple_color: [0, 0, 0, 0.2]
-            md_bg_color:0,0,0,0
-            #active_indicator_color:219/255,237/255,247/255,1
-            on_release:app.manager.push("letie")
 
+        MDNavigationDrawerItem:
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
+            canvas.before:
+                Color:
+                    rgba: app.drawer_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            on_release: app.manager.push("ProductPage")
             MDNavigationDrawerItemLeadingIcon:
                 icon: "package-variant-closed"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
-
-
             MDNavigationDrawerItemText:
                 text: "vos produits"
-                role:"small"
+                role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
         MDNavigationDrawerItem:
-            selected_color: [0, 0, 0, 0.2]
-            ripple_color: [0, 0, 0, 0.2]
-            md_bg_color:0,0,0,0
-            on_release:app.manager.push("ExpensesPage")
-
-
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
+            canvas.before:
+                Color:
+                    rgba: app.drawer_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            on_release: app.manager.push("ExpensesPage")
             MDNavigationDrawerItemLeadingIcon:
                 icon: "cash-minus"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
-
             MDNavigationDrawerItemText:
                 text: "Les dépenses"
-                role:"small"
+                role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
         MDNavigationDrawerItem:
-            selected_color: [0, 0, 0, 0.2]
-            ripple_color: [0, 0, 0, 0.2]
-            md_bg_color:0,0,0,0
-            on_release:app.manager.push("StatsPage")
-
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
+            canvas.before:
+                Color:
+                    rgba: app.drawer_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            on_release: app.manager.push("StatsPage")
             MDNavigationDrawerItemLeadingIcon:
                 icon: "chart-bar"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
-
             MDNavigationDrawerItemText:
                 text: "Statistiques"
-                role:"small"
+                role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
         MDNavigationDrawerItem:
-            selected_color: [1, 1, 1, 0.2]
-            ripple_color: [1, 1, 1, 0.2]
-            md_bg_color:0,0,0,0
-            on_release:app.manager.push("letie")
-
-
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
+            canvas.before:
+                Color:
+                    rgba: app.drawer_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            on_release: app.manager.push("ProductPage")
             MDNavigationDrawerItemLeadingIcon:
                 icon: "database"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
-
             MDNavigationDrawerItemText:
                 text: "Vos données"
-                role:"small"
+                role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
@@ -174,70 +190,67 @@
         MDNavigationDrawerLabel:
             text: "AUTRES"
             theme_text_color: "Custom"
-            text_color: 1, 1, 1, 0.6
+            text_color: 1, 1, 1, 0.8
 
         MDNavigationDrawerItem:
-            selected_color: [1, 1, 1, 0.2]
-            ripple_color: [1, 1, 1, 0.2]
-            md_bg_color:0,0,0,0
-            on_release:app.manager.push("letie")
-
-
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
+            canvas.before:
+                Color:
+                    rgba: app.drawer_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            on_release: app.manager.push("ProductPage")
             MDNavigationDrawerItemLeadingIcon:
                 icon: "lightbulb-outline"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
-
             MDNavigationDrawerItemText:
                 text: "Exemples"
-                role:"small"
+                role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
+
         MDNavigationDrawerItem:
-            selected_color: [1, 1, 1, 0.2]
-            ripple_color: [1, 1, 1, 0.2]
-            md_bg_color:0,0,0,0
-            on_release:app.manager.push("letie")
-            MDButton:
-                on_release: app.manager.push("letie")
-                pos_hint: {"center_x": 0.5, "center_y": 0.5}
-                style: "filled"
-                MDButtonIcon:
-                    icon: "package-variant-closed"
-                MDButtonText:
-                    text: "vos produis"
-
-
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
+            canvas.before:
+                Color:
+                    rgba: app.drawer_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            on_release: app.manager.push("ProductPage")
             MDNavigationDrawerItemLeadingIcon:
                 icon: "account-circle"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
-                text_color: 140/255,119/255,245/255,1
-
             MDNavigationDrawerItemText:
                 text: "Votre compte"
-                role:"small"
+                role: "small"
                 theme_text_color: "Custom"
-                text_color: 140/255,119/255,245/255,1
+                text_color: 1, 1, 1, 1
+
         MDNavigationDrawerItem:
-            selected_color: [1, 0, 0, 0.2]
-            ripple_color: [1, 0, 0, 0.2]
-            md_bg_color:0,0,0,0
-            on_release:app.manager.push("letie")
-
-
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
+            canvas.before:
+                Color:
+                    rgba: app.drawer_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            on_release: app.manager.push("ProductPage")
             MDNavigationDrawerItemLeadingIcon:
                 icon: "logout"
-
                 theme_text_color: "Custom"
-                text_color: 140/255,119/255,245/255,1
-
+                text_color: 1, 0.4, 0.4, 1
             MDNavigationDrawerItemText:
                 text: "Déconnexion"
-                role:"small"
+                role: "small"
                 theme_text_color: "Custom"
-                text_color: 140/255,119/255,245/255,1
-
+                text_color: 1, 0.4, 0.4, 1
 <AppBar@MDTopAppBar>
     type: "small"
     theme_bg_color: "Custom"
@@ -272,10 +285,17 @@
             theme_icon_color: "Custom"
             icon_color: 0, 0, 0, 1
 
+
         MDActionTopAppBarButton:
             icon: "dots-vertical"
             theme_icon_color: "Custom"
             icon_color: 0, 0, 0, 1
+        MDSwitch:
+            id: switch_control
+            thumb_color_active: 1, 0.5, 0, 1
+            on_active: app.on_switch_active(self, self.active)
+            pos_hint: {"center_x": 0.8, "center_y": 0.5}
+
 
 <Bg_mobile@MDNavigationDrawer>
 

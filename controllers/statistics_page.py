@@ -82,15 +82,15 @@ class StatDeVenteGlobal(MDCard):
         montants = [row[1] for row in ventes]
         depense_vals = [row[1] for row in depense]
 
-        if not ventes or not depense or (montant==0 for montant in montants) or (depense==0  for depense in depense_vals):
-            image = Image(
-                source="images/pas_vente.png",
-                allow_stretch=True,
-                keep_ratio=False,
-                size_hint=(1, 1),
-                pos_hint={"center_x": 0.5, "center_y": 0.5})
-            self.add_widget(image)
-            return
+       # if not ventes or not depense or (montant==0 for montant in montants) or (depense==0  for depense in depense_vals):
+        #    image = Image(
+        #        source="images/pas_vente.png",
+        #        allow_stretch=True,
+        #        keep_ratio=False,
+        #        size_hint=(1, 1),
+        #        pos_hint={"center_x": 0.5, "center_y": 0.5})
+        #    self.add_widget(image)
+        #    return
         min_len = min(len(dates_ventes), len(montants), len(depense_vals))
         if min_len == 0:
             self.add_widget(Label(text="Pas de données suffisantes pour générer le graphique."))
