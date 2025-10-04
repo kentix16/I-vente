@@ -1,6 +1,10 @@
 from datetime import datetime
 from functools import partial
 from tkinter import filedialog
+from kivymd.uix.dialog import MDDialog, MDDialogHeadlineText, MDDialogContentContainer, MDDialogButtonContainer
+from kivymd.uix.textfield import MDTextField, MDTextFieldHelperText, MDTextFieldHintText, MDTextFieldLeadingIcon, \
+    MDTextFieldTrailingIcon, MDTextFieldMaxLengthText
+from kivymd.uix.button import MDButton, MDButtonText
 
 import xlsxwriter
 import tkinter as tk
@@ -73,7 +77,100 @@ def pourcentage(self,nom_pourcentage="pv",date=None,date_fin=None,order=""):
 
 
     self.widget_showed = True
+def show_profile_popup():
+    profile_dialog = MDDialog(
+        MDDialogHeadlineText(
+            text="Modifier le profil",
+        ),
+        MDDialogContentContainer(
+            MDTextField(
+                MDTextFieldLeadingIcon(
+                    icon="Eail",
+                ),
+                MDTextFieldHintText(
+                    text="Email",
+                ),
+                MDTextFieldHelperText(
+                    text="Entrer le nouveau mail",
+                    mode="persistent",
+                ),
 
+                mode="outlined",
+            ),
+            MDTextField(
+                MDTextFieldLeadingIcon(
+                    icon="account",
+                ),
+                MDTextFieldHintText(
+                    text="Pseudo",
+                ),
+                MDTextFieldHelperText(
+                    text="Entres le nouveau pseudo",
+                    mode="persistent",
+                ),
+                mode="outlined",
+            ),
+            MDTextField(
+                MDTextFieldLeadingIcon(
+                    icon="lock",
+                ),
+                MDTextFieldHintText(
+                    text="Enrtrez le nouveau mot de passe",
+                ),
+                MDTextFieldHelperText(
+                    text="ex: Meva004",
+                    mode="persistent",
+                ),
+                mode="outlined",
+            ),
+            MDTextField(
+                MDTextFieldLeadingIcon(
+                    icon="lock",
+                ),
+                MDTextFieldHintText(
+                    text="confirmer le mot de passe",
+                ),
+                mode="outlined",
+            ),
+            orientation="vertical",
+            spacing="12dp",
+            adaptive_height=True,
+        ),
+        MDDialogButtonContainer(
+            MDButton(
+                MDButtonText(text="Annuler"),
+                style="text",
+                on_release=lambda x: (profile_dialog.dismiss(), App.get_running_app().enable_button())            ),
+            MDButton(
+                MDButtonText(text="Modifier"),
+                style="filled",
+                on_release=update_profile,
+            ),
+            spacing="8dp",
+        ),
+    )
+    profile_dialog.open()
+
+def update_profile(dialog):
+    # Récupérer les valeurs des champs
+    content = dialog.ids.container.children[0]
+
+    email = content.ids.email_field.text
+    username = content.ids.username_field.text
+    password = content.ids.password_field.text
+    confirm_password = content.ids.confirm_password_field.text
+
+    # Validation
+    if password != confirm_password:
+        print("Les mots de passe ne correspondent pas!")
+        return
+
+    # Votre logique de mise à jour ici
+    print(f"Email: {email}")
+    print(f"Username: {username}")
+    print(f"Password: {password}")
+
+    dialog.dismiss()
 def show_popup(self,title, message):
     popup = Popup(size_hint=(.4,.4))
     popup.title = title

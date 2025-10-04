@@ -90,36 +90,47 @@
     radius: [15]
     style: "elevated"
     elevation: 10
+
     MDBoxLayout:
         adaptive_height: True
         orientation: "vertical"
         padding: dp(20)
         spacing: dp(20)
-        pos_hint:{"center_x":.5,"center_y":.5}
-        CTextField:
+        pos_hint: {"center_x": .5, "center_y": .5}
+
+        MDTextField:
             id: nom_produit_vente
+            mode: "filled"
+            size_hint_x: 1
             MDTextFieldHelperText:
                 text: " ex: mon produit"
                 text_color_focus: "grey"
             MDTextFieldHintText:
                 text: "entrez le nom du produit"
                 text_color_normal: "grey"
-        CTextField:
+
+        MDTextField:
             id: qt_produit_vente
+            mode: "filled"
+            input_filter: "int"
+            size_hint_x: 1
             MDTextFieldHelperText:
                 text: " ex: 3"
                 text_color_focus: "grey"
             MDTextFieldHintText:
                 text: "entrez le qt du produit à vendre"
                 text_color_normal: "grey"
+
         MDButton:
             on_press: root.sale_product()
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             style: "filled"
+
             MDButtonIcon:
                 icon: "check-underline-circle"
+
             MDButtonText:
-                text: "vendre le produit"
+                text: "Vendre le produit"
 
 <InsertProductType>:
     size_hint_x: 1
@@ -302,7 +313,8 @@
 
 <Content>:
     theme_bg_color: "Custom"
-    md_bg_color: 218/255,236/255,246/255,1
+    #md_bg_color: 218/255,236/255,246/255,1
+    md_bg_color:app.product_tab
     MDBoxLayout:
         adaptive_height:True
         orientation:"vertical"
@@ -502,6 +514,8 @@
                         root.show_date_picker()
                     MDButtonText:
                         text:"Date"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
 
                 MDButton:
                     size_hint_y: None
@@ -513,6 +527,8 @@
                         root.show_modal_date_picker()
                     MDButtonText:
                         text:"Période"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
 
                 MDButton:
                     theme_bg_color:"Custom"
@@ -523,6 +539,8 @@
                         root.show_month_picker()
                     MDButtonText:
                         text:"Mois"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
                 MDButton:
                     theme_bg_color:"Custom"
                     md_bg_color:171/255,219/255,227/255,1
@@ -532,6 +550,8 @@
                         root.show_year_picker()
                     MDButtonText:
                         text:"Année"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
             CCard:
                 size_hint_x:1
                 SalesStatContent:

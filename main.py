@@ -3,7 +3,7 @@ import gc
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
-
+from utilities.myfunctions import show_profile_popup
 from kivy.utils import get_color_from_hex
 
 from font.fonts import register_fonts
@@ -11,7 +11,6 @@ from kivy.properties import ObjectProperty, ColorProperty
 from kivymd.app import MDApp
 from navigation_screen_manager import NavigationScreenManager
 import controllers.sales_page  # ou sales_pages si c’est le bon nom
-
 
 adresse_recherchee = '0x000002158F8E9BE0'
 class Damn(NavigationScreenManager):
@@ -128,6 +127,7 @@ class CompanyManager(MDApp):
     text_color = ColorProperty()
     opposite_bg_normal = ColorProperty()
     drawer_color = ColorProperty()
+    product_tab = ColorProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -146,6 +146,7 @@ class CompanyManager(MDApp):
         self.bg_dark = get_color_from_hex("#132e49")
         self.text_color = get_color_from_hex("#000000")
         self.opposite_bg_normal = get_color_from_hex("#b7e7eb")
+        self.product_tab = get_color_from_hex("#e8eae7")
         self.drawer_color = [13 / 255, 71 / 255, 161 / 255, 1]
 
     def wait_for_layout(self, dt):
@@ -163,21 +164,67 @@ class CompanyManager(MDApp):
         self.accent_color = get_color_from_hex("#ffffff")  # Changé en blanc
         self.bg_normal = get_color_from_hex("#0a1929")  # Bleu très nuit
         self.bg_dark = get_color_from_hex("#050d14")  # Bleu encore plus foncé
-        self.text_color = get_color_from_hex("#fcbe8d")
-        self.opposite_bg_normal = get_color_from_hex("#1a3a52")  # Bleu nuit moyen
+        self.text_color = get_color_from_hex("#a7e3ed")
+        self.opposite_bg_normal = get_color_from_hex("#1a3a52")
+        self.product_tab = get_color_from_hex("#054783")# Bleu nuit moyen
         self.drawer_color = [13 / 255, 71 / 255, 161 / 255, 1]
 
+    def set_drawer_color(self, drawer):
+        for i in range(10):
+            navitem = drawer.ids.get(f"item{i + 1}")
+            if navitem:  # Vérifie que l'item existe
+                print(f"Changement de couleur sur {navitem}")
+                navitem.theme_bg_color = "Custom"
+                navitem.md_bg_color = [13 / 255, 71 / 255, 161 / 255, 1]
+    def set_all_drawer_color(self):
+        menu = App.get_running_app().manager.ids.mainscreen.ids.nav_drawer
+        self.set_drawer_color(menu)
+        menu = App.get_running_app().manager.ids.productsscreen.ids.nav_drawer
+        self.set_drawer_color(menu)
+        menu = App.get_running_app().manager.ids.walletscreen.ids.nav_drawer
+        self.set_drawer_color(menu)
+        menu = App.get_running_app().manager.ids.expensesscreen.ids.nav_drawer
+        self.set_drawer_color(menu)
+        menu = App.get_running_app().manager.ids.statsscreen.ids.nav_drawer
+        self.set_drawer_color(menu)
+        App.get_running_app().manager.ids.mainscreen.ids.nav_drawer.background_color=(13 / 255, 71 / 255, 161 / 255, 1)
+        App.get_running_app().manager.ids.productsscreen.ids.nav_drawer.background_color=(13 / 255, 71 / 255, 161 / 255, 1)
+        App.get_running_app().manager.ids.walletscreen.ids.nav_drawer.background_color=(13 / 255, 71 / 255, 161 / 255, 1)
+        App.get_running_app().manager.ids.expensesscreen.ids.nav_drawer.background_color=(13 / 255, 71 / 255, 161 / 255, 1)
+        App.get_running_app().manager.ids.statsscreen.ids.nav_drawer.background_color=(13 / 255, 71 / 255, 161 / 255, 1)
     def damn(self, value=False):
         if value:
             self.theme_cls.theme_style = "Dark"
             self.set_dark_theme_colors()
+            self.set_all_drawer_color()
         else:
             self.theme_cls.theme_style = "Light"
             self.set_light_theme_colors()
-
+            self.set_all_drawer_color()
+    def enable_button(self):
+        i = 5
+        App.get_running_app().manager.ids.mainscreen.ids.nav_drawer.ids.get(f"item{i + 1}").disabled = False
+        App.get_running_app().manager.ids.productsscreen.ids.nav_drawer.ids.get(f"item{i + 1}").disabled = False
+        App.get_running_app().manager.ids.walletscreen.ids.nav_drawer.ids.get(f"item{i + 1}").disabled = False
+        App.get_running_app().manager.ids.expensesscreen.ids.nav_drawer.ids.get(f"item{i + 1}").disabled = False
+        App.get_running_app().manager.ids.statsscreen.ids.nav_drawer.ids.get(f"item{i + 1}").disabled = False
+    def show_update_profile(self):
+        i=5
+        self.manager.set_active_item(5)
+        App.get_running_app().manager.ids.mainscreen.ids.nav_drawer.ids.get(f"item{i + 1}").disabled = True
+        App.get_running_app().manager.ids.productsscreen.ids.nav_drawer.ids.get(f"item{i + 1}").disabled = True
+        App.get_running_app().manager.ids.walletscreen.ids.nav_drawer.ids.get(f"item{i + 1}").disabled = True
+        App.get_running_app().manager.ids.expensesscreen.ids.nav_drawer.ids.get(f"item{i + 1}").disabled = True
+        App.get_running_app().manager.ids.statsscreen.ids.nav_drawer.ids.get(f"item{i + 1}").disabled = True
+        show_profile_popup()
     def on_switch_active(self, instance_switch, value):
         self.damn(value)
+        walletscreen = App.get_running_app().manager.ids.walletscreen
 
+        # Vérifier si l'attribut existe avant de l'utiliser
+        if hasattr(walletscreen, 'historique_labels'):
+            for label in walletscreen.historique_labels:
+                label.color = App.get_running_app().text_color
     def on_start(self):
         on_window_resize(Window, Window.width, Window.height)
 

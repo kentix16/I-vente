@@ -1,4 +1,6 @@
 import datetime
+
+from kivy.app import App
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 from kivy.uix.button import Button
@@ -104,12 +106,22 @@ class Historique(ScrollView):
     def __init__(self,**kwargs):
         super(Historique,self).__init__(**kwargs)
 
-    def show_historique(self, date=None, date_fin=None, order = None):
-        if self.grid_showed:self.remove_widget(self.grid)
-        if not order: order = {'date':True}
-        if self.sort_by == list(order.keys())[0]:self.desc = not self.desc
-        else:self.sort_by = list(order.keys())[0]
+    def show_historique(self, date=None, date_fin=None, order=None):
+        if self.grid_showed:
+            self.remove_widget(self.grid)
 
+        # Initialiser une liste pour stocker les labels
+        self.historique_labels = []  # Liste pour les cellules de données
+        self.historique_headers = []  # Liste pour les en-têtes
+
+        if not order:
+            order = {'date': True}
+
+        if self.sort_by == list(order.keys())[0]:
+            self.desc = not self.desc
+        else:
+            self.sort_by = list(order.keys())[0]
+            self.desc = True
 
         self.grid = GridLayout(cols=3, spacing=2, size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter('height'))
@@ -117,20 +129,32 @@ class Historique(ScrollView):
         # TITRES CLIQUABLES
         titles = [('DATE', 'date'), ('SOMME', 'somme'), ('NOM', 'mouvement')]
         for text, column in titles:
+            arrow = ""
+            if self.sort_by == column:
+                arrow = " ▲" if self.desc else " ▼"
+
             btn = Button(
-                text=text,
+                text=f"{text}{arrow}",
                 size_hint=(1, None),
                 height=30,
-                bold=True
+                bold=True,
+                color=(1,1,1,1)
             )
-            btn.bind(on_press=lambda instance, col=column: self.show_historique(date, date_fin, order={col:self.desc}))
+            btn.bind(on_press=lambda instance, col=column: self.show_historique(date, date_fin, order={col: self.desc}))
+            self.historique_headers.append(btn)  # Stocker la référence
             self.grid.add_widget(btn)
 
         # DONNÉES
-        depenses = self.instance.get_historique(order,date, date_fin)
+        depenses = self.instance.get_historique(order, date, date_fin)
         for row in depenses:
             for item in row:
-                cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=40)
+                cell = Label(
+                    text=f'{item}',
+                    color=App.get_running_app().text_color,
+                    size_hint=(1, None),
+                    height=40
+                )
+                self.historique_labels.append(cell)  # Stocker la référence
                 self.grid.add_widget(cell)
 
         self.add_widget(self.grid)
