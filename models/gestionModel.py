@@ -317,7 +317,7 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
         return res[0][0]
     @property
     def get_produits_en_rupture(self):
-        res = to_database('SELECT COUNT(nom) from stock WHERE qt=0 group by nom')
+        res = to_database('SELECT COUNT(nom) from stock WHERE qt=0')
         if res:
             return res[0][0]
         else:
