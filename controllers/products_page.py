@@ -59,7 +59,7 @@ class TrailingPressedIconButton(
     ...
 
 class InsertProduct(MDCard):
-    from utilities.myfunctions import show_popup,show_popup_confirmation
+    from utilities.myfunctions import show_popup,show_popup_confirmation,popup_confirmed
     product_types = ListProperty()
     selected_product_type = StringProperty()
 
@@ -80,22 +80,7 @@ class InsertProduct(MDCard):
 
     def menu_callback(self, text_item):
         self.ids.drop_text.text = text_item
-    """def on_kv_post(self, base_widget):
-        # Cette méthode est appelée automatiquement une fois le KV chargé
-        self.load_product_types()
 
-    def load_product_types(self):
-        instance = GestionModel()
-        types = instance.get_type or []
-        self.product_types = [str(t) for t in types]  # ⚠️ forcer la conversion en string
-        if self.ids.get("product_type_spinner"):  # sécurité si spinner déjà instancié
-            self.ids.product_type_spinner.values = self.product_types
-        else:
-            self.ids.product_type_spinner.values = ["Aucun type"]
-
-    def on_product_type_select(self, spinner, text):
-        self.selected_product_type = text
-        print("Type sélectionné :", text)"""
     def show_produit(self):
         instance = GestionModel()
         product_types = instance.get_type
@@ -152,6 +137,7 @@ class InsertProduct(MDCard):
         pu = self.ids.pu.text
         qt = self.ids.qt.text
         type = self.ids.drop_text.text
+        for i in range(100):print(type)
         if not (nom and pu and qt):
             self.show_popup('champ manquant','veuillez compléter les champs manquants')
             return
@@ -163,9 +149,12 @@ class InsertProduct(MDCard):
             return
         gestionmodel = GestionModel()
         id_type = gestionmodel.get_id_type(type)
-        print(id_product,nom,pu,qt,type)
-        try:to_database('INSERT INTO stock VALUES (%s,%s,%s,%s,%s)',
-                    (id_product, nom, pu, id_type, qt))
+        if id_type==-1:
+            self.show_popup("erreur"," Veuillez selectionner un type de produit")
+            return
+
+        try:to_database('INSERT INTO stock VALUES (%s,%s,%s,%s,%s,%s)',
+                    (id_product, nom, pu, id_type, qt,1))
         except:
             plus=''
             if not gestionmodel.same_pu_stock(nom,int(pu)):plus=f' \net mettre à jour son pu'
@@ -177,7 +166,7 @@ class InsertProduct(MDCard):
         self.ids.pu.text = ''
         self.ids.qt.text = ''
         manager = App.get_running_app().manager
-        manager.ids.productsscreen.ids.productspage.ids.sliver_box.ids.content.ids.listproducts.show_products()
+        manager.ids.productsscreen.ids.productspage.ids.defaultscreen.ids.sliver_box.ids.content.ids.listproducts.show_products()
 
 
 class InsertProductType(MDCard):

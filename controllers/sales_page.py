@@ -34,6 +34,7 @@ LabelBase.register(name="OutfitSemiBold", fn_regular="font/Outfit-SemiBold.ttf")
 LabelBase.register(name="OutfitBlack", fn_regular="font/Outfit-Black.ttf")
 
 class StatToday(MDCard):
+
     stat_showed = False
     def __init__(self,**kwargs):
         super(StatToday,self).__init__(**kwargs)
@@ -47,6 +48,7 @@ class StatToday(MDCard):
 
         fig,ax = plt.subplots(figsize=(10, 6))
 class StatDeVente(MDCard):
+    from utilities.myfunctions import exist_data
     widget_showed = False
 
     def __init__(self, **kwargs):
@@ -79,19 +81,9 @@ class StatDeVente(MDCard):
         montants = [row[1] for row in ventes]
         depense_vals = [row[1] for row in depense]
 
-       # if not ventes or not depense or (i==0 for i in montants) or (i==0 for i in depense_vals):
-        #    image=Image(
-        #source="images/pas_encore_vente.png" ,
-        #allow_stretch=True,
-        #keep_ratio=False,
-        #size_hint= (1, 1),
-        #pos_hint={"center_x": 0.5, "center_y": 0.5})
-          #  self.add_widget(image)
-           # return
-
         min_len = min(len(dates_ventes), len(montants), len(depense_vals))
-        if min_len == 0:
-            self.add_widget(Label(text="Pas de données suffisantes pour générer le graphique."))
+        if not self.exist_data(montants,depense_vals):
+            self.add_widget(Label(text="Pas de données suffisantes pour générer le graphique.",color = (0,0,0,1)))
             return
 
         dates = dates_ventes[:min_len]
@@ -102,8 +94,8 @@ class StatDeVente(MDCard):
         x = np.arange(min_len)
         bar_width = 0.35
 
-        ax.bar(x - bar_width / 2, montants, width=bar_width, label='Vente', color='turquoise')
-        ax.bar(x + bar_width / 2, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
+        ax.bar(x + bar_width / 2, montants, width=bar_width, label='Vente', color='turquoise')
+        ax.bar(x +3* bar_width / 2, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
 
         ax.set_title("Ventes vs Dépenses")
         ax.set_xlabel("Heure")
@@ -129,7 +121,7 @@ class PourcentagePV(MDBoxLayout):
 
 class SalesPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
-    somme_total_gagnee = StringProperty('0 ar')
+    somme_nette_totale_gagnee = StringProperty('0 ar')
     produits_en_rupture = StringProperty('0')
     gestionmodel = GestionModel()
 
@@ -143,8 +135,8 @@ class SalesPage(MDBoxLayout):
         total_de_ventes = self.gestionmodel.get_total_de_ventes()
         self.total_de_ventes = str(total_de_ventes)
     def update_somme_total_gagnee(self):
-        somme_total_gagnee = self.gestionmodel.get_somme_total_gagnee()
-        self.somme_total_gagnee = str(somme_total_gagnee)+' ar'
+        somme_total_gagnee = self.gestionmodel.get_somme_nette_totale_gagnee()
+        self.somme_nette_totale_gagnee = str(somme_total_gagnee)+' ar'
     def update_produits_en_rupture(self):
         produits_en_rupture = self.gestionmodel.get_produits_en_rupture
         self.produits_en_rupture = str(produits_en_rupture)

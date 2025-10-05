@@ -19,6 +19,7 @@
             size: self.size
 
     MDNavigationDrawerMenu:
+        id:drawer_menu
         pos_hint: {"center_x": .5, "center_y": .5}
         canvas.before:
             Color:
@@ -65,26 +66,28 @@
             text_color: 1, 1, 1, 0.8
 
         MDNavigationDrawerItem:
+            id:item1
             theme_bg_color: "Custom"
             md_bg_color: app.drawer_color
-            canvas.before:
-                Color:
-                    rgba: app.drawer_color
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-            on_release: app.manager.push("SalesPage")
+            selected_color: app.drawer_color
+            disabled : True
+            on_release:
+                if app.manager.current != "SalesPage": app.manager.go("SalesPage",0)
+                selected = True
+                self.disabled= True
+
             MDNavigationDrawerItemLeadingIcon:
+                id:icon1
                 icon: "chart-areaspline"
-                theme_text_color: "Custom"
-                text_color: 1, 1, 1, 1
+
             MDNavigationDrawerItemText:
+                id:text1
                 role: "small"
                 text: "statistique du jour"
-                theme_text_color: "Custom"
-                text_color: 1, 1, 1, 1
+
 
         MDNavigationDrawerItem:
+            id:item2
             theme_bg_color: "Custom"
             md_bg_color: app.drawer_color
             canvas.before:
@@ -93,18 +96,24 @@
                 Rectangle:
                     pos: self.pos
                     size: self.size
-            on_release: app.manager.push("WalletPage")
+            on_release:
+                app.manager.go("WalletPage",1)
+                selected = True
+
             MDNavigationDrawerItemLeadingIcon:
+                id:icon2
                 icon: "wallet"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
             MDNavigationDrawerItemText:
+                id:text2
                 text: "Portefeuille"
                 role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
         MDNavigationDrawerItem:
+            id:item3
             theme_bg_color: "Custom"
             md_bg_color: app.drawer_color
             canvas.before:
@@ -113,18 +122,21 @@
                 Rectangle:
                     pos: self.pos
                     size: self.size
-            on_release: app.manager.push("ProductPage")
+            on_release: app.manager.go("ProductPage",2)
             MDNavigationDrawerItemLeadingIcon:
+                id:icon3
                 icon: "package-variant-closed"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
             MDNavigationDrawerItemText:
+                id:text3
                 text: "vos produits"
                 role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
         MDNavigationDrawerItem:
+            id:item4
             theme_bg_color: "Custom"
             md_bg_color: app.drawer_color
             canvas.before:
@@ -133,18 +145,21 @@
                 Rectangle:
                     pos: self.pos
                     size: self.size
-            on_release: app.manager.push("ExpensesPage")
+            on_release: app.manager.go("ExpensesPage",3)
             MDNavigationDrawerItemLeadingIcon:
+                id:icon4
                 icon: "cash-minus"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
             MDNavigationDrawerItemText:
+                id:text4
                 text: "Les dépenses"
                 role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
         MDNavigationDrawerItem:
+            id:item5
             theme_bg_color: "Custom"
             md_bg_color: app.drawer_color
             canvas.before:
@@ -153,33 +168,15 @@
                 Rectangle:
                     pos: self.pos
                     size: self.size
-            on_release: app.manager.push("StatsPage")
+            on_release: app.manager.go("StatsPage",4)
             MDNavigationDrawerItemLeadingIcon:
+                id:icon5
                 icon: "chart-bar"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
             MDNavigationDrawerItemText:
+                id:text5
                 text: "Statistiques"
-                role: "small"
-                theme_text_color: "Custom"
-                text_color: 1, 1, 1, 1
-
-        MDNavigationDrawerItem:
-            theme_bg_color: "Custom"
-            md_bg_color: app.drawer_color
-            canvas.before:
-                Color:
-                    rgba: app.drawer_color
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-            on_release: app.manager.push("ProductPage")
-            MDNavigationDrawerItemLeadingIcon:
-                icon: "database"
-                theme_text_color: "Custom"
-                text_color: 1, 1, 1, 1
-            MDNavigationDrawerItemText:
-                text: "Vos données"
                 role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
@@ -193,6 +190,7 @@
             text_color: 1, 1, 1, 0.8
 
         MDNavigationDrawerItem:
+            id:item6
             theme_bg_color: "Custom"
             md_bg_color: app.drawer_color
             canvas.before:
@@ -201,56 +199,44 @@
                 Rectangle:
                     pos: self.pos
                     size: self.size
-            on_release: app.manager.push("ProductPage")
+            on_release:
+                app.show_update_profile()
+                self.selected=True
             MDNavigationDrawerItemLeadingIcon:
-                icon: "lightbulb-outline"
-                theme_text_color: "Custom"
-                text_color: 1, 1, 1, 1
-            MDNavigationDrawerItemText:
-                text: "Exemples"
-                role: "small"
-                theme_text_color: "Custom"
-                text_color: 1, 1, 1, 1
-
-        MDNavigationDrawerItem:
-            theme_bg_color: "Custom"
-            md_bg_color: app.drawer_color
-            canvas.before:
-                Color:
-                    rgba: app.drawer_color
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-            on_release: app.manager.push("ProductPage")
-            MDNavigationDrawerItemLeadingIcon:
+                id:icon6
                 icon: "account-circle"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
             MDNavigationDrawerItemText:
+                id:text6
                 text: "Votre compte"
                 role: "small"
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
         MDNavigationDrawerItem:
+            id:item7
             theme_bg_color: "Custom"
             md_bg_color: app.drawer_color
+            selected_color: app.drawer_color
+            on_release:
+                if app.manager.current != "user_creation": app.manager.go("user_creation")
+
             canvas.before:
                 Color:
                     rgba: app.drawer_color
                 Rectangle:
                     pos: self.pos
                     size: self.size
-            on_release: app.manager.push("ProductPage")
             MDNavigationDrawerItemLeadingIcon:
+                id:icon7
                 icon: "logout"
-                theme_text_color: "Custom"
-                text_color: 1, 0.4, 0.4, 1
+
             MDNavigationDrawerItemText:
+                id:text7
                 text: "Déconnexion"
                 role: "small"
-                theme_text_color: "Custom"
-                text_color: 1, 0.4, 0.4, 1
+
 <AppBar@MDTopAppBar>
     type: "small"
     theme_bg_color: "Custom"

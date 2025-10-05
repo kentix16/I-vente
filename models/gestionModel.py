@@ -4,8 +4,6 @@ from utilities.databases import to_database
 
 
 class GestionModel:
-
-
     def get_initial_product(self):
         query=("""WITH RECURSIVE date_range AS (
     SELECT DATE_FORMAT(CURDATE(), '%Y-%m-01') AS day
@@ -186,7 +184,7 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
                     ),
                     dep_sum AS (
                         SELECT 
-                            DATE_FORMAT(date_dep, '%Y-%m-%d %H:00:00') AS rounded_hour,
+                            DATE_FORMAT(date_dep, '%Y-%m-%d %H:00') AS rounded_hour,
                             SUM(somme_dep) AS somme
                         FROM depense
                         WHERE date_dep >= CAST(CONCAT(%s, ' ', %s) AS DATETIME)
@@ -198,7 +196,7 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
                         COALESCE(ds.somme, 0) AS depense
                     FROM interval_time it
                     LEFT JOIN dep_sum ds 
-                        ON ds.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00:00')
+                        ON ds.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00')
                     ORDER BY it.time_slot
                 """, (date, heure_min, date, heure_max, date, heure_min, date, heure_max))
         else:
@@ -212,7 +210,7 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
                 ),
                 dep_sum AS (
                     SELECT 
-                        DATE_FORMAT(date_dep, '%Y-%m-%d %H:00:00') AS rounded_hour,
+                        DATE_FORMAT(date_dep, '%Y-%m-%d %H:00') AS rounded_hour,
                         SUM(somme_dep) AS somme
                     FROM depense
                     WHERE date_dep >= CAST(CONCAT(CURDATE(), ' ', %s) AS DATETIME)
@@ -224,7 +222,7 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
                     COALESCE(ds.somme, 0) AS depense
                 FROM interval_time it
                 LEFT JOIN dep_sum ds 
-                    ON ds.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00:00')
+                    ON ds.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00')
                 ORDER BY it.time_slot
             """, (heure_min, heure_max, heure_min, heure_max))
 
@@ -261,7 +259,7 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
                     ),
                     vente_sum AS (
                         SELECT 
-                            DATE_FORMAT(pv.date_de_vente, '%Y-%m-%d %H:00:00') AS rounded_hour,
+                            DATE_FORMAT(pv.date_de_vente, '%Y-%m-%d %H:00') AS rounded_hour,
                             SUM(pv.qte * s.pu) AS somme
                         FROM produits_vendu pv
                         LEFT JOIN stock s ON s.id_produit = pv.id_produit
@@ -274,7 +272,7 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
                         COALESCE(vs.somme, 0) AS vente
                     FROM interval_time it
                     LEFT JOIN vente_sum vs 
-                        ON vs.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00:00')
+                        ON vs.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00')
                     ORDER BY it.time_slot
                 """, (date, heure_min, date, heure_max, date, heure_min, date, heure_max))
         else:
@@ -288,7 +286,7 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
                 ),
                 vente_sum AS (
                     SELECT 
-                        DATE_FORMAT(pv.date_de_vente, '%Y-%m-%d %H:00:00') AS rounded_hour,
+                        DATE_FORMAT(pv.date_de_vente, '%Y-%m-%d %H') AS rounded_hour,
                         SUM(pv.qte * s.pu) AS somme
                     FROM produits_vendu pv
                     LEFT JOIN stock s ON s.id_produit = pv.id_produit
@@ -301,15 +299,15 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
                     COALESCE(vs.somme, 0) AS vente
                 FROM interval_time it
                 LEFT JOIN vente_sum vs 
-                    ON vs.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H:00:00')
+                    ON vs.rounded_hour = DATE_FORMAT(it.time_slot, '%Y-%m-%d %H')
                 ORDER BY it.time_slot
             """, (heure_min, heure_max, heure_min, heure_max))
 
         return res
 
-    def get_somme_total_gagnee(self,date=None):
-        if date:res = to_database("SELECT SUM(pv.qte*s.pu) FROM produits_vendu pv JOIN stock s ON s.id_produit=pv.id_produit WHERE DATE(date_de_vente)=%s",(date,))
-        else:res = to_database("SELECT SUM(pv.qte*s.pu) FROM produits_vendu pv JOIN stock s ON s.id_produit=pv.id_produit WHERE DATE(date_de_vente)=CURRENT_DATE()")
+    def get_somme_nette_totale_gagnee(self,date=None):
+        if date:res = to_database("SELECT (SELECT COALESCE(SUM(pv.qte*s.pu),0) FROM produits_vendu pv JOIN stock s ON s.id_produit=pv.id_produit WHERE DATE(date_de_vente)=%s) -(SELECT COALESCE(SUM(somme_dep),0) FROM DEPENSE WHERE DATE(date_dep)=%s) AS nette",(date,date))
+        else:res = to_database("SELECT (SELECT COALESCE(SUM(pv.qte*s.pu),0) FROM produits_vendu pv JOIN stock s ON s.id_produit=pv.id_produit WHERE DATE(date_de_vente)=CURRENT_DATE()) -(SELECT COALESCE(SUM(somme_dep),0) FROM DEPENSE WHERE DATE(date_dep)=CURRENT_DATE()) AS nette")
         return res[0][0]
     def get_total_de_ventes(self,date=None):
         if date: res = to_database("SELECT SUM(qte) as total FROM produits_vendu WHERE DATE(date_de_vente)=%s",(date,))
@@ -382,7 +380,10 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
         return res
     def get_id_type(self,type):
         res = to_database('SELECT id_type from type_produit where nom_type=%s',(type,))
-        return res[0][0]
+        try:
+            return res[0][0]
+        except:
+            return -1
 
     def get_expenses(self,order, date=None, date_fin=None):
         desc = list(order.values())[0]
@@ -469,8 +470,39 @@ LEFT JOIN stock s ON s.id_produit = pv.id_produit;
         res = int(res[0][0])
         res2 = int(res2[0][0])
         return round(res2/res,2)
+    def get_somme_statistique_periode(self, date, date_fin):
+        return to_database("""WITH RECURSIVE date_range AS (
+                SELECT DATE(%s) AS jour
+                UNION ALL
+                SELECT jour + INTERVAL 1 DAY
+                FROM date_range
+                WHERE jour < %s
+            )
+            
+            SELECT
+                dr.jour,
+                COALESCE(SUM(pv.qte*s.pu), 0) AS total_journalier
+            FROM date_range dr
+            LEFT JOIN produits_vendu pv ON DATE(pv.date_de_vente) = dr.jour 
+            LEFT JOIN stock s ON s.id_produit=pv.id_produit
+            GROUP BY dr.jour
+            ORDER BY dr.jour;
+            """,(date,date_fin))
+    def get_depense_statistique_periode(self,date,date_fin):
+        return to_database("""
+        WITH RECURSIVE date_range AS (
+    SELECT DATE(%s) AS jour
+    UNION ALL
+    SELECT jour + INTERVAL 1 DAY
+    FROM date_range
+    WHERE jour < %s
+)
 
-
-gestionmodel = GestionModel()
-res = gestionmodel.get_min_max_heures_vente(date='2025-03-06',)
-print(res)
+SELECT
+    dr.jour,
+    COALESCE(SUM(d.somme_dep), 0) AS total_journalier
+FROM date_range dr
+LEFT JOIN depense d ON DATE(d.date_dep) = dr.jour
+GROUP BY dr.jour
+ORDER BY dr.jour;
+""",(date,date_fin))

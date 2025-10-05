@@ -37,6 +37,8 @@
                         root.show_date_picker()
                     MDButtonText:
                         text:"Date"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
 
                 MDButton:
                     theme_bg_color:"Custom"
@@ -47,6 +49,8 @@
                         root.show_modal_date_picker()
                     MDButtonText:
                         text:"Période"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
 
                 MDButton:
                     theme_bg_color:"Custom"
@@ -57,6 +61,8 @@
                         root.show_month_picker()
                     MDButtonText:
                         text:"Mois"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
                 MDButton:
                     theme_bg_color:"Custom"
                     md_bg_color:171/255,219/255,227/255,1
@@ -66,6 +72,8 @@
                         root.show_year_picker()
                     MDButtonText:
                         text:"Année"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
 
         MDCard:
             size_hint_x:1
@@ -74,9 +82,13 @@
             style: "elevated"
             elevation:10
             radius:[20]
+            theme_bg_color:"Custom"
+            md_bg_color:app.product_tab
             ListeDepense:
                 id:listedepense
                 size_hint_y: None
+                theme_bg_color:"Custom"
+                md_bg_color:app.product_tab
                 height: dp(550)
                 size_hint : 1,1
                 on_parent:self.show_expenses()
@@ -112,6 +124,8 @@
                         icon: "currency-usd"
                     MDListItemHeadlineText:
                         text:"comparaison mensuelle"
+                        theme_text_color: "Custom"
+                        text_color: 0, 0, 0, 1
                 LabelSommePortefeuille:
                     size_hint_y: None
                     height :"40dp"
@@ -144,6 +158,9 @@
 
                     MDListItemHeadlineText:
                         text: "Pourcentage des depenses"
+                        theme_text_color: "Custom"
+                        text_color: 0, 0, 0, 1
+
                 PourcentageDepense:
                     id:pourcentagedepense
                     size_hint:1,1

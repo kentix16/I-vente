@@ -1,5 +1,7 @@
 import datetime
 from datetime import datetime
+
+from kivy.app import App
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
@@ -125,6 +127,7 @@ class LabelSommePortefeuille(Label):
         super(LabelSommePortefeuille, self).__init__(**kwargs)
         #self.text = 'je ne sais pas'
         self.update_somme_portefeuille()
+        self.text_color = App.get_running_app().text_color
 
     def update_somme_portefeuille(self):
         gestionmodel = GestionModel()
@@ -170,7 +173,7 @@ class ListeDepense(ScrollView):
         depenses = self.instance.get_expenses(order, date, date_fin)
         for row in depenses:
             for item in row:
-                cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=40)
+                cell = Label(text=f'{item}', color=(0, .0, 0, 1), size_hint=(1, None), height=40)
                 self.grid.add_widget(cell)
 
         self.add_widget(self.grid)
@@ -179,7 +182,7 @@ class ListeDepense(ScrollView):
     def update_expenses(self):
         row = self.instance.get_last_depense
         for item in row:
-            cell = Label(text=f'{item}', color=(.2, .2, .2, 1), size_hint=(1, None), height=40)
+            cell = Label(text=f'{item}', color=(0, 0, 0, 1), size_hint=(1, None), height=40)
             self.grid.add_widget(cell)
 
 class PourcentageDepense(ScrollView):

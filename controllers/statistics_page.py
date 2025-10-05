@@ -19,6 +19,7 @@ from matplotlib import pyplot as plt
 from controllers.sales_page import PourcentagePV
 from models.gestionModel import GestionModel
 from utilities.myfunctions import show_year, show_month
+from datetime import datetime, timedelta
 
 LabelBase.register(name="OutfitSemiBold", fn_regular="font/Outfit-SemiBold.ttf")
 LabelBase.register(name="OutfitBlack", fn_regular="font/Outfit-Black.ttf")
@@ -55,6 +56,7 @@ Builder.load_file(kv_path)
 
 
 class StatDeVenteGlobal(MDCard):
+    from utilities.myfunctions import exist_data
     widget_showed = False
     def __init__(self, **kwargs):
         super(StatDeVenteGlobal, self).__init__(**kwargs)
@@ -64,117 +66,97 @@ class StatDeVenteGlobal(MDCard):
 
         salemodel = GestionModel()
 
+        if not date_fin:
+            # Single day, hourly data
+            heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=date)
+            heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=date) + 1
+            heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=date)
+            heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=date) + 1
+            heure_min = f"{min(heure_min_vente, heure_min_dep)}"
+            heure_max = f"{max(heure_max_vente, heure_max_dep)}"
 
-        heure_min_vente = salemodel.get_min_max_heures_vente(order="MIN", date=date)
-        heure_max_vente = salemodel.get_min_max_heures_vente(order="MAX", date=date)+1
-        heure_min_dep = salemodel.get_min_max_heures_dep(order="MIN", date=date)
-        heure_max_dep = salemodel.get_min_max_heures_dep(order="MAX", date=date)+1
-        heure_min = f"{min(heure_min_vente, heure_min_dep):02d}:00:00"
-        heure_max = f"{max(heure_max_vente, heure_max_dep):02d}:00:00"
+            ventes = salemodel.get_heures_somme_stat(date=date, heure_min=heure_min, heure_max=heure_max)
+            depense = salemodel.get_heures_depense_stat(date=date, heure_min=heure_min, heure_max=heure_max)
 
 
-        ventes = salemodel.get_heures_somme_stat(date=date, heure_min=heure_min, heure_max=heure_max)
-        depense = salemodel.get_heures_depense_stat(date=date, heure_min=heure_min, heure_max=heure_max)
+            dates_ventes = [row[0] for row in ventes]
+            montants = [row[1] for row in ventes]
+            depense_vals = [row[1] for row in depense]
 
+            min_len = min(len(dates_ventes), len(montants), len(depense_vals))
+            for i in range(100):print(montants)
+            if not self.exist_data(montants, depense_vals):
+                self.add_widget(Label(text="Pas de données suffisantes pour générer le graphique.",color=(0,0,0,1)))
+                return
 
+            dates = dates_ventes[:min_len]
+            montants = montants[:min_len]
+            depense_vals = depense_vals[:min_len]
 
-        dates_ventes = [row[0] for row in ventes]
-        montants = [row[1] for row in ventes]
-        depense_vals = [row[1] for row in depense]
+            x_label = "Heure"
+            x_labels = [d.strftime('%H:%M') if hasattr(d, 'strftime') else str(d) for d in dates]
+        else:
+            # Date range, daily data
+            if isinstance(date, str):
+                date = datetime.strptime(date, '%Y-%m-%d')
+            if isinstance(date_fin, str):
+                date_fin = datetime.strptime(date_fin, '%Y-%m-%d')
 
-       # if not ventes or not depense or (montant==0 for montant in montants) or (depense==0  for depense in depense_vals):
-        #    image = Image(
-        #        source="images/pas_vente.png",
-        #        allow_stretch=True,
-        #        keep_ratio=False,
-        #        size_hint=(1, 1),
-        #        pos_hint={"center_x": 0.5, "center_y": 0.5})
-        #    self.add_widget(image)
-        #    return
-        min_len = min(len(dates_ventes), len(montants), len(depense_vals))
-        if min_len == 0:
-            self.add_widget(Label(text="Pas de données suffisantes pour générer le graphique."))
-            return
+            # Generate list of dates in the range
+            delta = (date_fin - date).days + 1
+            dates = [date + timedelta(days=i) for i in range(delta)]
 
-        dates = dates_ventes[:min_len]
-        montants = montants[:min_len]
-        depense_vals = depense_vals[:min_len]
+            # Aggregate data for each day
 
+            ventes = salemodel.get_somme_statistique_periode(date,date_fin)
+            depense = salemodel.get_depense_statistique_periode(date,date_fin)
+            for i in range(100):
+                for vente in ventes:
+                    print(f"fente:{vente[1]}")
+
+            # Sum values for the day
+            montant = sum(row[1] for row in ventes) if ventes else 0
+            depense_val = sum(row[1] for row in depense) if depense else 0
+            montants = [vente[1] for vente in ventes ]
+            depense_vals = [dep[1] for dep in depense]
+
+            min_len = min(len(dates), len(montants), len(depense_vals))
+            if not self.exist_data(montants, depense_vals):
+                self.add_widget(Label(text="Pas de données suffisantes pour générer le graphique.",color=(0,0,0,1)))
+                return
+
+            """dates = dates[:min_len]
+            montants = montants[:min_len]
+            depense_vals = depense_vals[:min_len]"""
+
+            x_label = "Jour"
+            x_labels = [d.strftime('%Y-%m-%d') for d in dates]
+
+        # Create the plot
         fig, ax = plt.subplots(figsize=(10, 6))
         x = np.arange(min_len)
         bar_width = 0.35
 
-        ax.bar(x - bar_width / 2, montants, width=bar_width, label='Vente', color='turquoise')
-        ax.bar(x + bar_width / 2, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
+        ax.bar(x+bar_width/2, montants, width=bar_width, label='Vente', color='turquoise')
+        ax.bar(x +3* bar_width / 2, depense_vals, width=bar_width, label='Dépense', color='mediumpurple')
 
         ax.set_title("Ventes & Dépenses")
-        ax.set_xlabel("Jour" if date_fin else "Heure")
-        ax.set_ylabel("Montant (Ar)")
+        ax.set_xlabel(x_label)
+        ax.set_ylabel("Montant ($)")
         ax.set_xticks(x)
-        ax.set_xticklabels([d.strftime('%H:%M:%S') if hasattr(d,"%d/%m" ) else str(d) for d in dates], rotation=45)
+        ax.set_xticklabels(x_labels, rotation=45)
         ax.legend()
         ax.grid(axis='y', linestyle="--", alpha=0.7)
         fig.tight_layout()
 
         self.add_widget(FigureCanvasKivyAgg(fig))
 
-
-        """montants = [row[1] for row in ventes]
-        # Grouper par tranche de 10 minutes
-        heures = [datetime.strptime(str(row[0]), '%Y-%m-%d %H:%M:%S') for row in ventes]
-
-        donnees_par_10min = defaultdict(float)
-        for heure, montant in zip(heures, montants):
-            minute = (heure.minute // 10) * 10
-            heure_arrondie = heure.replace(minute=minute, second=0, microsecond=0)
-            donnees_par_10min[heure_arrondie] += montant
-
-        heures_groupees = sorted(donnees_par_10min.keys())
-        montant_groupes = [donnees_par_10min[h] for h in heures_groupees]
-
-        couleurs_palette = ['#1abc9c', '#16a085']
-        couleurs_alternees = [couleurs_palette[i % len(couleurs_palette)] for i in range(len(heures_groupees))]
-
-        fig, ax = plt.subplots(figsize=(10, 5))
-        bars = ax.bar(heures_groupees, montant_groupes, width=0.006, color=couleurs_alternees, edgecolor='black',
-                      linewidth=0.5)
-
-        for bar, montant in zip(bars, montant_groupes):
-            height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width() / 2.0, height + 0.5, f"{montant:.0f}", ha='center', va='bottom',
-                    fontsize=9, color="#333")
-
-        # Forcer l'affichage de 00:00 à 23:00
-        if heures_groupees:
-            jour = heures_groupees[0].date()
-        else:
-            jour = datetime.today().date()
-
-        debut_journee = datetime.combine(jour, datetime.min.time())
-        fin_journee = datetime.combine(jour, datetime.max.time()).replace(hour=23, minute=59, second=59)
-
-        ax.set_xlim(debut_journee, fin_journee)
-
-        # Ticks majeurs toutes les heures
-        ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-
-        # Formatage et esthétique
-        fig.autofmt_xdate()
-        ax.grid(True, linestyle='--', alpha=0.4)
-        fig.patch.set_facecolor("#f7f7f7")
-        ax.set_facecolor('#f0f0f0')
-        ax.set_ylabel("Prix ($)", fontsize=12)
-        ax.set_xlabel("Heure", fontsize=12)
-        plt.xticks(rotation=45)
-        fig.tight_layout()
-
-        self.add_widget(FigureCanvasKivyAgg(fig))"""
         widget_showed = True
+
 
 class StatsPage(MDBoxLayout):
     total_de_ventes = StringProperty('0')
-    somme_total_gagnee = StringProperty('0 ar')
+    somme_nette_total_gagnee = StringProperty('0 ar')
     produits_en_rupture = StringProperty('0')
     gestionmodel = GestionModel()
     avg_gain = StringProperty('')
@@ -265,8 +247,8 @@ class StatsPage(MDBoxLayout):
         self.total_de_ventes = str(total_de_ventes)
 
     def update_somme_total_gagnee(self,date=None):
-        somme_total_gagnee = self.gestionmodel.get_somme_total_gagnee(date)
-        self.somme_total_gagnee = str(somme_total_gagnee) + ' ar'
+        somme_total_gagnee = self.gestionmodel.get_somme_nette_totale_gagnee(date)
+        self.somme_nette_total_gagnee = str(somme_total_gagnee) + ' ar'
 
     def update_produits_en_rupture(self):
         produits_en_rupture = self.gestionmodel.get_produits_en_rupture
@@ -302,7 +284,6 @@ class ResponsiveView(MDResponsiveLayout, MDScreen):
         self.mobile_view = MobileView()
         self.tablet_view = TabletView()
         self.desktop_view = DesktopView()
-
 
 class GradientNavigationDrawer(MDNavigationDrawer):
     pass

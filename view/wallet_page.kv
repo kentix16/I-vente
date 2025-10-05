@@ -36,6 +36,8 @@
                         root.show_date_picker()
                     MDButtonText:
                         text:"Date"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
 
                 MDButton:
                     theme_bg_color:"Custom"
@@ -46,6 +48,8 @@
                         root.show_modal_date_picker()
                     MDButtonText:
                         text:"Période"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
 
                 MDButton:
                     theme_bg_color:"Custom"
@@ -56,6 +60,8 @@
                         root.show_month_picker()
                     MDButtonText:
                         text:"Mois"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
                 MDButton:
                     theme_bg_color:"Custom"
                     md_bg_color:171/255,219/255,227/255,1
@@ -65,6 +71,8 @@
                         root.show_year_picker()
                     MDButtonText:
                         text:"Année"
+                        theme_text_color:"Custom"
+                        text_color:26/255, 58/255, 82/255, 1
 
         MDCard:
             size_hint_x:1
@@ -72,9 +80,13 @@
             height:dp(400)
             style: "elevated"
             elevation:10
+            theme_bg_color:"Custom"
+            md_bg_color:app.product_tab
             radius:[20]
             Historique:
                 id:historique
+                theme_bg_color:"Custom"
+                md_bg_color:app.product_tab
                 size_hint : 1,1
                 on_parent:self.show_historique()
     MDBoxLayout:
@@ -97,8 +109,10 @@
                 adaptive_height: True
                 orientation:'vertical'
                 MDListItem:
-                    theme_bg_color: "Custom"
-                    md_bg_color: 214/255,234/255,93/255,1
+                    #theme_bg_color:"Custom"
+                    #md_bg_color:49/255, 159/255, 192/255, 1
+                    theme_bg_color:"Custom"
+                    md_bg_color:49/255, 159/255, 192/255, 1
                     size_hint: 1,None
                     height:dp(30)
                     radius:[20,20,0,0]
@@ -117,6 +131,8 @@
                 LabelSommePortefeuille:
                     size_hint: 1,None
                     height:dp(70)
+                    theme_text_color:"Custom"
+                    text_color:0,0,0,0
                     id:labelsommeportefeuille2
                     text:self.somme_portefeuille
         MDCard:

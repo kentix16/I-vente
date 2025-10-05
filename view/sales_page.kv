@@ -63,7 +63,7 @@
                             text: "somme total gagnée"
                             text_color: 245/255, 189/255, 32/255, 1
                     Label:
-                        text: root.somme_total_gagnee
+                        text: root.somme_nette_totale_gagnee
                         color: 0, .65, 0, 1
                         size_hint_y: None
                         height: self.texture_size[1]
@@ -155,6 +155,7 @@
                     MDListItemHeadlineText:
                         text: "liste des ventes"
                 ListeVente:
+                    id:listevente
                     size_hint_y: 1
                     on_parent: self.show_products_sale()
 

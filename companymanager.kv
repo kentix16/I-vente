@@ -8,6 +8,7 @@
 #:import statistics_page controllers.statistics_page
 
 <MyScreenManager@NavigationScreenManager>:
+    id:screenmanager
     UserCreationScreen:
         id:user_creation_screen
 
@@ -57,6 +58,8 @@
 
         Gradient:
             id:nav_drawer
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
 
 <UserCreationScreen@Screen>:
     name: "user_creation"
@@ -98,6 +101,8 @@
 
         Gradient:
             id:nav_drawer
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
 
 <WalletScreen@Screen>:
     name: "WalletPage"
@@ -123,6 +128,8 @@
 
         Gradient:
             id:nav_drawer
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
 <ExpensesScreen@Screen>:
     name: "ExpensesPage"
     MDNavigationLayout:
@@ -146,7 +153,10 @@
                                 height: self.minimum_height
 
         Gradient:
+
             id:nav_drawer
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color
 <StatsScreen@Screen>:
     name: "StatsPage"
     MDNavigationLayout:
@@ -171,3 +181,5 @@
 
         Gradient:
             id:nav_drawer
+            theme_bg_color: "Custom"
+            md_bg_color: app.drawer_color

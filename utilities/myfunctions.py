@@ -1,7 +1,11 @@
 from datetime import datetime
 from functools import partial
 from tkinter import filedialog
-
+from kivymd.uix.dialog import MDDialog, MDDialogHeadlineText, MDDialogContentContainer, MDDialogButtonContainer
+from kivymd.uix.textfield import MDTextField, MDTextFieldHelperText, MDTextFieldHintText, MDTextFieldLeadingIcon, \
+    MDTextFieldTrailingIcon, MDTextFieldMaxLengthText
+from kivymd.uix.button import MDButton, MDButtonText
+from kivy.core.window import Window
 import xlsxwriter
 import tkinter as tk
 from kivy.app import App
@@ -22,7 +26,7 @@ from matplotlib import pyplot as plt
 from models.gestionModel import GestionModel
 from kivy.metrics import dp
 from kivymd.uix.pickers import MDDockedDatePicker, MDTimePickerDialVertical, MDTimePickerDialHorizontal, \
-    MDModalDatePicker
+    MDModalDatePicker, MDModalInputDatePicker
 
 from utilities.databases import to_database
 
@@ -73,7 +77,100 @@ def pourcentage(self,nom_pourcentage="pv",date=None,date_fin=None,order=""):
 
 
     self.widget_showed = True
+def show_profile_popup():
+    profile_dialog = MDDialog(
+        MDDialogHeadlineText(
+            text="Modifier le profil",
+        ),
+        MDDialogContentContainer(
+            MDTextField(
+                MDTextFieldLeadingIcon(
+                    icon="Eail",
+                ),
+                MDTextFieldHintText(
+                    text="Email",
+                ),
+                MDTextFieldHelperText(
+                    text="Entrer le nouveau mail",
+                    mode="persistent",
+                ),
 
+                mode="outlined",
+            ),
+            MDTextField(
+                MDTextFieldLeadingIcon(
+                    icon="account",
+                ),
+                MDTextFieldHintText(
+                    text="Pseudo",
+                ),
+                MDTextFieldHelperText(
+                    text="Entres le nouveau pseudo",
+                    mode="persistent",
+                ),
+                mode="outlined",
+            ),
+            MDTextField(
+                MDTextFieldLeadingIcon(
+                    icon="lock",
+                ),
+                MDTextFieldHintText(
+                    text="Enrtrez le nouveau mot de passe",
+                ),
+                MDTextFieldHelperText(
+                    text="ex: Meva004",
+                    mode="persistent",
+                ),
+                mode="outlined",
+            ),
+            MDTextField(
+                MDTextFieldLeadingIcon(
+                    icon="lock",
+                ),
+                MDTextFieldHintText(
+                    text="confirmer le mot de passe",
+                ),
+                mode="outlined",
+            ),
+            orientation="vertical",
+            spacing="12dp",
+            adaptive_height=True,
+        ),
+        MDDialogButtonContainer(
+            MDButton(
+                MDButtonText(text="Annuler"),
+                style="text",
+                on_release=lambda x: (profile_dialog.dismiss(), App.get_running_app().enable_button())            ),
+            MDButton(
+                MDButtonText(text="Modifier"),
+                style="filled",
+                on_release=update_profile,
+            ),
+            spacing="8dp",
+        ),
+    )
+    profile_dialog.open()
+
+def update_profile(dialog):
+    # Récupérer les valeurs des champs
+    content = dialog.ids.container.children[0]
+
+    email = content.ids.email_field.text
+    username = content.ids.username_field.text
+    password = content.ids.password_field.text
+    confirm_password = content.ids.confirm_password_field.text
+
+    # Validation
+    if password != confirm_password:
+        print("Les mots de passe ne correspondent pas!")
+        return
+
+    # Votre logique de mise à jour ici
+    print(f"Email: {email}")
+    print(f"Username: {username}")
+    print(f"Password: {password}")
+
+    dialog.dismiss()
 def show_popup(self,title, message):
     popup = Popup(size_hint=(.4,.4))
     popup.title = title
@@ -93,15 +190,14 @@ def show_popup_confirmation(self,title,message,nom,qt,pu=None):
     button1 = Button(text='Confirmer', size_hint=(.3, .3), pos_hint={'right': .94, 'y': .012})
     button1.bind(on_press=partial(self.popup.dismiss,qt,pu))
     button2 = Button(text='Annuler', size_hint=(.3, .3), pos_hint={'right': .94, 'y': .012})
-    button2.bind(on_press=self.popup_confirmed)
+    button2.bind(on_press=partial(self.popup_confirmed,nom,qt,pu))
     for w in (button1,button2):boxbutton.add_widget(w)
     for w in (label, boxbutton): content.add_widget(w)
     self.popup.content = content
     self.popup.open()
-def popup_confirmed(self,nom,qt,pu=None):
+def popup_confirmed(self,nom,qt,pu,instance):
     self.popup.dismiss()
-    if pu:to_database("update stock set qt=qt+%s pu=%s where nom=%s",(qt,pu,nom))
-    else:to_database("update stock set qt=qt+%s where nom=%s",(qt,nom))
+    to_database("update stock set qt=qt+%s, pu=%s where nom=%s",(qt,pu,nom))
 def ouvrir_fichier(self, instance):
     # Lancer tkinter de manière cachée juste pour le file dialog
     root = tk.Tk()
@@ -111,6 +207,13 @@ def ouvrir_fichier(self, instance):
     if fichier:
         self.label.text = f"Fichier sélectionné :\n{fichier}"
     root.destroy()  # Fermer le root tkinter après sélection
+
+def exist_data(self,montants, depenses):
+    for montant in montants:
+        if montant:return True
+    for depense in depenses:
+        if depense:return True
+    return False
 
 
 def show_time_picker_horizontal(self, hour, minute):
@@ -129,11 +232,11 @@ def show_time_picker_vertical(self, hour, minute):
 
 def date_picker(self):
 
-    date_dialog = MDDockedDatePicker()
+    date_dialog = MDModalInputDatePicker()
     # You have to control the position of the date picker dialog yourself.
     date_dialog.pos = [
-        self.ids.date_button.center_x - date_dialog.width / 2,
-        self.ids.date_button.y - (date_dialog.height + dp(32)),
+        Window.width/2-date_dialog.width/2,
+        Window.height / 2 - date_dialog.height / 2,
     ]
     date_dialog.bind(on_ok=self.on_ok_date)
     date_dialog.open()

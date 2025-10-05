@@ -21,6 +21,8 @@
                     root.show_date_picker()
                 MDButtonText:
                     text:"Date"
+                    theme_text_color:"Custom"
+                    text_color:26/255, 58/255, 82/255, 1
 
             MDButton:
                 theme_bg_color:"Custom"
@@ -31,6 +33,8 @@
                     root.show_modal_date_picker()
                 MDButtonText:
                     text:"Période"
+                    theme_text_color:"Custom"
+                    text_color:26/255, 58/255, 82/255, 1
 
             MDButton:
                 theme_bg_color:"Custom"
@@ -41,6 +45,8 @@
                     root.show_month_picker()
                 MDButtonText:
                     text:"Mois"
+                    theme_text_color:"Custom"
+                    text_color:26/255, 58/255, 82/255, 1
             MDButton:
                 theme_bg_color:"Custom"
                 md_bg_color:171/255,219/255,227/255,1
@@ -50,6 +56,8 @@
                     root.show_year_picker()
                 MDButtonText:
                     text:"Année"
+                    theme_text_color:"Custom"
+                    text_color:26/255, 58/255, 82/255, 1
         MDBoxLayout:
             padding: dp(20)
             spacing:dp(20)
@@ -88,16 +96,18 @@
 
                         MDListItemLeadingIcon:
                             icon: "cash"
+                            theme_icon_color:"Custom"
                             icon_color:245/255,189/255,32/255,1
 
                         MDListItemHeadlineText:
                             text: "somme total gagnée"
+                            theme_text_color:"Custom"
                             text_color:245/255,189/255,32/255,1
                     Label:
                         id:somme
                         size_hint_y: None
                         height: dp(56)
-                        text:root.somme_total_gagnee
+                        text:root.somme_nette_total_gagnee
                         color:0,.65,0,1
             MDCard:
                 adaptive_height: True
@@ -123,10 +133,12 @@
 
                         MDListItemLeadingIcon:
                             icon: "sale"
+                            theme_icon_color:"Custom"
                             icon_color:245/255,189/255,32/255,1
 
                         MDListItemHeadlineText:
                             text: "total de ventes"
+                            theme_text_color:"Custom"
                             text_color:245/255,189/255,32/255,1
                     Label:
                         size_hint_y: None
@@ -160,10 +172,12 @@
 
                         MDListItemLeadingIcon:
                             icon: "package-variant"
+                            theme_icon_color:"Custom"
                             icon_color:245/255,189/255,32/255,1
 
                         MDListItemHeadlineText:
                             text: "Total de depenses"
+                            theme_text_color:"Custom"
                             text_color:245/255,189/255,32/255,1
                     Label:
                         size_hint_y: None
